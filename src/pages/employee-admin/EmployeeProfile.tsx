@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -9,7 +9,6 @@ import {
   Calendar,
   Briefcase,
   Building,
-  DollarSign,
   Users,
   User,
   FileText,
@@ -24,18 +23,155 @@ import {
   Languages,
   Folder,
   Download,
-  Plus,
-  Trash2,
-  Eye,
   ChevronDown,
   ChevronUp,
   BadgeCheck,
   History,
   ClipboardList,
-  FileCheck
+  FileCheck,
+  Printer,
+  X,
+  Building2
 } from 'lucide-react';
 
-const EMPLOYMENT_STATUSES = {
+// ==================== TYPES ====================
+
+interface EmergencyContact {
+  id: number;
+  contact_type: string;
+  full_name: string;
+  relationship: string;
+  phone_primary: string;
+  phone_secondary: string | null;
+  address: string;
+}
+
+interface Education {
+  id: number;
+  degree_level: string;
+  degree_name: string;
+  specialization: string;
+  institution_name: string;
+  country: string;
+  graduation_year: number;
+  is_verified: boolean;
+}
+
+interface WorkExperience {
+  id: number;
+  organization_name: string;
+  position_held: string;
+  start_date: string;
+  end_date: string;
+  is_current: boolean;
+  reason_for_leaving: string;
+  verification_status: string;
+}
+
+interface Skill {
+  id: number;
+  skill_type: string;
+  skill_name: string;
+  proficiency_level: string;
+  certificate_name?: string;
+  certificate_issuer?: string;
+  certificate_date?: string;
+  expiry_date?: string;
+}
+
+interface MedicalInfo {
+  blood_type: string;
+  special_needs: string | null;
+}
+
+interface Contract {
+  id: number;
+  contract_number: string;
+  contract_type: string;
+  start_date: string;
+  end_date: string | null;
+  status: string;
+  base_salary: number;
+}
+
+interface PolicyAcknowledgement {
+  id: number;
+  policy_type: string;
+  policy_version: string;
+  acknowledged_at: string;
+}
+
+interface StatusHistory {
+  id: number;
+  previous_status: string;
+  new_status: string;
+  effective_date: string;
+  reason: string;
+}
+
+interface Employee {
+  id: number;
+  employee_code: string;
+  full_name: string;
+  father_name: string;
+  date_of_birth: string;
+  gender: string;
+  nationality: string;
+  national_id_type: string;
+  national_id_number: string;
+  tax_id: string;
+  marital_status: string;
+  phone_primary: string;
+  phone_secondary: string;
+  personal_email: string;
+  current_address: string;
+  current_city: string;
+  current_province: string;
+  permanent_address: string;
+  permanent_city: string;
+  permanent_province: string;
+  bank_name: string;
+  bank_branch: string;
+  account_name: string;
+  account_number: string;
+  mobile_money_number: string;
+  position: string;
+  department: string;
+  project: string;
+  reporting_to: string;
+  date_of_hire: string;
+  employment_type: string;
+  employment_status: string;
+  probation_end_date: string;
+  contract_end_date: string | null;
+  photo_path: string | null;
+  office?: string;
+  emergency_contacts: EmergencyContact[];
+  educations: Education[];
+  work_experiences: WorkExperience[];
+  skills: Skill[];
+  medical_info: MedicalInfo;
+  contracts: Contract[];
+  policy_acknowledgements: PolicyAcknowledgement[];
+  status_history: StatusHistory[];
+  created_at: string;
+  updated_at: string;
+}
+
+interface StatusConfig {
+  label: string;
+  color: string;
+}
+
+interface Tab {
+  id: string;
+  label: string;
+  icon: React.FC<{ className?: string }>;
+}
+
+// ==================== CONSTANTS ====================
+
+const EMPLOYMENT_STATUSES: Record<string, StatusConfig> = {
   pre_boarding: { label: 'Pre-Boarding', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' },
   onboarding: { label: 'Onboarding', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
   probation: { label: 'Probation', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' },
@@ -47,7 +183,7 @@ const EMPLOYMENT_STATUSES = {
   terminated: { label: 'Terminated', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }
 };
 
-const EMPLOYMENT_TYPES = {
+const EMPLOYMENT_TYPES: Record<string, string> = {
   core: 'Core Staff',
   project: 'Project Staff',
   consultant: 'Consultant',
@@ -58,24 +194,354 @@ const EMPLOYMENT_TYPES = {
   temporary: 'Temporary'
 };
 
-const EmployeeProfile = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
+// ==================== HELPER FUNCTIONS ====================
 
-  const [employee, setEmployee] = useState(null);
+const formatDate = (dateString?: string): string => {
+  if (!dateString) return '-';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+const formatDateShort = (dateString?: string): string => {
+  if (!dateString) return '-';
+  return new Date(dateString).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+};
+
+const calculateExpiryDate = (hireDate?: string): string => {
+  if (!hireDate) return '-';
+  const date = new Date(hireDate);
+  date.setFullYear(date.getFullYear() + 1);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+};
+
+const formatCurrency = (amount?: number, currency = 'AFN'): string => {
+  if (!amount) return '-';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
+// ==================== ID CARD COMPONENT ====================
+
+interface IDCardProps {
+  employee: Employee;
+  onClose: () => void;
+}
+
+const IDCardGenerator: React.FC<IDCardProps> = ({ employee, onClose }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useCallback(() => {
+    const printContent = cardRef.current;
+    if (!printContent) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Employee ID Card - ${employee.employee_code}</title>
+          <style>
+            @page { size: 85.6mm 54mm; margin: 0; }
+            body { margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+            .id-card { width: 85.6mm; height: 54mm; position: relative; }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  }, [employee.employee_code]);
+
+  const expiryDate = useMemo(
+    () => calculateExpiryDate(employee.date_of_hire),
+    [employee.date_of_hire]
+  );
+
+  const getStatusColor = (status: string): string => {
+    if (status === 'active') return 'bg-green-500 text-white';
+    if (status === 'on_leave') return 'bg-yellow-500 text-white';
+    return 'bg-gray-500 text-white';
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg mx-4">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Generate Employee ID Card
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* ID Card Preview */}
+        <div className="flex justify-center mb-6">
+          <div
+            ref={cardRef}
+            className="id-card w-[340px] h-[214px] bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-2xl overflow-hidden relative"
+          >
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
+            </div>
+
+            {/* Card Content */}
+            <div className="relative h-full p-4 flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-sm">VDO</h3>
+                    <p className="text-blue-200 text-[10px]">Employee ID Card</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-mono font-bold text-xs">
+                    {employee.employee_code}
+                  </p>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="flex gap-3 flex-1">
+                {/* Photo */}
+                <div className="w-20 h-24 bg-white rounded-lg overflow-hidden flex-shrink-0 shadow-lg">
+                  {employee.photo_path ? (
+                    <img
+                      src={employee.photo_path}
+                      alt={employee.full_name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-gray-400">
+                        {employee.full_name?.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 text-white">
+                  <h4 className="font-bold text-sm mb-0.5 truncate">
+                    {employee.full_name}
+                  </h4>
+                  <p className="text-blue-200 text-[10px] mb-2 truncate">
+                    {employee.position || 'Position'}
+                  </p>
+
+                  <div className="space-y-1 text-[9px]">
+                    <div className="flex items-center gap-1">
+                      <Building2 className="w-3 h-3 text-blue-300" />
+                      <span className="truncate">
+                        {employee.department || 'Department'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Phone className="w-3 h-3 text-blue-300" />
+                      <span>{employee.phone_primary || '-'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Mail className="w-3 h-3 text-blue-300" />
+                      <span className="truncate">
+                        {employee.personal_email || '-'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-blue-500/30">
+                <div className="text-[9px] text-blue-200">
+                  <span>Issue: </span>
+                  <span className="text-white font-medium">
+                    {formatDateShort(employee.date_of_hire)}
+                  </span>
+                </div>
+                <div className="text-[9px] text-blue-200">
+                  <span>Expiry: </span>
+                  <span className="text-white font-medium">{expiryDate}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-blue-300" />
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded ${getStatusColor(employee.employment_status)}`}>
+                    {employee.employment_status?.replace('_', ' ').toUpperCase()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card Information Summary */}
+        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 mb-6">
+          <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+            ID Card Information
+          </h4>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Employee ID</p>
+              <p className="font-medium text-gray-900 dark:text-white font-mono">
+                {employee.employee_code}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Full Name</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {employee.full_name}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Position</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {employee.position || '-'}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Department</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {employee.department || '-'}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Issue Date</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {formatDateShort(employee.date_of_hire)}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Expiry Date</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {expiryDate}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            Close
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <Printer className="w-4 h-4" />
+            Print ID Card
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <Download className="w-4 h-4" />
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==================== HELPER COMPONENTS ====================
+
+interface InfoItemProps {
+  icon: React.FC<{ className?: string }>;
+  label: string;
+  value?: string;
+  className?: string;
+}
+
+const InfoItem: React.FC<InfoItemProps> = ({ icon: Icon, label, value, className = '' }) => (
+  <div className={`flex items-start space-x-3 ${className}`}>
+    <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex-shrink-0">
+      <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+    </div>
+    <div className="min-w-0">
+      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+      <p className="text-sm font-medium text-gray-900 dark:text-white break-words">{value || '-'}</p>
+    </div>
+  </div>
+);
+
+interface SectionHeaderProps {
+  title: string;
+  icon: React.FC<{ className?: string }>;
+  collapsible?: boolean;
+  sectionKey?: string;
+  expanded?: boolean;
+  onToggle?: () => void;
+}
+
+const SectionHeader: React.FC<SectionHeaderProps> = ({
+  title,
+  icon: Icon,
+  collapsible = false,
+  expanded,
+  onToggle
+}) => (
+  <div
+    className={`flex items-center justify-between py-3 ${collapsible ? 'cursor-pointer' : ''}`}
+    onClick={collapsible ? onToggle : undefined}
+  >
+    <div className="flex items-center space-x-2">
+      <Icon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+    </div>
+    {collapsible && (
+      expanded ? (
+        <ChevronUp className="w-5 h-5 text-gray-400" />
+      ) : (
+        <ChevronDown className="w-5 h-5 text-gray-400" />
+      )
+    )}
+  </div>
+);
+
+// ==================== MAIN COMPONENT ====================
+
+const EmployeeProfile: React.FC = () => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+
+  const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('personal');
-  const [expandedSections, setExpandedSections] = useState({});
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [showIDCardModal, setShowIDCardModal] = useState(false);
 
-  useEffect(() => {
-    loadEmployee();
-  }, [id]);
-
-  const loadEmployee = async () => {
+  const loadEmployee = useCallback(async () => {
     setLoading(true);
     try {
       // Simulated data - replace with API call
-      const mockEmployee = {
+      const mockEmployee: Employee = {
         id: 1,
         employee_code: 'VDO-EMP-0001',
         full_name: 'Ahmad Shah Ahmadi',
@@ -159,63 +625,31 @@ const EmployeeProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  useEffect(() => {
+    loadEmployee();
+  }, [loadEmployee, id]);
 
-  const formatCurrency = (amount, currency = 'AFN') => {
-    if (!amount) return '-';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const toggleSection = (section) => {
+  const toggleSection = useCallback((section: string) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
-  };
+  }, []);
 
-  const InfoItem = ({ icon: Icon, label, value, className = '' }) => (
-    <div className={`flex items-start space-x-3 ${className}`}>
-      <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex-shrink-0">
-        <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-        <p className="text-sm font-medium text-gray-900 dark:text-white break-words">{value || '-'}</p>
-      </div>
-    </div>
-  );
-
-  const SectionHeader = ({ title, icon: Icon, collapsible = false, sectionKey }) => (
-    <div
-      className={`flex items-center justify-between py-3 ${collapsible ? 'cursor-pointer' : ''}`}
-      onClick={collapsible ? () => toggleSection(sectionKey) : undefined}
-    >
-      <div className="flex items-center space-x-2">
-        <Icon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-      </div>
-      {collapsible && (
-        expandedSections[sectionKey] ? (
-          <ChevronUp className="w-5 h-5 text-gray-400" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-gray-400" />
-        )
-      )}
-    </div>
-  );
+  const tabs: Tab[] = useMemo(() => [
+    { id: 'personal', label: 'Personal', icon: User },
+    { id: 'employment', label: 'Employment', icon: Briefcase },
+    { id: 'education', label: 'Education', icon: GraduationCap },
+    { id: 'experience', label: 'Experience', icon: Award },
+    { id: 'skills', label: 'Skills', icon: Languages },
+    { id: 'banking', label: 'Banking', icon: CreditCard },
+    { id: 'emergency', label: 'Emergency', icon: Heart },
+    { id: 'documents', label: 'Documents', icon: Folder },
+    { id: 'policies', label: 'Policies', icon: Shield },
+    { id: 'history', label: 'History', icon: History }
+  ], []);
 
   if (loading) {
     return (
@@ -232,19 +666,6 @@ const EmployeeProfile = () => {
       </div>
     );
   }
-
-  const tabs = [
-    { id: 'personal', label: 'Personal', icon: User },
-    { id: 'employment', label: 'Employment', icon: Briefcase },
-    { id: 'education', label: 'Education', icon: GraduationCap },
-    { id: 'experience', label: 'Experience', icon: Award },
-    { id: 'skills', label: 'Skills', icon: Languages },
-    { id: 'banking', label: 'Banking', icon: CreditCard },
-    { id: 'emergency', label: 'Emergency', icon: Heart },
-    { id: 'documents', label: 'Documents', icon: Folder },
-    { id: 'policies', label: 'Policies', icon: Shield },
-    { id: 'history', label: 'History', icon: History }
-  ];
 
   const statusConfig = EMPLOYMENT_STATUSES[employee.employment_status] || EMPLOYMENT_STATUSES.active;
 
@@ -266,13 +687,22 @@ const EmployeeProfile = () => {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => navigate(`/employee-admin/employees/${id}/edit`)}
-          className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-        >
-          <Edit className="w-4 h-4" />
-          <span>Edit Profile</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowIDCardModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            <CreditCard className="w-4 h-4" />
+            <span>Generate ID Card</span>
+          </button>
+          <button
+            onClick={() => navigate(`/employee-admin/employees/${id}/edit`)}
+            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          >
+            <Edit className="w-4 h-4" />
+            <span>Edit Profile</span>
+          </button>
+        </div>
       </div>
 
       {/* Profile Header Card */}
@@ -318,6 +748,13 @@ const EmployeeProfile = () => {
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">
         <button
+          onClick={() => setShowIDCardModal(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>Generate ID Card</span>
+        </button>
+        <button
           onClick={() => navigate(`/employee-admin/employees/${id}/onboarding`)}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
         >
@@ -333,7 +770,7 @@ const EmployeeProfile = () => {
         </button>
         <button
           onClick={() => navigate(`/employee-admin/employees/${id}/personnel-file`)}
-          className="flex items-center space-x-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
         >
           <Folder className="w-4 h-4" />
           <span>Personnel File</span>
@@ -434,7 +871,7 @@ const EmployeeProfile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
                   <InfoItem icon={Calendar} label="Date of Hire" value={formatDate(employee.date_of_hire)} />
                   <InfoItem icon={Calendar} label="Probation End Date" value={formatDate(employee.probation_end_date)} />
-                  <InfoItem icon={Calendar} label="Contract End Date" value={formatDate(employee.contract_end_date) || 'Indefinite'} />
+                  <InfoItem icon={Calendar} label="Contract End Date" value={formatDate(employee.contract_end_date || undefined) || 'Indefinite'} />
                 </div>
               </div>
 
@@ -734,7 +1171,7 @@ const EmployeeProfile = () => {
                 <div className="relative">
                   <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
                   <div className="space-y-6">
-                    {employee.status_history.map((history, index) => (
+                    {employee.status_history.map((history) => (
                       <div key={history.id} className="relative flex items-start space-x-4 ml-2">
                         <div className="w-4 h-4 rounded-full bg-primary-600 border-4 border-white dark:border-gray-800 z-10" />
                         <div className="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
@@ -782,6 +1219,14 @@ const EmployeeProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* ID Card Modal */}
+      {showIDCardModal && employee && (
+        <IDCardGenerator
+          employee={employee}
+          onClose={() => setShowIDCardModal(false)}
+        />
+      )}
     </div>
   );
 };

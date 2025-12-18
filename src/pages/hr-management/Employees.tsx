@@ -204,6 +204,56 @@ const INITIAL_FORM_DATA: FormData = {
   notes: "",
 };
 
+// Afghanistan provinces and their districts
+const PROVINCES_DISTRICTS: Record<string, string[]> = {
+  Kabul: ["Kabul City", "Paghman", "Char Asiab", "Bagrami", "Khak-e-Jabar", "Deh Sabz", "Guldara", "Istalif", "Kalakan", "Mir Bacha Kot", "Musahi", "Qarabagh", "Shakardara", "Surobi", "Farza"],
+  Balkh: ["Mazar-i-Sharif", "Balkh", "Char Bolak", "Char Kent", "Chimtal", "Dawlat Abad", "Dehdadi", "Kaldar", "Khulm", "Kishindeh", "Marmul", "Nahri Shahi", "Sholgara", "Shortepa", "Zari"],
+  Herat: ["Herat City", "Adraskan", "Chishti Sharif", "Enjil", "Farsi", "Ghoryan", "Gulran", "Guzara", "Karukh", "Kohsan", "Kushk", "Kushk-i-Kuhna", "Obe", "Pashtun Zarghun", "Shindand", "Zinda Jan"],
+  Kandahar: ["Kandahar City", "Arghandab", "Arghistan", "Daman", "Dand", "Ghorak", "Khakrez", "Maruf", "Maywand", "Nesh", "Panjwai", "Reg", "Shah Wali Kot", "Shorabak", "Spin Boldak", "Zhari"],
+  Nangarhar: ["Jalalabad", "Achin", "Bati Kot", "Behsud", "Chaparhar", "Dara-i-Nur", "Deh Bala", "Dur Baba", "Goshta", "Hesarak", "Kama", "Khogyani", "Kot", "Kuz Kunar", "Lal Pur", "Mohmand Dara", "Muhmand Dara", "Nazyan", "Pachir Wa Agam", "Rodat", "Shinwar", "Surkh Rod"],
+  Parwan: ["Charikar", "Bagram", "Ghorband", "Jabul Saraj", "Koh-i-Safi", "Salang", "Sayed Khel", "Sheikh Ali", "Shinwari", "Surkhi Parsa"],
+  Baghlan: ["Pul-e-Khumri", "Andarab", "Baghlan-i-Jadid", "Burka", "Dahana-i-Ghori", "Doshi", "Fereng and Gharu", "Guzargah-i-Nur", "Khinjan", "Khost Wa Fereng", "Nahrin", "Pul-i-Hisar", "Tala Wa Barfak"],
+  Kunduz: ["Kunduz City", "Aliabad", "Archi", "Chahar Dara", "Dasht-i-Archi", "Imam Sahib", "Khanabad", "Qala-i-Zal"],
+  Takhar: ["Taloqan", "Baharak", "Bangi", "Cha Ab", "Chal", "Darqad", "Dasht-i-Qala", "Farkhar", "Hazar Sumuch", "Ishkamish", "Kalafgan", "Khwaja Bahauddin", "Khwaja Ghar", "Namak Ab", "Rostaq", "Warsaj", "Yangi Qala"],
+  Badakhshan: ["Fayzabad", "Argo", "Arghanj Khwa", "Baharak", "Darayim", "Darwaz", "Darwaz-i-Bala", "Ishkashim", "Jurm", "Khash", "Khwahan", "Kof Ab", "Kohistan", "Kuf Ab", "Maimay", "Raghistan", "Shahr-i-Buzurg", "Shighnan", "Shiki", "Tagab", "Tishkan", "Wakhan", "Warduj", "Yaftal-i-Sufla", "Yamgan", "Zebak"],
+  Ghazni: ["Ghazni City", "Ab Band", "Ajristan", "Andar", "Deh Yak", "Gelan", "Giro", "Jagatu", "Jaghori", "Khwaja Omari", "Malistan", "Muqur", "Nawa", "Nawur", "Qarabagh", "Rashidan", "Waghaz", "Zanakhan"],
+  Paktia: ["Gardez", "Ahmad Abad", "Chamkani", "Dand Patan", "Jaji", "Jaji Aryub", "Jani Khel", "Lija Ahmad Khel", "Mirzaka", "Sayed Karam", "Shwak", "Wuza Zadran", "Zurmat"],
+  Paktika: ["Sharana", "Barmal", "Dila", "Gayan", "Giyan", "Gomal", "Jani Khel", "Mata Khan", "Neka", "Omna", "Sar Hawza", "Sarhawza", "Sharan", "Terwa", "Urgun", "Waza Khwa", "Wor Mamay", "Yosuf Khel", "Zarghun Shahr", "Ziruk"],
+  Logar: ["Pul-i-Alam", "Azra", "Baraki Barak", "Charkh", "Kharwar", "Khoshi", "Mohammad Agha"],
+  Wardak: ["Maidan Shahr", "Chak", "Daymirdad", "Hesa-i-Awal-i-Behsud", "Jaghatu", "Jalrez", "Markaz-i-Behsud", "Nirkh", "Sayed Abad"],
+  Kapisa: ["Mahmud-i-Raqi", "Alasay", "Hesa-i-Awal-i-Kohistan", "Hesa-i-Duwum-i-Kohistan", "Kohband", "Nijrab", "Tagab"],
+  Laghman: ["Mehtarlam", "Alingar", "Alishang", "Dawlat Shah", "Qarghayi"],
+  Kunar: ["Asadabad", "Bar Kunar", "Chapa Dara", "Chawkay", "Dangam", "Ghaziabad", "Khas Kunar", "Marawara", "Narang", "Nari", "Nurgal", "Pech", "Sawkai", "Shigal Wa Sheltan", "Sirkani", "Wata Pur"],
+  Nuristan: ["Parun", "Barg-i-Matal", "Do Ab", "Kamdesh", "Mandol", "Nurgaram", "Wama", "Waygal"],
+  Bamyan: ["Bamyan City", "Kahmard", "Panjab", "Sayghan", "Shibar", "Waras", "Yakawlang"],
+  Daykundi: ["Nili", "Ashtarlay", "Gizab", "Isar-i-Miramor", "Kajran", "Khadir", "Kiti", "Miramor", "Sang-i-Takht", "Shahristan"],
+  Ghor: ["Firoz Koh", "Chaghcharan", "Charsada", "Dawlat Yar", "Du Layna", "Lal Wa Sarjangal", "Pasaband", "Saghar", "Shahrak", "Taywarah", "Tolak"],
+  Farah: ["Farah City", "Anar Dara", "Bakwa", "Bala Buluk", "Gulistan", "Khak-i-Safed", "Lash-i-Juwayn", "Purchaman", "Pusht-i-Rod", "Qala-i-Kah", "Shib Koh"],
+  Nimroz: ["Zaranj", "Chahar Burjak", "Chakhansur", "Kang", "Khash Rod"],
+  Helmand: ["Lashkar Gah", "Baghran", "Dishu", "Garmser", "Gereshk", "Kajaki", "Lashkargah", "Musa Qala", "Nad Ali", "Nahr-i-Saraj", "Nawa-i-Barakzayi", "Nawzad", "Reg-i-Khan Neshin", "Sangin", "Washer"],
+  Zabul: ["Qalat", "Arghandab", "Atghar", "Daychopan", "Kakar", "Mizan", "Naw Bahar", "Shahjoy", "Shamulzayi", "Shinkay", "Tarnak Wa Jaldak"],
+  Uruzgan: ["Tarin Kowt", "Chora", "Dehrawud", "Gizab", "Khas Uruzgan", "Shahid-i-Hassas"],
+  Faryab: ["Maymana", "Almar", "Andkhoy", "Bilchiragh", "Dawlat Abad", "Gurziwan", "Khan-i-Char Bagh", "Kohistan", "Pashtun Kot", "Qaramqol", "Qaysar", "Qurghan", "Shirin Tagab"],
+  Jawzjan: ["Sheberghan", "Aqcha", "Darzab", "Fayzabad", "Khamyab", "Khanaqa", "Khwaja Du Koh", "Mardyan", "Mingajik", "Qarqin", "Qush Tepa"],
+  Samangan: ["Aybak", "Dara-i-Suf-i-Bala", "Dara-i-Suf-i-Payin", "Feroz Nakhchir", "Hazrat-i-Sultan", "Khuram Wa Sarbagh", "Ruyi Du Ab"],
+  Sar_e_Pol: ["Sar-i-Pul", "Balkhab", "Gosfandi", "Kohestanat", "Sangcharak", "Sayad", "Sozma Qala"],
+  Badghis: ["Qala-i-Naw", "Ab Kamari", "Ghormach", "Jawand", "Muqur", "Qadis"],
+  Khost: ["Khost City", "Alisher", "Bak", "Gurbuz", "Jaji Maidan", "Mando Zayi", "Matun", "Musa Khel", "Nadir Shah Kot", "Qalandar", "Sabari", "Shamal", "Spera", "Tani", "Terezayi"],
+  Panjshir: ["Bazarak", "Anaba", "Dara", "Hesa-i-Awal", "Paryan", "Rukha", "Shutul"]
+};
+
+const STEP_LABELS = [
+  "Personal Info",
+  "Contact Info",
+  "Address",
+  "Employment",
+];
+
+interface StepValidation {
+  step: number;
+  validate: (data: FormData) => { valid: boolean; errors: FormErrors };
+}
+
 const STATUS_CLASSES: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
   on_leave:
@@ -526,6 +576,61 @@ const Employees: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  // Get districts for a province
+  const getDistrictsForProvince = useCallback((province: string): string[] => {
+    return PROVINCES_DISTRICTS[province] || [];
+  }, []);
+
+  // Step validation functions
+  const validateStep = useCallback((step: number, data: FormData): { valid: boolean; errors: FormErrors } => {
+    const errors: FormErrors = {};
+
+    switch (step) {
+      case 0: // Personal Info
+        if (!data.first_name.trim()) errors.first_name = ["First name is required"];
+        if (!data.last_name.trim()) errors.last_name = ["Last name is required"];
+        if (!data.date_of_birth) errors.date_of_birth = ["Date of birth is required"];
+        if (!data.gender) errors.gender = ["Gender is required"];
+        break;
+      case 1: // Contact Info
+        if (!data.primary_email.trim()) errors.primary_email = ["Primary email is required"];
+        if (data.primary_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.primary_email)) {
+          errors.primary_email = ["Invalid email format"];
+        }
+        if (!data.primary_phone.trim()) errors.primary_phone = ["Primary phone is required"];
+        break;
+      case 2: // Address
+        // Address fields are optional but if province is selected, validate district
+        break;
+      case 3: // Employment
+        if (!data.hire_date) errors.hire_date = ["Hire date is required"];
+        if (!data.office_id) errors.office_id = ["Office is required"];
+        if (!data.department_id) errors.department_id = ["Department is required"];
+        if (!data.position_id) errors.position_id = ["Position is required"];
+        break;
+    }
+
+    return { valid: Object.keys(errors).length === 0, errors };
+  }, []);
+
+  // Navigate to next step
+  const handleNextStep = useCallback(() => {
+    const { valid, errors } = validateStep(currentStep, formData);
+    if (valid) {
+      setFormErrors({});
+      setCurrentStep(prev => Math.min(prev + 1, STEP_LABELS.length - 1));
+    } else {
+      setFormErrors(errors);
+    }
+  }, [currentStep, formData, validateStep]);
+
+  // Navigate to previous step
+  const handlePrevStep = useCallback(() => {
+    setFormErrors({});
+    setCurrentStep(prev => Math.max(prev - 1, 0));
+  }, []);
 
   // Statistics
   const [statistics, setStatistics] = useState<Statistics | null>(null);
@@ -601,7 +706,7 @@ const Employees: React.FC = () => {
     fetchEmployees();
     fetchDropdownData();
     fetchStatistics();
-  }, []);
+  }, [fetchDropdownData, fetchEmployees, fetchStatistics]);
 
   // Fetch on filter change
   useEffect(() => {
@@ -609,7 +714,7 @@ const Employees: React.FC = () => {
       fetchEmployees(1);
     }, 500);
     return () => clearTimeout(timer);
-  }, [filters]);
+  }, [fetchEmployees, filters]);
 
   // Handle filter change
   const handleFilterChange = useCallback(
@@ -620,7 +725,7 @@ const Employees: React.FC = () => {
     []
   );
 
-  // Handle form change
+  // Handle form change - no dependency on formErrors to prevent re-renders
   const handleFormChange = useCallback(
     (
       e: React.ChangeEvent<
@@ -630,21 +735,42 @@ const Employees: React.FC = () => {
       const { name, value, type } = e.target;
       const checked =
         type === "checkbox" ? (e.target as HTMLInputElement).checked : false;
-      setFormData((prev) => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      }));
-      if (formErrors[name]) {
-        setFormErrors((prev) => ({ ...prev, [name]: undefined }));
-      }
+
+      setFormData((prev) => {
+        const newData = {
+          ...prev,
+          [name]: type === "checkbox" ? checked : value,
+        };
+
+        // Clear district when province changes
+        if (name === "permanent_province") {
+          newData.permanent_district = "";
+        }
+        if (name === "current_province") {
+          newData.current_district = "";
+        }
+
+        return newData;
+      });
+
+      // Clear error for this field
+      setFormErrors((prev) => {
+        if (prev[name]) {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        }
+        return prev;
+      });
     },
-    [formErrors]
+    []
   );
 
   // Open create modal
   const handleCreate = useCallback(() => {
     setFormData(INITIAL_FORM_DATA);
     setFormErrors({});
+    setCurrentStep(0);
     setShowCreateModal(true);
   }, []);
 
@@ -795,7 +921,7 @@ const Employees: React.FC = () => {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Employees
+          Employees here
         </h1>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Manage employee records and generate ID cards
@@ -1155,243 +1281,570 @@ const Employees: React.FC = () => {
             </div>
           )}
 
-          {/* Personal Information */}
+          {/* Step Indicator */}
           <div className="mb-6">
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Personal Information
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Title
-                </label>
-                <select
-                  name="title"
-                  value={formData.title}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select</option>
-                  <option value="mr">Mr</option>
-                  <option value="ms">Ms</option>
-                  <option value="mrs">Mrs</option>
-                  <option value="dr">Dr</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  First Name *
-                </label>
-                <input
-                  type="text"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                {formErrors.first_name && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {Array.isArray(formErrors.first_name)
-                      ? formErrors.first_name[0]
-                      : formErrors.first_name}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Last Name *
-                </label>
-                <input
-                  type="text"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                {formErrors.last_name && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {Array.isArray(formErrors.last_name)
-                      ? formErrors.last_name[0]
-                      : formErrors.last_name}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Date of Birth *
-                </label>
-                <input
-                  type="date"
-                  name="date_of_birth"
-                  value={formData.date_of_birth}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Gender *
-                </label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  National ID Number
-                </label>
-                <input
-                  type="text"
-                  name="national_id_number"
-                  value={formData.national_id_number}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
+            <div className="flex items-center justify-between">
+              {STEP_LABELS.map((label, index) => (
+                <div key={label} className="flex items-center">
+                  <div className="flex flex-col items-center">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        index < currentStep
+                          ? "bg-green-500 text-white"
+                          : index === currentStep
+                          ? "bg-primary-500 text-white"
+                          : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                      }`}
+                    >
+                      {index < currentStep ? "✓" : index + 1}
+                    </div>
+                    <span className={`text-xs mt-1 ${
+                      index === currentStep
+                        ? "text-primary-600 dark:text-primary-400 font-medium"
+                        : "text-gray-500 dark:text-gray-400"
+                    }`}>
+                      {label}
+                    </span>
+                  </div>
+                  {index < STEP_LABELS.length - 1 && (
+                    <div
+                      className={`w-12 sm:w-20 h-0.5 mx-2 ${
+                        index < currentStep ? "bg-green-500" : "bg-gray-200 dark:bg-gray-700"
+                      }`}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Contact Information */}
-          <div className="mb-6">
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Contact Information
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Primary Email *
-                </label>
-                <input
-                  type="email"
-                  name="primary_email"
-                  value={formData.primary_email}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Primary Phone *
-                </label>
-                <input
-                  type="text"
-                  name="primary_phone"
-                  value={formData.primary_phone}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
+          {/* Step 0: Personal Information */}
+          {currentStep === 0 && (
+            <div className="mb-6">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Personal Information
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Title
+                  </label>
+                  <select
+                    name="title"
+                    value={formData.title}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Select</option>
+                    <option value="mr">Mr</option>
+                    <option value="ms">Ms</option>
+                    <option value="mrs">Mrs</option>
+                    <option value="dr">Dr</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.first_name ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  />
+                  {formErrors.first_name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.first_name) ? formErrors.first_name[0] : formErrors.first_name}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.last_name ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  />
+                  {formErrors.last_name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.last_name) ? formErrors.last_name[0] : formErrors.last_name}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Father Name
+                  </label>
+                  <input
+                    type="text"
+                    name="father_name"
+                    value={formData.father_name}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Date of Birth *
+                  </label>
+                  <input
+                    type="date"
+                    name="date_of_birth"
+                    value={formData.date_of_birth}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.date_of_birth ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  />
+                  {formErrors.date_of_birth && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.date_of_birth) ? formErrors.date_of_birth[0] : formErrors.date_of_birth}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Gender *
+                  </label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.gender ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  >
+                    <option value="">Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                  {formErrors.gender && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.gender) ? formErrors.gender[0] : formErrors.gender}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Marital Status
+                  </label>
+                  <select
+                    name="marital_status"
+                    value={formData.marital_status}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Select</option>
+                    <option value="single">Single</option>
+                    <option value="married">Married</option>
+                    <option value="divorced">Divorced</option>
+                    <option value="widowed">Widowed</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    National ID Number
+                  </label>
+                  <input
+                    type="text"
+                    name="national_id_number"
+                    value={formData.national_id_number}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Employment Information */}
-          <div className="mb-6">
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Employment Information
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Hire Date *
-                </label>
-                <input
-                  type="date"
-                  name="hire_date"
-                  value={formData.hire_date}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Office *
-                </label>
-                <select
-                  name="office_id"
-                  value={formData.office_id}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select Office</option>
-                  {offices.map((office) => (
-                    <option key={office.id} value={office.id}>
-                      {office.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Department *
-                </label>
-                <select
-                  name="department_id"
-                  value={formData.department_id}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select Department</option>
-                  {departments.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Position *
-                </label>
-                <select
-                  name="position_id"
-                  value={formData.position_id}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select Position</option>
-                  {positions.map((pos) => (
-                    <option key={pos.id} value={pos.id}>
-                      {pos.title}
-                    </option>
-                  ))}
-                </select>
+          {/* Step 1: Contact Information */}
+          {currentStep === 1 && (
+            <div className="mb-6">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Contact Information
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Primary Email *
+                  </label>
+                  <input
+                    type="email"
+                    name="primary_email"
+                    value={formData.primary_email}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.primary_email ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  />
+                  {formErrors.primary_email && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.primary_email) ? formErrors.primary_email[0] : formErrors.primary_email}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Personal Email
+                  </label>
+                  <input
+                    type="email"
+                    name="personal_email"
+                    value={formData.personal_email}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Primary Phone *
+                  </label>
+                  <input
+                    type="text"
+                    name="primary_phone"
+                    value={formData.primary_phone}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.primary_phone ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  />
+                  {formErrors.primary_phone && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.primary_phone) ? formErrors.primary_phone[0] : formErrors.primary_phone}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Alternate Phone
+                  </label>
+                  <input
+                    type="text"
+                    name="alternate_phone"
+                    value={formData.alternate_phone}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Step 2: Address Information */}
+          {currentStep === 2 && (
+            <div className="mb-6">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Address Information
+              </h4>
+
+              {/* Permanent Address */}
+              <div className="mb-6">
+                <h5 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-3">
+                  Permanent Address
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Province
+                    </label>
+                    <select
+                      name="permanent_province"
+                      value={formData.permanent_province}
+                      onChange={handleFormChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="">Select Province</option>
+                      {Object.keys(PROVINCES_DISTRICTS).map((province) => (
+                        <option key={province} value={province}>
+                          {province.replace("_", " ")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      District
+                    </label>
+                    <select
+                      name="permanent_district"
+                      value={formData.permanent_district}
+                      onChange={handleFormChange}
+                      disabled={!formData.permanent_province}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select District</option>
+                      {getDistrictsForProvince(formData.permanent_province).map((district) => (
+                        <option key={district} value={district}>
+                          {district}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Address Details
+                    </label>
+                    <input
+                      type="text"
+                      name="permanent_address"
+                      value={formData.permanent_address}
+                      onChange={handleFormChange}
+                      placeholder="Street, House No, etc."
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Current Address */}
+              <div>
+                <h5 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-3">
+                  Current Address
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Province
+                    </label>
+                    <select
+                      name="current_province"
+                      value={formData.current_province}
+                      onChange={handleFormChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="">Select Province</option>
+                      {Object.keys(PROVINCES_DISTRICTS).map((province) => (
+                        <option key={province} value={province}>
+                          {province.replace("_", " ")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      District
+                    </label>
+                    <select
+                      name="current_district"
+                      value={formData.current_district}
+                      onChange={handleFormChange}
+                      disabled={!formData.current_province}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select District</option>
+                      {getDistrictsForProvince(formData.current_province).map((district) => (
+                        <option key={district} value={district}>
+                          {district}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Address Details
+                    </label>
+                    <input
+                      type="text"
+                      name="current_address"
+                      value={formData.current_address}
+                      onChange={handleFormChange}
+                      placeholder="Street, House No, etc."
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Employment Information */}
+          {currentStep === 3 && (
+            <div className="mb-6">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Employment Information
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Hire Date *
+                  </label>
+                  <input
+                    type="date"
+                    name="hire_date"
+                    value={formData.hire_date}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.hire_date ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  />
+                  {formErrors.hire_date && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.hire_date) ? formErrors.hire_date[0] : formErrors.hire_date}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Employment Type
+                  </label>
+                  <select
+                    name="employment_type"
+                    value={formData.employment_type}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="full_time">Full Time</option>
+                    <option value="part_time">Part Time</option>
+                    <option value="contract">Contract</option>
+                    <option value="consultant">Consultant</option>
+                    <option value="intern">Intern</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Office *
+                  </label>
+                  <select
+                    name="office_id"
+                    value={formData.office_id}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.office_id ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  >
+                    <option value="">Select Office</option>
+                    {offices.map((office) => (
+                      <option key={office.id} value={office.id}>
+                        {office.name}
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.office_id && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.office_id) ? formErrors.office_id[0] : formErrors.office_id}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Department *
+                  </label>
+                  <select
+                    name="department_id"
+                    value={formData.department_id}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.department_id ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  >
+                    <option value="">Select Department</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.department_id && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.department_id) ? formErrors.department_id[0] : formErrors.department_id}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Position *
+                  </label>
+                  <select
+                    name="position_id"
+                    value={formData.position_id}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.position_id ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    }`}
+                  >
+                    <option value="">Select Position</option>
+                    {positions.map((pos) => (
+                      <option key={pos.id} value={pos.id}>
+                        {pos.title}
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.position_id && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {Array.isArray(formErrors.position_id) ? formErrors.position_id[0] : formErrors.position_id}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Grade
+                  </label>
+                  <select
+                    name="grade_id"
+                    value={formData.grade_id}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Select Grade</option>
+                    {grades.map((grade) => (
+                      <option key={grade.id} value={grade.id}>
+                        {grade.name} {grade.code ? `(${grade.code})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(false)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
-            >
-              {submitting ? "Creating..." : "Create Employee"}
-            </button>
+          <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div>
+              {currentStep > 0 && (
+                <button
+                  type="button"
+                  onClick={handlePrevStep}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Previous
+                </button>
+              )}
+            </div>
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              {currentStep < STEP_LABELS.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={handleNextStep}
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
+                >
+                  {submitting ? "Creating..." : "Create Employee"}
+                </button>
+              )}
+            </div>
           </div>
         </form>
       </Modal>

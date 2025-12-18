@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus,
@@ -20,12 +20,75 @@ import {
   MoreVertical,
   FileText,
   ClipboardList,
-  Building2
+  Building2,
+  CreditCard,
+  Printer,
+  X,
+  Calendar,
+  Phone,
+  Mail
 } from 'lucide-react';
 import { initEmployeeAdminDB } from '../../services/db/employeeAdminService';
-import { employeeDB, departmentDB, officeDB } from '../../services/db/indexedDB';
+import { employeeDB, departmentDB } from '../../services/db/indexedDB';
 
-const EMPLOYMENT_TYPES = [
+// ==================== TYPES ====================
+
+interface Employee {
+  id: number;
+  employee_code: string;
+  full_name: string;
+  father_name: string;
+  position: string;
+  department: string;
+  employment_type: string;
+  employment_status: string;
+  gender: string;
+  date_of_hire: string;
+  phone_primary: string;
+  photo_path: string | null;
+  email: string;
+  office?: string;
+}
+
+interface Department {
+  id: number;
+  name: string;
+}
+
+interface Statistics {
+  total: number;
+  active: number;
+  onboarding: number;
+  probation: number;
+  onLeave: number;
+  separated: number;
+}
+
+interface DeleteModal {
+  show: boolean;
+  employee: Employee | null;
+}
+
+interface Toast {
+  show: boolean;
+  message: string;
+  type: 'success' | 'error';
+}
+
+interface EmploymentType {
+  value: string;
+  label: string;
+}
+
+interface EmploymentStatus {
+  value: string;
+  label: string;
+  color: string;
+}
+
+// ==================== CONSTANTS ====================
+
+const EMPLOYMENT_TYPES: EmploymentType[] = [
   { value: 'core', label: 'Core Staff' },
   { value: 'project', label: 'Project Staff' },
   { value: 'consultant', label: 'Consultant' },
@@ -36,7 +99,7 @@ const EMPLOYMENT_TYPES = [
   { value: 'temporary', label: 'Temporary' }
 ];
 
-const EMPLOYMENT_STATUSES = [
+const EMPLOYMENT_STATUSES: EmploymentStatus[] = [
   { value: 'pre_boarding', label: 'Pre-Boarding', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' },
   { value: 'onboarding', label: 'Onboarding', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
   { value: 'probation', label: 'Probation', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' },
@@ -48,14 +111,275 @@ const EMPLOYMENT_STATUSES = [
   { value: 'terminated', label: 'Terminated', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }
 ];
 
-const EmployeeList = () => {
+// ==================== HELPER FUNCTIONS ====================
+
+const formatDate = (dateString?: string): string => {
+  if (!dateString) return '-';
+  return new Date(dateString).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+};
+
+const calculateExpiryDate = (hireDate?: string): string => {
+  if (!hireDate) return '-';
+  const date = new Date(hireDate);
+  date.setFullYear(date.getFullYear() + 1);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+};
+
+// ==================== ID CARD COMPONENT ====================
+
+interface IDCardProps {
+  employee: Employee;
+  onClose: () => void;
+}
+
+const IDCardGenerator: React.FC<IDCardProps> = ({ employee, onClose }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useCallback(() => {
+    const printContent = cardRef.current;
+    if (!printContent) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Employee ID Card - ${employee.employee_code}</title>
+          <style>
+            @page { size: 85.6mm 54mm; margin: 0; }
+            body { margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+            .id-card { width: 85.6mm; height: 54mm; position: relative; }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  }, [employee.employee_code]);
+
+  const expiryDate = useMemo(
+    () => calculateExpiryDate(employee.date_of_hire),
+    [employee.date_of_hire]
+  );
+
+  const getStatusColor = (status: string): string => {
+    const statusConfig = EMPLOYMENT_STATUSES.find(s => s.value === status);
+    if (status === 'active') return 'bg-green-500 text-white';
+    if (status === 'on_leave') return 'bg-yellow-500 text-white';
+    return statusConfig?.color || 'bg-gray-500 text-white';
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg mx-4">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Generate Employee ID Card
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* ID Card Preview */}
+        <div className="flex justify-center mb-6">
+          <div
+            ref={cardRef}
+            className="id-card w-[340px] h-[214px] bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-2xl overflow-hidden relative"
+          >
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
+            </div>
+
+            {/* Card Content */}
+            <div className="relative h-full p-4 flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-sm">VDO</h3>
+                    <p className="text-blue-200 text-[10px]">Employee ID Card</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-mono font-bold text-xs">
+                    {employee.employee_code}
+                  </p>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="flex gap-3 flex-1">
+                {/* Photo */}
+                <div className="w-20 h-24 bg-white rounded-lg overflow-hidden flex-shrink-0 shadow-lg">
+                  {employee.photo_path ? (
+                    <img
+                      src={employee.photo_path}
+                      alt={employee.full_name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-gray-400">
+                        {employee.full_name?.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 text-white">
+                  <h4 className="font-bold text-sm mb-0.5 truncate">
+                    {employee.full_name}
+                  </h4>
+                  <p className="text-blue-200 text-[10px] mb-2 truncate">
+                    {employee.position || 'Position'}
+                  </p>
+
+                  <div className="space-y-1 text-[9px]">
+                    <div className="flex items-center gap-1">
+                      <Building2 className="w-3 h-3 text-blue-300" />
+                      <span className="truncate">
+                        {employee.department || 'Department'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Phone className="w-3 h-3 text-blue-300" />
+                      <span>{employee.phone_primary || '-'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Mail className="w-3 h-3 text-blue-300" />
+                      <span className="truncate">
+                        {employee.email || '-'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-blue-500/30">
+                <div className="text-[9px] text-blue-200">
+                  <span>Issue: </span>
+                  <span className="text-white font-medium">
+                    {formatDate(employee.date_of_hire)}
+                  </span>
+                </div>
+                <div className="text-[9px] text-blue-200">
+                  <span>Expiry: </span>
+                  <span className="text-white font-medium">{expiryDate}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-blue-300" />
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded ${getStatusColor(employee.employment_status)}`}>
+                    {employee.employment_status?.replace('_', ' ').toUpperCase()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card Information Summary */}
+        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 mb-6">
+          <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+            ID Card Information
+          </h4>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Employee ID</p>
+              <p className="font-medium text-gray-900 dark:text-white font-mono">
+                {employee.employee_code}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Full Name</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {employee.full_name}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Position</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {employee.position || '-'}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Department</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {employee.department || '-'}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Issue Date</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {formatDate(employee.date_of_hire)}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400">Expiry Date</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {expiryDate}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            Close
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <Printer className="w-4 h-4" />
+            Print ID Card
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <Download className="w-4 h-4" />
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==================== MAIN COMPONENT ====================
+
+const EmployeeList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialFilter = searchParams.get('filter');
 
-  const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statistics, setStatistics] = useState({
+  const [statistics, setStatistics] = useState<Statistics>({
     total: 0,
     active: 0,
     onboarding: 0,
@@ -73,7 +397,7 @@ const EmployeeList = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   // Reference data
-  const [departments, setDepartments] = useState([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,33 +405,97 @@ const EmployeeList = () => {
   const [totalItems, setTotalItems] = useState(0);
 
   // Modals
-  const [deleteModal, setDeleteModal] = useState({ show: false, employee: null });
-  const [actionMenu, setActionMenu] = useState(null);
+  const [deleteModal, setDeleteModal] = useState<DeleteModal>({ show: false, employee: null });
+  const [actionMenu, setActionMenu] = useState<number | null>(null);
+  const [idCardModal, setIdCardModal] = useState<{ show: boolean; employee: Employee | null }>({
+    show: false,
+    employee: null
+  });
 
   // Toast notification
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [toast, setToast] = useState<Toast>({ show: false, message: '', type: 'success' });
 
-  useEffect(() => {
-    loadData();
+  const loadEmployees = useCallback(async () => {
+    try {
+      const allEmployees = await employeeDB.getAll();
+
+      let filtered = allEmployees.map((emp: Record<string, unknown>) => ({
+        id: emp.id as number,
+        employee_code: (emp.employeeId as string) || `VDO-EMP-${String(emp.id).padStart(4, '0')}`,
+        full_name: `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || (emp.name as string) || 'Unknown',
+        father_name: (emp.fatherName as string) || '',
+        position: (emp.position as string) || 'Not Assigned',
+        department: (emp.department as string) || 'Not Assigned',
+        employment_type: (emp.employmentType as string) || (emp.employment_type as string) || 'core',
+        employment_status: (emp.status as string) || (emp.employment_status as string) || 'active',
+        gender: (emp.gender as string) || 'male',
+        date_of_hire: (emp.hireDate as string) || (emp.date_of_hire as string) || new Date().toISOString().split('T')[0],
+        phone_primary: (emp.phone as string) || (emp.phone_primary as string) || '',
+        photo_path: (emp.photoPath as string) || (emp.photo_path as string) || null,
+        email: (emp.email as string) || '',
+        office: (emp.office as string) || ''
+      }));
+
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        filtered = filtered.filter((e: Employee) =>
+          e.full_name.toLowerCase().includes(search) ||
+          e.employee_code.toLowerCase().includes(search) ||
+          e.position.toLowerCase().includes(search)
+        );
+      }
+
+      if (statusFilter) {
+        filtered = filtered.filter((e: Employee) => e.employment_status === statusFilter);
+      }
+
+      if (typeFilter) {
+        filtered = filtered.filter((e: Employee) => e.employment_type === typeFilter);
+      }
+
+      if (departmentFilter) {
+        filtered = filtered.filter((e: Employee) => e.department === departmentFilter);
+      }
+
+      if (genderFilter) {
+        filtered = filtered.filter((e: Employee) => e.gender === genderFilter);
+      }
+
+      setTotalItems(filtered.length);
+      setEmployees(filtered);
+    } catch (error) {
+      console.error('Error loading employees:', error);
+    }
+  }, [searchTerm, statusFilter, typeFilter, departmentFilter, genderFilter]);
+
+  const loadStatistics = useCallback(async () => {
+    try {
+      const allEmployees = await employeeDB.getAll();
+      const stats: Statistics = {
+        total: allEmployees.length,
+        active: allEmployees.filter((e: Record<string, unknown>) => ((e.status as string) || (e.employment_status as string)) === 'active').length,
+        onboarding: allEmployees.filter((e: Record<string, unknown>) => ((e.status as string) || (e.employment_status as string)) === 'onboarding').length,
+        probation: allEmployees.filter((e: Record<string, unknown>) => ((e.status as string) || (e.employment_status as string)) === 'probation').length,
+        onLeave: allEmployees.filter((e: Record<string, unknown>) => ((e.status as string) || (e.employment_status as string)) === 'on_leave').length,
+        separated: allEmployees.filter((e: Record<string, unknown>) => ['separated', 'terminated'].includes((e.status as string) || (e.employment_status as string))).length
+      };
+      setStatistics(stats);
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+    }
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadEmployees();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchTerm, statusFilter, typeFilter, departmentFilter, genderFilter, currentPage]);
+  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  }, []);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Initialize IndexedDB and seed defaults
       await initEmployeeAdminDB();
-
-      // Load departments from IndexedDB
       const depts = await departmentDB.getAll();
-      setDepartments(depts);
-
+      setDepartments(depts as Department[]);
       await loadEmployees();
       loadStatistics();
     } catch (error) {
@@ -116,80 +504,20 @@ const EmployeeList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadEmployees, loadStatistics, showToast]);
 
-  const loadEmployees = async () => {
-    try {
-      // Load employees from IndexedDB
-      let allEmployees = await employeeDB.getAll();
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-      // Map IndexedDB format to component format
-      let filtered = allEmployees.map(emp => ({
-        id: emp.id,
-        employee_code: emp.employeeId || `VDO-EMP-${String(emp.id).padStart(4, '0')}`,
-        full_name: `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || emp.name || 'Unknown',
-        father_name: emp.fatherName || '',
-        position: emp.position || 'Not Assigned',
-        department: emp.department || 'Not Assigned',
-        employment_type: emp.employmentType || emp.employment_type || 'core',
-        employment_status: emp.status || emp.employment_status || 'active',
-        gender: emp.gender || 'male',
-        date_of_hire: emp.hireDate || emp.date_of_hire || new Date().toISOString().split('T')[0],
-        phone_primary: emp.phone || emp.phone_primary || '',
-        photo_path: emp.photoPath || emp.photo_path || null,
-        email: emp.email || ''
-      }));
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadEmployees();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [loadEmployees]);
 
-      if (searchTerm) {
-        const search = searchTerm.toLowerCase();
-        filtered = filtered.filter(e =>
-          e.full_name.toLowerCase().includes(search) ||
-          e.employee_code.toLowerCase().includes(search) ||
-          e.position.toLowerCase().includes(search)
-        );
-      }
-
-      if (statusFilter) {
-        filtered = filtered.filter(e => e.employment_status === statusFilter);
-      }
-
-      if (typeFilter) {
-        filtered = filtered.filter(e => e.employment_type === typeFilter);
-      }
-
-      if (departmentFilter) {
-        filtered = filtered.filter(e => e.department === departmentFilter);
-      }
-
-      if (genderFilter) {
-        filtered = filtered.filter(e => e.gender === genderFilter);
-      }
-
-      setTotalItems(filtered.length);
-      setEmployees(filtered);
-    } catch (error) {
-      console.error('Error loading employees:', error);
-    }
-  };
-
-  const loadStatistics = async () => {
-    try {
-      const allEmployees = await employeeDB.getAll();
-      const stats = {
-        total: allEmployees.length,
-        active: allEmployees.filter(e => (e.status || e.employment_status) === 'active').length,
-        onboarding: allEmployees.filter(e => (e.status || e.employment_status) === 'onboarding').length,
-        probation: allEmployees.filter(e => (e.status || e.employment_status) === 'probation').length,
-        onLeave: allEmployees.filter(e => (e.status || e.employment_status) === 'on_leave').length,
-        separated: allEmployees.filter(e => ['separated', 'terminated'].includes(e.status || e.employment_status)).length
-      };
-      setStatistics(stats);
-    } catch (error) {
-      console.error('Error loading statistics:', error);
-    }
-  };
-
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!deleteModal.employee) return;
     try {
       await employeeDB.delete(deleteModal.employee.id);
@@ -201,22 +529,17 @@ const EmployeeList = () => {
       console.error('Error deleting employee:', error);
       showToast('Failed to delete employee', 'error');
     }
-  };
+  }, [deleteModal.employee, loadEmployees, loadStatistics, showToast]);
 
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
-  };
-
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearchTerm('');
     setStatusFilter('');
     setTypeFilter('');
     setDepartmentFilter('');
     setGenderFilter('');
-  };
+  }, []);
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = useCallback((status: string) => {
     const statusConfig = EMPLOYMENT_STATUSES.find(s => s.value === status);
     if (!statusConfig) return null;
     return (
@@ -224,17 +547,25 @@ const EmployeeList = () => {
         {statusConfig.label}
       </span>
     );
-  };
+  }, []);
 
-  const getTypeBadge = (type) => {
+  const getTypeBadge = useCallback((type: string) => {
     const typeConfig = EMPLOYMENT_TYPES.find(t => t.value === type);
     if (!typeConfig) return type;
     return typeConfig.label;
-  };
+  }, []);
+
+  const handleGenerateIDCard = useCallback((employee: Employee) => {
+    setIdCardModal({ show: true, employee });
+    setActionMenu(null);
+  }, []);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedEmployees = employees.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedEmployees = useMemo(
+    () => employees.slice(startIndex, startIndex + itemsPerPage),
+    [employees, startIndex, itemsPerPage]
+  );
 
   const hasActiveFilters = searchTerm || statusFilter || typeFilter || departmentFilter || genderFilter;
 
@@ -263,7 +594,7 @@ const EmployeeList = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Employees</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Manage employee master data and records
+            Manage employee master data and generate ID cards
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -554,6 +885,13 @@ const EmployeeList = () => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1 relative">
                         <button
+                          onClick={() => handleGenerateIDCard(employee)}
+                          className="p-2 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
+                          title="Generate ID Card"
+                        >
+                          <CreditCard className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        </button>
+                        <button
                           onClick={() => navigate(`/employee-admin/employees/${employee.id}`)}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           title="View Profile"
@@ -576,6 +914,15 @@ const EmployeeList = () => {
                           </button>
                           {actionMenu === employee.id && (
                             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                              <button
+                                onClick={() => {
+                                  handleGenerateIDCard(employee);
+                                }}
+                                className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                <span>Generate ID Card</span>
+                              </button>
                               <button
                                 onClick={() => {
                                   navigate(`/employee-admin/employees/${employee.id}/onboarding`);
@@ -657,6 +1004,14 @@ const EmployeeList = () => {
           </div>
         )}
       </div>
+
+      {/* ID Card Modal */}
+      {idCardModal.show && idCardModal.employee && (
+        <IDCardGenerator
+          employee={idCardModal.employee}
+          onClose={() => setIdCardModal({ show: false, employee: null })}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteModal.show && (

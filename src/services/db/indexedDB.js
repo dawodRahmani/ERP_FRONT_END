@@ -2705,6 +2705,145 @@ export const initDB = async () => {
         coStore.createIndex('processedBy', 'processedBy', { unique: false });
         coStore.createIndex('processedAt', 'processedAt', { unique: false });
       }
+
+
+
+
+
+
+
+      // PERFORMANCE APPRAISAL MANAGEMENT
+      const APPRAISAL_STORES = {
+        appraisalCycles: 'appraisalCycles',
+        appraisalTemplates: 'appraisalTemplates',
+        appraisalSections: 'appraisalSections',
+        appraisalCriteria: 'appraisalCriteria',
+        employeeAppraisals: 'employeeAppraisals',
+        appraisalRatings: 'appraisalRatings',
+        appraisalCommitteeMembers: 'appraisalCommitteeMembers',
+        appraisalGoals: 'appraisalGoals',
+        appraisalTrainingNeeds: 'appraisalTrainingNeeds',
+        probationRecords: 'probationRecords',
+        probationExtensions: 'probationExtensions',
+        probationKpis: 'probationKpis',
+        performanceImprovementPlans: 'performanceImprovementPlans',
+        pipGoals: 'pipGoals',
+        pipCheckIns: 'pipCheckIns',
+        appraisalOutcomes: 'appraisalOutcomes'
+      };
+      
+
+      // Appraisal Cycles
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalCycles)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalCycles, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_status', 'status');
+        store.createIndex('by_year', 'fiscalYear');
+        store.createIndex('by_type', 'cycleType');
+      }
+
+      // Appraisal Templates
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalTemplates)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalTemplates, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_type', 'templateType');
+        store.createIndex('by_active', 'isActive');
+      }
+
+      // Appraisal Sections
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalSections)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalSections, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_template', 'templateId');
+      }
+
+      // Appraisal Criteria
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalCriteria)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalCriteria, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_section', 'sectionId');
+      }
+
+      // Employee Appraisals
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.employeeAppraisals)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.employeeAppraisals, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_employee', 'employeeId');
+        store.createIndex('by_cycle', 'appraisalCycleId');
+        store.createIndex('by_status', 'status');
+        store.createIndex('by_type', 'appraisalType');
+        store.createIndex('by_manager', 'lineManagerId');
+      }
+
+      // Appraisal Ratings
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalRatings)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalRatings, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_appraisal', 'appraisalId');
+        store.createIndex('by_criteria', 'criteriaId');
+      }
+
+      // Appraisal Committee Members
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalCommitteeMembers)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalCommitteeMembers, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_appraisal', 'appraisalId');
+        store.createIndex('by_member', 'memberId');
+      }
+
+      // Appraisal Goals
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalGoals)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalGoals, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_appraisal', 'appraisalId');
+        store.createIndex('by_status', 'status');
+      }
+
+      // Appraisal Training Needs
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalTrainingNeeds)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalTrainingNeeds, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_appraisal', 'appraisalId');
+        store.createIndex('by_type', 'trainingType');
+      }
+
+      // Probation Records
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.probationRecords)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.probationRecords, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_employee', 'employeeId');
+        store.createIndex('by_status', 'status');
+      }
+
+      // Probation Extensions
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.probationExtensions)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.probationExtensions, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_probation', 'probationId');
+      }
+
+      // Probation KPIs
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.probationKpis)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.probationKpis, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_extension', 'extensionId');
+      }
+
+      // Performance Improvement Plans
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.performanceImprovementPlans)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.performanceImprovementPlans, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_employee', 'employeeId');
+        store.createIndex('by_status', 'status');
+        store.createIndex('by_manager', 'managerId');
+      }
+
+      // PIP Goals
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.pipGoals)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.pipGoals, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_pip', 'pipId');
+        store.createIndex('by_status', 'status');
+      }
+
+      // PIP Check-ins
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.pipCheckIns)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.pipCheckIns, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_pip', 'pipId');
+      }
+
+      // Appraisal Outcomes
+      if (!db.objectStoreNames.contains(APPRAISAL_STORES.appraisalOutcomes)) {
+        const store = db.createObjectStore(APPRAISAL_STORES.appraisalOutcomes, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_appraisal', 'appraisalId');
+        store.createIndex('by_type', 'outcomeType');
+      }
     },
   });
 };

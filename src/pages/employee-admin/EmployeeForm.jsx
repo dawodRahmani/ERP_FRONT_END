@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -18,6 +18,83 @@ import {
   Languages
 } from 'lucide-react';
 
+// Afghanistan provinces and their districts - defined OUTSIDE component to prevent re-creation
+const PROVINCES_DISTRICTS = {
+  Kabul: ["Kabul City", "Paghman", "Char Asiab", "Bagrami", "Khak-e-Jabar", "Deh Sabz", "Guldara", "Istalif", "Kalakan", "Mir Bacha Kot", "Musahi", "Qarabagh", "Shakardara", "Surobi", "Farza"],
+  Balkh: ["Mazar-i-Sharif", "Balkh", "Char Bolak", "Char Kent", "Chimtal", "Dawlat Abad", "Dehdadi", "Kaldar", "Khulm", "Kishindeh", "Marmul", "Nahri Shahi", "Sholgara", "Shortepa", "Zari"],
+  Herat: ["Herat City", "Adraskan", "Chishti Sharif", "Enjil", "Farsi", "Ghoryan", "Gulran", "Guzara", "Karukh", "Kohsan", "Kushk", "Kushk-i-Kuhna", "Obe", "Pashtun Zarghun", "Shindand", "Zinda Jan"],
+  Kandahar: ["Kandahar City", "Arghandab", "Arghistan", "Daman", "Dand", "Ghorak", "Khakrez", "Maruf", "Maywand", "Nesh", "Panjwai", "Reg", "Shah Wali Kot", "Shorabak", "Spin Boldak", "Zhari"],
+  Nangarhar: ["Jalalabad", "Achin", "Bati Kot", "Behsud", "Chaparhar", "Dara-i-Nur", "Deh Bala", "Dur Baba", "Goshta", "Hesarak", "Kama", "Khogyani", "Kot", "Kuz Kunar", "Lal Pur", "Mohmand Dara", "Nazyan", "Pachir Wa Agam", "Rodat", "Shinwar", "Surkh Rod"],
+  Parwan: ["Charikar", "Bagram", "Ghorband", "Jabul Saraj", "Koh-i-Safi", "Salang", "Sayed Khel", "Sheikh Ali", "Shinwari", "Surkhi Parsa"],
+  Baghlan: ["Pul-e-Khumri", "Andarab", "Baghlan-i-Jadid", "Burka", "Dahana-i-Ghori", "Doshi", "Fereng and Gharu", "Guzargah-i-Nur", "Khinjan", "Khost Wa Fereng", "Nahrin", "Pul-i-Hisar", "Tala Wa Barfak"],
+  Kunduz: ["Kunduz City", "Aliabad", "Archi", "Chahar Dara", "Dasht-i-Archi", "Imam Sahib", "Khanabad", "Qala-i-Zal"],
+  Takhar: ["Taloqan", "Baharak", "Bangi", "Cha Ab", "Chal", "Darqad", "Dasht-i-Qala", "Farkhar", "Hazar Sumuch", "Ishkamish", "Kalafgan", "Khwaja Bahauddin", "Khwaja Ghar", "Namak Ab", "Rostaq", "Warsaj", "Yangi Qala"],
+  Badakhshan: ["Fayzabad", "Argo", "Arghanj Khwa", "Baharak", "Darayim", "Darwaz", "Darwaz-i-Bala", "Ishkashim", "Jurm", "Khash", "Khwahan", "Kof Ab", "Kohistan", "Maimay", "Raghistan", "Shahr-i-Buzurg", "Shighnan", "Shiki", "Tagab", "Tishkan", "Wakhan", "Warduj", "Yaftal-i-Sufla", "Yamgan", "Zebak"],
+  Ghazni: ["Ghazni City", "Ab Band", "Ajristan", "Andar", "Deh Yak", "Gelan", "Giro", "Jagatu", "Jaghori", "Khwaja Omari", "Malistan", "Muqur", "Nawa", "Nawur", "Qarabagh", "Rashidan", "Waghaz", "Zanakhan"],
+  Paktia: ["Gardez", "Ahmad Abad", "Chamkani", "Dand Patan", "Jaji", "Jaji Aryub", "Jani Khel", "Lija Ahmad Khel", "Mirzaka", "Sayed Karam", "Shwak", "Wuza Zadran", "Zurmat"],
+  Paktika: ["Sharana", "Barmal", "Dila", "Gayan", "Giyan", "Gomal", "Jani Khel", "Mata Khan", "Neka", "Omna", "Sar Hawza", "Sharan", "Terwa", "Urgun", "Waza Khwa", "Wor Mamay", "Yosuf Khel", "Zarghun Shahr", "Ziruk"],
+  Logar: ["Pul-i-Alam", "Azra", "Baraki Barak", "Charkh", "Kharwar", "Khoshi", "Mohammad Agha"],
+  Wardak: ["Maidan Shahr", "Chak", "Daymirdad", "Hesa-i-Awal-i-Behsud", "Jaghatu", "Jalrez", "Markaz-i-Behsud", "Nirkh", "Sayed Abad"],
+  Kapisa: ["Mahmud-i-Raqi", "Alasay", "Hesa-i-Awal-i-Kohistan", "Hesa-i-Duwum-i-Kohistan", "Kohband", "Nijrab", "Tagab"],
+  Laghman: ["Mehtarlam", "Alingar", "Alishang", "Dawlat Shah", "Qarghayi"],
+  Kunar: ["Asadabad", "Bar Kunar", "Chapa Dara", "Chawkay", "Dangam", "Ghaziabad", "Khas Kunar", "Marawara", "Narang", "Nari", "Nurgal", "Pech", "Sawkai", "Shigal Wa Sheltan", "Sirkani", "Wata Pur"],
+  Nuristan: ["Parun", "Barg-i-Matal", "Do Ab", "Kamdesh", "Mandol", "Nurgaram", "Wama", "Waygal"],
+  Bamyan: ["Bamyan City", "Kahmard", "Panjab", "Sayghan", "Shibar", "Waras", "Yakawlang"],
+  Daykundi: ["Nili", "Ashtarlay", "Gizab", "Isar-i-Miramor", "Kajran", "Khadir", "Kiti", "Miramor", "Sang-i-Takht", "Shahristan"],
+  Ghor: ["Firoz Koh", "Chaghcharan", "Charsada", "Dawlat Yar", "Du Layna", "Lal Wa Sarjangal", "Pasaband", "Saghar", "Shahrak", "Taywarah", "Tolak"],
+  Farah: ["Farah City", "Anar Dara", "Bakwa", "Bala Buluk", "Gulistan", "Khak-i-Safed", "Lash-i-Juwayn", "Purchaman", "Pusht-i-Rod", "Qala-i-Kah", "Shib Koh"],
+  Nimroz: ["Zaranj", "Chahar Burjak", "Chakhansur", "Kang", "Khash Rod"],
+  Helmand: ["Lashkar Gah", "Baghran", "Dishu", "Garmser", "Gereshk", "Kajaki", "Musa Qala", "Nad Ali", "Nahr-i-Saraj", "Nawa-i-Barakzayi", "Nawzad", "Reg-i-Khan Neshin", "Sangin", "Washer"],
+  Zabul: ["Qalat", "Arghandab", "Atghar", "Daychopan", "Kakar", "Mizan", "Naw Bahar", "Shahjoy", "Shamulzayi", "Shinkay", "Tarnak Wa Jaldak"],
+  Uruzgan: ["Tarin Kowt", "Chora", "Dehrawud", "Gizab", "Khas Uruzgan", "Shahid-i-Hassas"],
+  Faryab: ["Maymana", "Almar", "Andkhoy", "Bilchiragh", "Dawlat Abad", "Gurziwan", "Khan-i-Char Bagh", "Kohistan", "Pashtun Kot", "Qaramqol", "Qaysar", "Qurghan", "Shirin Tagab"],
+  Jawzjan: ["Sheberghan", "Aqcha", "Darzab", "Fayzabad", "Khamyab", "Khanaqa", "Khwaja Du Koh", "Mardyan", "Mingajik", "Qarqin", "Qush Tepa"],
+  Samangan: ["Aybak", "Dara-i-Suf-i-Bala", "Dara-i-Suf-i-Payin", "Feroz Nakhchir", "Hazrat-i-Sultan", "Khuram Wa Sarbagh", "Ruyi Du Ab"],
+  "Sar-e-Pol": ["Sar-i-Pul", "Balkhab", "Gosfandi", "Kohestanat", "Sangcharak", "Sayad", "Sozma Qala"],
+  Badghis: ["Qala-i-Naw", "Ab Kamari", "Ghormach", "Jawand", "Muqur", "Qadis"],
+  Khost: ["Khost City", "Alisher", "Bak", "Gurbuz", "Jaji Maidan", "Mando Zayi", "Matun", "Musa Khel", "Nadir Shah Kot", "Qalandar", "Sabari", "Shamal", "Spera", "Tani", "Terezayi"],
+  Panjshir: ["Bazarak", "Anaba", "Dara", "Hesa-i-Awal", "Paryan", "Rukha", "Shutul"]
+};
+
+// Input field component - defined OUTSIDE to prevent re-creation on each render
+const InputField = memo(({ label, required, error, ...props }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <input
+      {...props}
+      className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+        error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+      }`}
+    />
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+  </div>
+));
+
+// Select field component - defined OUTSIDE to prevent re-creation on each render
+const SelectField = memo(({ label, required, options, error, ...props }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <select
+      {...props}
+      className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+        error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+      }`}
+    >
+      <option value="">Select...</option>
+      {options.map(opt => (
+        <option key={opt.value || opt.id} value={opt.value || opt.id}>
+          {opt.label || opt.name}
+        </option>
+      ))}
+    </select>
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+  </div>
+));
+
 const EMPLOYMENT_TYPES = [
   { value: 'core', label: 'Core Staff' },
   { value: 'project', label: 'Project Staff' },
@@ -32,10 +109,16 @@ const EMPLOYMENT_TYPES = [
 const DEGREE_LEVELS = [
   { value: 'high_school', label: 'High School' },
   { value: 'diploma', label: 'Diploma' },
+  { value: '14th_grade', label: '14th Grade' },
   { value: 'bachelors', label: "Bachelor's" },
   { value: 'masters', label: "Master's" },
   { value: 'phd', label: 'PhD' },
   { value: 'other', label: 'Other' }
+];
+
+const INSTITUTE_TYPES = [
+  { value: 'public', label: 'Public' },
+  { value: 'private', label: 'Private' }
 ];
 
 const SKILL_TYPES = [
@@ -81,9 +164,11 @@ const EmployeeForm = () => {
     current_address: '',
     current_city: '',
     current_province: '',
+    current_district: '',
     permanent_address: '',
     permanent_city: '',
     permanent_province: '',
+    permanent_district: '',
     // Employment Info
     position_id: '',
     department_id: '',
@@ -177,9 +262,27 @@ const EmployeeForm = () => {
     }
   };
 
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const handleChange = useCallback((field, value) => {
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+
+      // Clear district when province changes
+      if (field === 'current_province') {
+        newData.current_district = '';
+      }
+      if (field === 'permanent_province') {
+        newData.permanent_district = '';
+      }
+
+      return newData;
+    });
+  }, []);
+
+  // Get districts for a province
+  const getDistrictsForProvince = useCallback((province) => {
+    if (!province) return [];
+    return PROVINCES_DISTRICTS[province] || [];
+  }, []);
 
   const handleEmergencyContactChange = (index, field, value) => {
     const updated = [...formData.emergency_contacts];
@@ -217,7 +320,7 @@ const EmployeeForm = () => {
       ...prev,
       educations: [
         ...prev.educations,
-        { degree_level: 'bachelors', degree_name: '', specialization: '', institution_name: '', country: 'Afghanistan', graduation_year: '' }
+        { degree_level: 'bachelors', degree_name: '', specialization: '', institution_name: '', institute_type: '', country: 'Afghanistan', graduation_year: '' }
       ]
     }));
   };
@@ -253,7 +356,7 @@ const EmployeeForm = () => {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
   };
 
-  const validateStep = (step) => {
+  const validateStep = useCallback((step) => {
     switch (step) {
       case 1:
         return formData.full_name && formData.father_name && formData.date_of_birth && formData.gender && formData.national_id_number;
@@ -272,7 +375,7 @@ const EmployeeForm = () => {
       default:
         return true;
     }
-  };
+  }, [formData]);
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
@@ -316,36 +419,26 @@ const EmployeeForm = () => {
     { id: 7, label: 'Skills', icon: Languages }
   ];
 
-  const InputField = ({ label, required, ...props }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        {...props}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-      />
-    </div>
-  );
-
-  const SelectField = ({ label, required, options, ...props }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <select
-        {...props}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-      >
-        <option value="">Select...</option>
-        {options.map(opt => (
-          <option key={opt.value || opt.id} value={opt.value || opt.id}>
-            {opt.label || opt.name}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
+  // Handle step click - only allow going to completed steps or current step
+  const handleStepClick = useCallback((stepId) => {
+    // Can only go back to previous steps, not forward (must use Next button)
+    if (stepId < currentStep) {
+      setCurrentStep(stepId);
+    } else if (stepId > currentStep) {
+      // Check if all previous steps are valid before allowing skip
+      let canNavigate = true;
+      for (let i = 1; i < stepId; i++) {
+        if (!validateStep(i)) {
+          canNavigate = false;
+          showToast(`Please complete Step ${i} first`, 'error');
+          break;
+        }
+      }
+      if (canNavigate) {
+        setCurrentStep(stepId);
+      }
+    }
+  }, [currentStep, validateStep]);
 
   if (loading) {
     return (
@@ -398,7 +491,7 @@ const EmployeeForm = () => {
                     ? 'text-green-600 dark:text-green-400'
                     : 'text-gray-400'
                 }`}
-                onClick={() => setCurrentStep(step.id)}
+                onClick={() => handleStepClick(step.id)}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   currentStep === step.id
@@ -452,21 +545,47 @@ const EmployeeForm = () => {
               <InputField label="Secondary Phone" type="tel" value={formData.phone_secondary} onChange={(e) => handleChange('phone_secondary', e.target.value)} placeholder="+93..." />
               <InputField label="Personal Email" type="email" value={formData.personal_email} onChange={(e) => handleChange('personal_email', e.target.value)} placeholder="email@example.com" />
             </div>
+
             <h4 className="text-md font-medium text-gray-900 dark:text-white mt-6">Current Address</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <SelectField
+                label="Province"
+                value={formData.current_province}
+                onChange={(e) => handleChange('current_province', e.target.value)}
+                options={Object.keys(PROVINCES_DISTRICTS).map(p => ({ value: p, label: p }))}
+              />
+              <SelectField
+                label="District"
+                value={formData.current_district}
+                onChange={(e) => handleChange('current_district', e.target.value)}
+                options={getDistrictsForProvince(formData.current_province).map(d => ({ value: d, label: d }))}
+                disabled={!formData.current_province}
+              />
+              <InputField label="City/Village" required type="text" value={formData.current_city} onChange={(e) => handleChange('current_city', e.target.value)} placeholder="City or Village name" />
               <div className="lg:col-span-3">
-                <InputField label="Address" required type="text" value={formData.current_address} onChange={(e) => handleChange('current_address', e.target.value)} placeholder="House, Street, Area" />
+                <InputField label="Address Details" required type="text" value={formData.current_address} onChange={(e) => handleChange('current_address', e.target.value)} placeholder="House, Street, Area" />
               </div>
-              <InputField label="City" required type="text" value={formData.current_city} onChange={(e) => handleChange('current_city', e.target.value)} placeholder="City" />
-              <SelectField label="Province" value={formData.current_province} onChange={(e) => handleChange('current_province', e.target.value)} options={referenceData.provinces} />
             </div>
+
             <h4 className="text-md font-medium text-gray-900 dark:text-white mt-6">Permanent Address</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <SelectField
+                label="Province"
+                value={formData.permanent_province}
+                onChange={(e) => handleChange('permanent_province', e.target.value)}
+                options={Object.keys(PROVINCES_DISTRICTS).map(p => ({ value: p, label: p }))}
+              />
+              <SelectField
+                label="District"
+                value={formData.permanent_district}
+                onChange={(e) => handleChange('permanent_district', e.target.value)}
+                options={getDistrictsForProvince(formData.permanent_province).map(d => ({ value: d, label: d }))}
+                disabled={!formData.permanent_province}
+              />
+              <InputField label="City/Village" type="text" value={formData.permanent_city} onChange={(e) => handleChange('permanent_city', e.target.value)} placeholder="City or Village name" />
               <div className="lg:col-span-3">
-                <InputField label="Address" type="text" value={formData.permanent_address} onChange={(e) => handleChange('permanent_address', e.target.value)} placeholder="House, Street, Area (leave blank if same as current)" />
+                <InputField label="Address Details" type="text" value={formData.permanent_address} onChange={(e) => handleChange('permanent_address', e.target.value)} placeholder="House, Street, Area (leave blank if same as current)" />
               </div>
-              <InputField label="City" type="text" value={formData.permanent_city} onChange={(e) => handleChange('permanent_city', e.target.value)} placeholder="City" />
-              <SelectField label="Province" value={formData.permanent_province} onChange={(e) => handleChange('permanent_province', e.target.value)} options={referenceData.provinces} />
             </div>
           </div>
         )}
@@ -579,6 +698,7 @@ const EmployeeForm = () => {
                     <InputField label="Degree Name" type="text" value={edu.degree_name} onChange={(e) => handleEducationChange(index, 'degree_name', e.target.value)} placeholder="e.g., Bachelor of Science" />
                     <InputField label="Specialization" type="text" value={edu.specialization} onChange={(e) => handleEducationChange(index, 'specialization', e.target.value)} placeholder="e.g., Computer Science" />
                     <InputField label="Institution" type="text" value={edu.institution_name} onChange={(e) => handleEducationChange(index, 'institution_name', e.target.value)} placeholder="University/College name" />
+                    <SelectField label="Institute Type" value={edu.institute_type} onChange={(e) => handleEducationChange(index, 'institute_type', e.target.value)} options={INSTITUTE_TYPES} />
                     <InputField label="Country" type="text" value={edu.country} onChange={(e) => handleEducationChange(index, 'country', e.target.value)} placeholder="Afghanistan" />
                     <InputField label="Graduation Year" type="number" min="1950" max="2030" value={edu.graduation_year} onChange={(e) => handleEducationChange(index, 'graduation_year', e.target.value)} placeholder="2020" />
                   </div>
