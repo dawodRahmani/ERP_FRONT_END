@@ -1,26 +1,24 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  Plus,
-  Search,
-  Filter,
-  Eye,
-  Trash2,
-  RefreshCw,
-  Users,
-  FileText,
-  CheckCircle,
-  XCircle,
-  Clock,
   AlertCircle,
-  Zap,
   Briefcase,
-  UserCheck,
   Calendar,
+  Download,
+  Eye,
+  FileText,
+  Filter,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+  UserCheck,
+  Users,
+  Zap
 } from "lucide-react";
-import { useRecruitment } from "../../contexts/RecruitmentContext";
-import StatusBadge from "../../components/recruitment/StatusBadge";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Modal from "../../components/Modal";
+import StatusBadge from "../../components/recruitment/StatusBadge";
+import { useRecruitment } from "../../contexts/RecruitmentContext";
 import seedCompleteRecruitment from "../../services/db/seedRecruitment";
 
 // ==================== TYPES ====================
@@ -75,6 +73,7 @@ const RecruitmentList: React.FC = () => {
     fetchStats,
     deleteRecruitment,
     filterByStatus,
+    getRecruitmentById,
     RECRUITMENT_STATUS,
   } = useRecruitment();
 
@@ -134,6 +133,38 @@ const RecruitmentList: React.FC = () => {
     setDeleteModalOpen(false);
     setRecruitmentToDelete(null);
   }, []);
+
+  const handleDownload = useCallback(async (recruitment: Recruitment) => {
+    try {
+      // Fetch complete recruitment data with all related entities
+      const fullRecruitment = await getRecruitmentById(recruitment.id);
+
+      // Create a clean export object
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        recruitment: fullRecruitment,
+      };
+
+      // Convert to JSON and create download
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      // Create download link and trigger
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${recruitment.recruitmentCode}_${recruitment.positionTitle?.replace(/\s+/g, '_') || 'recruitment'}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to download recruitment data';
+      alert(`Error: ${errorMessage}`);
+    }
+  }, [getRecruitmentById]);
 
   const handleSeedDemoData = useCallback(async () => {
     setSeeding(true);
@@ -442,6 +473,13 @@ const RecruitmentList: React.FC = () => {
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDownload(recruitment)}
+                          className="p-2 text-gray-400 hover:text-green-500 transition-colors"
+                          title="Download Recruitment Data"
+                        >
+                          <Download className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openDeleteModal(recruitment)}

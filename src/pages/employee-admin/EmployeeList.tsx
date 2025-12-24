@@ -26,7 +26,9 @@ import {
   X,
   Calendar,
   Phone,
-  Mail
+  Mail,
+  History,
+  Briefcase
 } from 'lucide-react';
 import { initEmployeeAdminDB } from '../../services/db/employeeAdminService';
 import { employeeDB, departmentDB } from '../../services/db/indexedDB';
@@ -901,9 +903,16 @@ const EmployeeList: React.FC = () => {
                         <button
                           onClick={() => navigate(`/employee-admin/employees/${employee.id}/edit`)}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                          title="Edit"
+                          title="Edit Employee Data"
                         >
                           <Edit className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                        </button>
+                        <button
+                          onClick={() => navigate(`/employee-admin/employees/${employee.id}/update-position`)}
+                          className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                          title="Update Position (New Record)"
+                        >
+                          <Briefcase className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         </button>
                         <div className="relative">
                           <button
@@ -922,6 +931,26 @@ const EmployeeList: React.FC = () => {
                               >
                                 <CreditCard className="w-4 h-4" />
                                 <span>Generate ID Card</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  navigate(`/employee-admin/employees/${employee.id}/update-position`);
+                                  setActionMenu(null);
+                                }}
+                                className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                              >
+                                <Briefcase className="w-4 h-4" />
+                                <span>Update Position</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  navigate(`/employee-admin/employees/${employee.id}?tab=history`);
+                                  setActionMenu(null);
+                                }}
+                                className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              >
+                                <History className="w-4 h-4" />
+                                <span>View Position History</span>
                               </button>
                               <button
                                 onClick={() => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ClipboardCheck,
   UserCheck,
@@ -15,6 +15,14 @@ import {
   Building,
   Edit3,
   X as XIcon,
+  Upload,
+  Paperclip,
+  File,
+  FileText,
+  Image,
+  Download,
+  Trash2,
+  Eye,
 } from 'lucide-react';
 import { backgroundCheckDB, sanctionDB } from '../../../services/db/recruitmentService';
 
@@ -26,6 +34,9 @@ const Step14BackgroundCheck = ({ recruitment, onAdvance, isCurrentStep }) => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('references');
   const [editMode, setEditMode] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [previewFile, setPreviewFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const canEdit = editMode || isCurrentStep;
   const showEditButton = !isCurrentStep && !editMode;
@@ -64,7 +75,12 @@ const Step14BackgroundCheck = ({ recruitment, onAdvance, isCurrentStep }) => {
               checkedDate: '',
               notes: '',
             },
+            attachments: [],
           });
+        }
+        // Ensure attachments array exists for existing records
+        if (existing && !existing.attachments) {
+          existing.attachments = [];
         }
         setBackgroundCheck(existing);
       } catch (err) {
@@ -142,6 +158,126 @@ const Step14BackgroundCheck = ({ recruitment, onAdvance, isCurrentStep }) => {
     }));
   };
 
+  // File handling functions
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleFileInput = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFiles(e.target.files);
+    }
+  };
+
+  const handleFiles = async (files) => {
+    const maxSize = 10 * 1024 * 1024; // 10MB max
+    const allowedTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+
+    const newAttachments = [];
+
+    for (const file of files) {
+      if (file.size > maxSize) {
+        setError(`File "${file.name}" exceeds 10MB limit`);
+        continue;
+      }
+
+      if (!allowedTypes.includes(file.type)) {
+        setError(`File type "${file.type}" is not allowed`);
+        continue;
+      }
+
+      // Convert file to base64
+      const base64 = await fileToBase64(file);
+
+      newAttachments.push({
+        id: Date.now() + Math.random(),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        data: base64,
+        uploadedAt: new Date().toISOString(),
+        category: 'general',
+      });
+    }
+
+    if (newAttachments.length > 0) {
+      setBackgroundCheck(prev => ({
+        ...prev,
+        attachments: [...(prev.attachments || []), ...newAttachments],
+      }));
+    }
+  };
+
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const removeAttachment = (id) => {
+    setBackgroundCheck(prev => ({
+      ...prev,
+      attachments: (prev.attachments || []).filter(att => att.id !== id),
+    }));
+  };
+
+  const updateAttachmentCategory = (id, category) => {
+    setBackgroundCheck(prev => ({
+      ...prev,
+      attachments: (prev.attachments || []).map(att =>
+        att.id === id ? { ...att, category } : att
+      ),
+    }));
+  };
+
+  const downloadAttachment = (attachment) => {
+    const link = document.createElement('a');
+    link.href = attachment.data;
+    link.download = attachment.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const getFileIcon = (type) => {
+    if (type.startsWith('image/')) return Image;
+    if (type === 'application/pdf') return FileText;
+    return File;
+  };
+
   const handleComplete = async () => {
     // Check if all checks are completed
     const refsComplete = backgroundCheck.references?.length >= 2 &&
@@ -199,6 +335,7 @@ const Step14BackgroundCheck = ({ recruitment, onAdvance, isCurrentStep }) => {
     { id: 'guarantee', name: 'Guarantee Letter', icon: FileCheck },
     { id: 'address', name: 'Address Verification', icon: MapPin },
     { id: 'criminal', name: 'Criminal Check', icon: Shield },
+    { id: 'attachments', name: 'Attachments', icon: Paperclip, count: backgroundCheck?.attachments?.length || 0 },
   ];
 
   const getCheckStatus = () => {
@@ -609,8 +746,167 @@ const Step14BackgroundCheck = ({ recruitment, onAdvance, isCurrentStep }) => {
               )}
             </div>
           )}
+
+          {/* Attachments Tab */}
+          {activeTab === 'attachments' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Upload supporting documents (PDF, Images, Word documents - max 10MB each)
+                </p>
+              </div>
+
+              {/* Drop Zone */}
+              <div
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                  dragActive
+                    ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  onChange={handleFileInput}
+                  accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <Upload className={`w-10 h-10 mx-auto mb-3 ${dragActive ? 'text-teal-500' : 'text-gray-400'}`} />
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="font-medium text-teal-600 dark:text-teal-400">Click to upload</span> or drag and drop
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  PDF, JPG, PNG, GIF, DOC, DOCX (max 10MB)
+                </p>
+              </div>
+
+              {/* Attachment Categories */}
+              <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Document Categories</h4>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded">Reference Letters</span>
+                  <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded">Guarantee Documents</span>
+                  <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded">ID/Address Proof</span>
+                  <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded">Police Clearance</span>
+                  <span className="px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded">Other</span>
+                </div>
+              </div>
+
+              {/* Attachments List */}
+              {backgroundCheck?.attachments?.length > 0 ? (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Uploaded Files ({backgroundCheck.attachments.length})
+                  </h4>
+                  {backgroundCheck.attachments.map((attachment) => {
+                    const FileIcon = getFileIcon(attachment.type);
+                    return (
+                      <div
+                        key={attachment.id}
+                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-sm transition-shadow"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={`p-2 rounded-lg ${
+                            attachment.type.startsWith('image/')
+                              ? 'bg-purple-100 dark:bg-purple-900/30'
+                              : attachment.type === 'application/pdf'
+                              ? 'bg-red-100 dark:bg-red-900/30'
+                              : 'bg-blue-100 dark:bg-blue-900/30'
+                          }`}>
+                            <FileIcon className={`w-5 h-5 ${
+                              attachment.type.startsWith('image/')
+                                ? 'text-purple-600 dark:text-purple-400'
+                                : attachment.type === 'application/pdf'
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-blue-600 dark:text-blue-400'
+                            }`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {attachment.name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatFileSize(attachment.size)} • {new Date(attachment.uploadedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <select
+                            value={attachment.category || 'general'}
+                            onChange={(e) => updateAttachmentCategory(attachment.id, e.target.value)}
+                            className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                          >
+                            <option value="general">General</option>
+                            <option value="reference">Reference Letter</option>
+                            <option value="guarantee">Guarantee Document</option>
+                            <option value="id_proof">ID/Address Proof</option>
+                            <option value="police_clearance">Police Clearance</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-1 ml-3">
+                          {attachment.type.startsWith('image/') && (
+                            <button
+                              onClick={() => setPreviewFile(attachment)}
+                              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                              title="Preview"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => downloadAttachment(attachment)}
+                            className="p-2 text-gray-500 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="Download"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => removeAttachment(attachment.id)}
+                            className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="Remove"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Paperclip className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No attachments uploaded yet</p>
+                  <p className="text-xs mt-1">Upload reference letters, guarantee documents, ID proofs, etc.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewFile && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setPreviewFile(null)}>
+          <div className="relative max-w-4xl max-h-[90vh] p-4" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setPreviewFile(null)}
+              className="absolute top-2 right-2 p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
+            <img
+              src={previewFile.data}
+              alt={previewFile.name}
+              className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-xl"
+            />
+            <p className="text-center text-white mt-2">{previewFile.name}</p>
+          </div>
+        </div>
+      )}
 
       {/* Progress Summary */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">

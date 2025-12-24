@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Edit,
@@ -12,7 +12,6 @@ import {
   Users,
   User,
   FileText,
-  AlertCircle,
   CheckCircle,
   Clock,
   CreditCard,
@@ -31,8 +30,10 @@ import {
   FileCheck,
   Printer,
   X,
-  Building2
+  Building2,
+  Plus
 } from 'lucide-react';
+import { employeeDB, employeePositionHistoryDB } from '../../services/db/indexedDB';
 
 // ==================== TYPES ====================
 
@@ -107,6 +108,21 @@ interface StatusHistory {
   new_status: string;
   effective_date: string;
   reason: string;
+}
+
+interface PositionHistory {
+  id: number;
+  employeeId: number;
+  position: string;
+  department: string;
+  project: string;
+  employmentType: string;
+  startDate: string;
+  endDate: string | null;
+  isCurrent: boolean;
+  supervisor?: string;
+  notes?: string;
+  createdAt: string;
 }
 
 interface Employee {
@@ -530,10 +546,12 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 const EmployeeProfile: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
 
   const [employee, setEmployee] = useState<Employee | null>(null);
+  const [positionHistory, setPositionHistory] = useState<PositionHistory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('personal');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'personal');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [showIDCardModal, setShowIDCardModal] = useState(false);
 
@@ -618,6 +636,32 @@ const EmployeeProfile: React.FC = () => {
         updated_at: '2024-01-15'
       };
 
+      // Load real employee data from DB if available
+      if (id) {
+        const dbEmployee = await employeeDB.getById(Number(id));
+        if (dbEmployee) {
+          // Merge DB data with mock structure (use DB data where available)
+          mockEmployee.id = dbEmployee.id;
+          mockEmployee.employee_code = dbEmployee.employeeId || mockEmployee.employee_code;
+          mockEmployee.full_name = dbEmployee.full_name || `${dbEmployee.firstName || ''} ${dbEmployee.lastName || ''}`.trim() || mockEmployee.full_name;
+          mockEmployee.position = dbEmployee.position || mockEmployee.position;
+          mockEmployee.department = dbEmployee.department || mockEmployee.department;
+          mockEmployee.project = dbEmployee.project || mockEmployee.project;
+          mockEmployee.employment_type = dbEmployee.employmentType || dbEmployee.employment_type || mockEmployee.employment_type;
+          mockEmployee.date_of_hire = dbEmployee.hireDate || dbEmployee.date_of_hire || mockEmployee.date_of_hire;
+          mockEmployee.employment_status = dbEmployee.status || mockEmployee.employment_status;
+          mockEmployee.phone_primary = dbEmployee.phone || dbEmployee.phone_primary || mockEmployee.phone_primary;
+          mockEmployee.personal_email = dbEmployee.email || dbEmployee.personal_email || mockEmployee.personal_email;
+          mockEmployee.gender = dbEmployee.gender || mockEmployee.gender;
+          mockEmployee.nationality = dbEmployee.nationality || mockEmployee.nationality;
+          mockEmployee.office = dbEmployee.office;
+        }
+
+        // Load position history from DB
+        const history = await employeePositionHistoryDB.getByEmployeeId(Number(id));
+        setPositionHistory(history || []);
+      }
+
       setEmployee(mockEmployee);
     } catch (error) {
       console.error('Error loading employee:', error);
@@ -625,7 +669,7 @@ const EmployeeProfile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
+  }, [navigate, id]);
 
   useEffect(() => {
     loadEmployee();
@@ -1165,42 +1209,125 @@ const EmployeeProfile: React.FC = () => {
 
           {/* History Tab */}
           {activeTab === 'history' && (
-            <div className="space-y-6">
-              <SectionHeader title="Status History" icon={History} />
-              {employee.status_history?.length > 0 ? (
-                <div className="relative">
-                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
-                  <div className="space-y-6">
-                    {employee.status_history.map((history) => (
-                      <div key={history.id} className="relative flex items-start space-x-4 ml-2">
-                        <div className="w-4 h-4 rounded-full bg-primary-600 border-4 border-white dark:border-gray-800 z-10" />
-                        <div className="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              <span className={`px-2 py-1 text-xs rounded-full ${EMPLOYMENT_STATUSES[history.previous_status]?.color || ''}`}>
-                                {EMPLOYMENT_STATUSES[history.previous_status]?.label || history.previous_status}
-                              </span>
-                              <span className="text-gray-400">→</span>
-                              <span className={`px-2 py-1 text-xs rounded-full ${EMPLOYMENT_STATUSES[history.new_status]?.color || ''}`}>
-                                {EMPLOYMENT_STATUSES[history.new_status]?.label || history.new_status}
+            <div className="space-y-8">
+              {/* Position History Section */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <SectionHeader title="Position History" icon={Briefcase} />
+                  <button
+                    onClick={() => navigate(`/employee-admin/employees/${id}/update-position`)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add New Position</span>
+                  </button>
+                </div>
+                {positionHistory.length > 0 ? (
+                  <div className="relative">
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-blue-200 dark:bg-blue-800" />
+                    <div className="space-y-4">
+                      {positionHistory.map((record) => (
+                        <div key={record.id} className="relative flex items-start space-x-4 ml-2">
+                          <div className={`w-4 h-4 rounded-full border-4 border-white dark:border-gray-800 z-10 ${
+                            record.isCurrent ? 'bg-green-500' : 'bg-blue-500'
+                          }`} />
+                          <div className={`flex-1 rounded-lg p-4 ${
+                            record.isCurrent
+                              ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                              : 'bg-gray-50 dark:bg-gray-700/50'
+                          }`}>
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <h4 className="font-semibold text-gray-900 dark:text-white">{record.position}</h4>
+                                  {record.isCurrent && (
+                                    <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full">
+                                      Current
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  <Building className="w-3 h-3 inline mr-1" />
+                                  {record.department}
+                                  {record.project && <span className="ml-2">• {record.project}</span>}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                  {formatDate(record.startDate)}
+                                  {record.endDate ? ` - ${formatDate(record.endDate)}` : ' - Present'}
+                                </span>
+                                {record.employmentType && (
+                                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                    {EMPLOYMENT_TYPES[record.employmentType] || record.employmentType}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            {record.supervisor && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                Supervisor: {record.supervisor}
+                              </p>
+                            )}
+                            {record.notes && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">
+                                {record.notes}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                    <Briefcase className="w-12 h-12 mx-auto mb-4 text-gray-400 opacity-50" />
+                    <p className="text-gray-500 dark:text-gray-400">No position history recorded</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                      Click "Add New Position" to create the first record
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Status History Section */}
+              <div>
+                <SectionHeader title="Status History" icon={History} />
+                {employee.status_history?.length > 0 ? (
+                  <div className="relative mt-4">
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+                    <div className="space-y-6">
+                      {employee.status_history.map((history) => (
+                        <div key={history.id} className="relative flex items-start space-x-4 ml-2">
+                          <div className="w-4 h-4 rounded-full bg-primary-600 border-4 border-white dark:border-gray-800 z-10" />
+                          <div className="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center space-x-2">
+                                <span className={`px-2 py-1 text-xs rounded-full ${EMPLOYMENT_STATUSES[history.previous_status]?.color || ''}`}>
+                                  {EMPLOYMENT_STATUSES[history.previous_status]?.label || history.previous_status}
+                                </span>
+                                <span className="text-gray-400">→</span>
+                                <span className={`px-2 py-1 text-xs rounded-full ${EMPLOYMENT_STATUSES[history.new_status]?.color || ''}`}>
+                                  {EMPLOYMENT_STATUSES[history.new_status]?.label || history.new_status}
+                                </span>
+                              </div>
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {formatDate(history.effective_date)}
                               </span>
                             </div>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              {formatDate(history.effective_date)}
-                            </span>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{history.reason}</p>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{history.reason}</p>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No status history found</p>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400 mt-4">
+                    <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No status history found</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

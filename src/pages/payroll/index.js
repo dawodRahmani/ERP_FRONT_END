@@ -8,3 +8,5 @@ export { default as Advances } from './Advances';
 export { default as Loans } from './Loans';
 export { default as OvertimeRecords } from './OvertimeRecords';
 export { default as Payslips } from './Payslips';
+export { default as PayrollGeneration } from './PayrollGeneration';
+export { default as PayrollGenerationReport } from './PayrollGenerationReport';

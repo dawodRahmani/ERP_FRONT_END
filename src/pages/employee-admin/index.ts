@@ -4,6 +4,7 @@ export { default as HRDashboard } from './HRDashboard';
 export { default as EmployeeList } from './EmployeeList';
 export { default as EmployeeProfile } from './EmployeeProfile';
 export { default as EmployeeForm } from './EmployeeForm';
+export { default as UpdatePosition } from './UpdatePosition';
 export { default as OnboardingDashboard } from './OnboardingDashboard';
 export { default as ContractManagement } from './ContractManagement';
 export { default as InterimHiring } from './InterimHiring';

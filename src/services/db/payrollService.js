@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'vdo-erp-db';
-const DB_VERSION = 33; // Synchronized version across all services
+const DB_VERSION = 35; // Synchronized version across all services
 
 // Get database connection
 const getDB = async () => {
@@ -757,6 +757,7 @@ export const initPayrollDB = async () => {
 };
 
 export default {
+  // Original DB exports
   payrollPeriodsDB,
   salaryStructuresDB,
   employeeSalaryDB,
@@ -770,4 +771,20 @@ export default {
   cashPaymentsDB,
   initPayrollDB,
   seedPayrollDefaults,
+
+  // Aliases for component compatibility
+  payrollPeriods: payrollPeriodsDB,
+  payrollEntries: payrollEntriesDB,
+  salaryStructures: salaryStructuresDB,
+  advances: advancesDB,
+  loans: loansDB,
+  overtime: overtimeDB,
+  payslips: payslipsDB,
+
+  // Workflow helper methods
+  initiatePayroll: payrollPeriodsDB.initiate,
+  hrSubmitPayroll: payrollPeriodsDB.hrSubmit,
+  approvePayroll: payrollPeriodsDB.approve,
+  completePayroll: payrollPeriodsDB.complete,
+  lockPayroll: payrollPeriodsDB.lock,
 };

@@ -103,6 +103,7 @@ import {
   EmployeeList,
   EmployeeProfile,
   EmployeeForm,
+  UpdatePosition,
   OnboardingDashboard,
   ContractManagement,
   InterimHiring,
@@ -161,7 +162,9 @@ import {
   Advances,
   Loans,
   OvertimeRecords,
-  Payslips
+  Payslips,
+  PayrollGeneration,
+  PayrollGenerationReport
 } from '../pages/payroll';
 
 // Performance Appraisal Module Pages
@@ -192,6 +195,7 @@ const employeeAdminRoutes: RouteObject[] = [
   { path: 'employee-admin/employees/new', element: <EmployeeForm /> },
   { path: 'employee-admin/employees/:id', element: <EmployeeProfile /> },
   { path: 'employee-admin/employees/:id/edit', element: <EmployeeForm /> },
+  { path: 'employee-admin/employees/:id/update-position', element: <UpdatePosition /> },
   { path: 'employee-admin/onboarding', element: <OnboardingDashboard /> },
   { path: 'employee-admin/contracts', element: <ContractManagement /> },
   { path: 'employee-admin/interim-hiring', element: <InterimHiring /> },
@@ -369,6 +373,8 @@ const payrollRoutes: RouteObject[] = [
   { path: 'payroll/loans', element: <Loans /> },
   { path: 'payroll/overtime', element: <OvertimeRecords /> },
   { path: 'payroll/payslips', element: <Payslips /> },
+  { path: 'payroll/generation', element: <PayrollGeneration /> },
+  { path: 'payroll/generation/:id', element: <PayrollGenerationReport /> },
 ];
 
 // Performance Appraisal Module Routes

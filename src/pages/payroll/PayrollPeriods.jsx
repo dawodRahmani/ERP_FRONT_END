@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Calendar,
   Plus,
@@ -17,21 +17,30 @@ import {
   ChevronDown,
   RefreshCw,
   AlertCircle,
-  FileText
-} from 'lucide-react';
-import payrollService from '../../services/db/payrollService';
+  FileText,
+} from "lucide-react";
+import payrollService from "../../services/db/payrollService";
 
 const PayrollPeriods = () => {
   const navigate = useNavigate();
   const [periods, setPeriods] = useState([]);
   const [filteredPeriods, setFilteredPeriods] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [yearFilter, setYearFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newPeriod, setNewPeriod] = useState({
+    month: "",
+    year: new Date().getFullYear(),
+    startDate: "",
+    endDate: "",
+    paymentDate: "",
+  });
 
   useEffect(() => {
     loadPeriods();
@@ -45,10 +54,12 @@ const PayrollPeriods = () => {
     try {
       setLoading(true);
       const data = await payrollService.payrollPeriods.getAll();
-      const sortedData = data.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+      const sortedData = data.sort(
+        (a, b) => new Date(b.startDate) - new Date(a.startDate)
+      );
       setPeriods(sortedData);
     } catch (error) {
-      console.error('Error loading periods:', error);
+      console.error("Error loading periods:", error);
     } finally {
       setLoading(false);
     }
@@ -59,18 +70,19 @@ const PayrollPeriods = () => {
 
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(search) ||
-        p.month.toLowerCase().includes(search)
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(search) ||
+          p.month.toLowerCase().includes(search)
       );
     }
 
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(p => p.status === statusFilter);
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((p) => p.status === statusFilter);
     }
 
-    if (yearFilter !== 'all') {
-      filtered = filtered.filter(p => p.year.toString() === yearFilter);
+    if (yearFilter !== "all") {
+      filtered = filtered.filter((p) => p.year.toString() === yearFilter);
     }
 
     setFilteredPeriods(filtered);
@@ -78,48 +90,102 @@ const PayrollPeriods = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      draft: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-      collecting: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      processing: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      hr_review: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-      finance_review: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
-      pending_approval: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-      approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      disbursing: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
-      completed: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
-      locked: 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300'
+      draft: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+      collecting:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+      processing:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+      hr_review:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+      finance_review:
+        "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
+      pending_approval:
+        "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+      approved:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+      disbursing:
+        "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
+      completed:
+        "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300",
+      locked:
+        "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300",
     };
     return colors[status] || colors.draft;
   };
 
   const getStatusLabel = (status) => {
     const labels = {
-      draft: 'Draft',
-      collecting: 'Collecting Data',
-      processing: 'Processing',
-      hr_review: 'HR Review',
-      finance_review: 'Finance Review',
-      pending_approval: 'Pending Approval',
-      approved: 'Approved',
-      disbursing: 'Disbursing',
-      completed: 'Completed',
-      locked: 'Locked'
+      draft: "Draft",
+      collecting: "Collecting Data",
+      processing: "Processing",
+      hr_review: "HR Review",
+      finance_review: "Finance Review",
+      pending_approval: "Pending Approval",
+      approved: "Approved",
+      disbursing: "Disbursing",
+      completed: "Completed",
+      locked: "Locked",
     };
     return labels[status] || status;
   };
 
   const getNextAction = (status) => {
     const actions = {
-      draft: { label: 'Initiate', action: 'initiate', icon: Play, color: 'bg-blue-600 hover:bg-blue-700' },
-      collecting: { label: 'Process', action: 'process', icon: RefreshCw, color: 'bg-yellow-600 hover:bg-yellow-700' },
-      processing: { label: 'Submit to HR', action: 'hrSubmit', icon: Send, color: 'bg-purple-600 hover:bg-purple-700' },
-      hr_review: { label: 'Submit to Finance', action: 'financeSubmit', icon: Send, color: 'bg-indigo-600 hover:bg-indigo-700' },
-      finance_review: { label: 'Request Approval', action: 'requestApproval', icon: FileText, color: 'bg-orange-600 hover:bg-orange-700' },
-      pending_approval: { label: 'Approve', action: 'approve', icon: CheckCircle, color: 'bg-green-600 hover:bg-green-700' },
-      approved: { label: 'Start Disbursement', action: 'disburse', icon: DollarSign, color: 'bg-cyan-600 hover:bg-cyan-700' },
-      disbursing: { label: 'Complete', action: 'complete', icon: CheckCircle, color: 'bg-emerald-600 hover:bg-emerald-700' },
-      completed: { label: 'Lock', action: 'lock', icon: Lock, color: 'bg-slate-600 hover:bg-slate-700' },
-      locked: null
+      draft: {
+        label: "Initiate",
+        action: "initiate",
+        icon: Play,
+        color: "bg-blue-600 hover:bg-blue-700",
+      },
+      collecting: {
+        label: "Process",
+        action: "process",
+        icon: RefreshCw,
+        color: "bg-yellow-600 hover:bg-yellow-700",
+      },
+      processing: {
+        label: "Submit to HR",
+        action: "hrSubmit",
+        icon: Send,
+        color: "bg-purple-600 hover:bg-purple-700",
+      },
+      hr_review: {
+        label: "Submit to Finance",
+        action: "financeSubmit",
+        icon: Send,
+        color: "bg-indigo-600 hover:bg-indigo-700",
+      },
+      finance_review: {
+        label: "Request Approval",
+        action: "requestApproval",
+        icon: FileText,
+        color: "bg-orange-600 hover:bg-orange-700",
+      },
+      pending_approval: {
+        label: "Approve",
+        action: "approve",
+        icon: CheckCircle,
+        color: "bg-green-600 hover:bg-green-700",
+      },
+      approved: {
+        label: "Start Disbursement",
+        action: "disburse",
+        icon: DollarSign,
+        color: "bg-cyan-600 hover:bg-cyan-700",
+      },
+      disbursing: {
+        label: "Complete",
+        action: "complete",
+        icon: CheckCircle,
+        color: "bg-emerald-600 hover:bg-emerald-700",
+      },
+      completed: {
+        label: "Lock",
+        action: "lock",
+        icon: Lock,
+        color: "bg-slate-600 hover:bg-slate-700",
+      },
+      locked: null,
     };
     return actions[status];
   };
@@ -140,35 +206,66 @@ const PayrollPeriods = () => {
       let updated;
 
       switch (action.action) {
-        case 'initiate':
+        case "initiate":
           updated = await payrollService.initiatePayroll(selectedPeriod.id);
           break;
-        case 'process':
-          updated = { ...selectedPeriod, status: 'processing', updatedAt: new Date().toISOString() };
-          await payrollService.payrollPeriods.update(selectedPeriod.id, updated);
+        case "process":
+          updated = {
+            ...selectedPeriod,
+            status: "processing",
+            updatedAt: new Date().toISOString(),
+          };
+          await payrollService.payrollPeriods.update(
+            selectedPeriod.id,
+            updated
+          );
           break;
-        case 'hrSubmit':
+        case "hrSubmit":
           updated = await payrollService.hrSubmitPayroll(selectedPeriod.id);
           break;
-        case 'financeSubmit':
-          updated = { ...selectedPeriod, status: 'finance_review', updatedAt: new Date().toISOString() };
-          await payrollService.payrollPeriods.update(selectedPeriod.id, updated);
+        case "financeSubmit":
+          updated = {
+            ...selectedPeriod,
+            status: "finance_review",
+            updatedAt: new Date().toISOString(),
+          };
+          await payrollService.payrollPeriods.update(
+            selectedPeriod.id,
+            updated
+          );
           break;
-        case 'requestApproval':
-          updated = { ...selectedPeriod, status: 'pending_approval', updatedAt: new Date().toISOString() };
-          await payrollService.payrollPeriods.update(selectedPeriod.id, updated);
+        case "requestApproval":
+          updated = {
+            ...selectedPeriod,
+            status: "pending_approval",
+            updatedAt: new Date().toISOString(),
+          };
+          await payrollService.payrollPeriods.update(
+            selectedPeriod.id,
+            updated
+          );
           break;
-        case 'approve':
-          updated = await payrollService.approvePayroll(selectedPeriod.id, 'admin');
+        case "approve":
+          updated = await payrollService.approvePayroll(
+            selectedPeriod.id,
+            "admin"
+          );
           break;
-        case 'disburse':
-          updated = { ...selectedPeriod, status: 'disbursing', updatedAt: new Date().toISOString() };
-          await payrollService.payrollPeriods.update(selectedPeriod.id, updated);
+        case "disburse":
+          updated = {
+            ...selectedPeriod,
+            status: "disbursing",
+            updatedAt: new Date().toISOString(),
+          };
+          await payrollService.payrollPeriods.update(
+            selectedPeriod.id,
+            updated
+          );
           break;
-        case 'complete':
+        case "complete":
           updated = await payrollService.completePayroll(selectedPeriod.id);
           break;
-        case 'lock':
+        case "lock":
           updated = await payrollService.lockPayroll(selectedPeriod.id);
           break;
         default:
@@ -179,32 +276,104 @@ const PayrollPeriods = () => {
       setShowActionModal(false);
       setSelectedPeriod(null);
     } catch (error) {
-      console.error('Error executing action:', error);
-      alert('Error: ' + error.message);
+      console.error("Error executing action:", error);
+      alert("Error: " + error.message);
     } finally {
       setActionLoading(false);
     }
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-AF', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount || 0) + ' AFN';
+    return (
+      new Intl.NumberFormat("en-AF", {
+        style: "decimal",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(amount || 0) + " AFN"
+    );
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getUniqueYears = () => {
-    const years = [...new Set(periods.map(p => p.year))];
+    const years = [...new Set(periods.map((p) => p.year))];
     return years.sort((a, b) => b - a);
+  };
+
+  const handleMonthChange = (monthValue) => {
+    if (!monthValue) return;
+
+    const [year, month] = monthValue.split("-");
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const monthName = monthNames[parseInt(month) - 1];
+    const yearNum = parseInt(year);
+
+    // Calculate start date (1st of the month)
+    const startDate = `${year}-${month}-01`;
+
+    // Calculate end date (last day of the month)
+    const lastDay = new Date(yearNum, parseInt(month), 0).getDate();
+    const endDate = `${year}-${month}-${String(lastDay).padStart(2, "0")}`;
+
+    // Payment date defaults to 25th of the month
+    const paymentDate = `${year}-${month}-25`;
+
+    setNewPeriod({
+      month: monthName,
+      year: yearNum,
+      startDate,
+      endDate,
+      paymentDate,
+    });
+  };
+
+  const handleAddPeriod = async () => {
+    if (!newPeriod.month || !newPeriod.startDate || !newPeriod.endDate || !newPeriod.paymentDate) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const periodData = {
+        name: `${newPeriod.month} ${newPeriod.year} Payroll`,
+        month: newPeriod.month,
+        year: newPeriod.year,
+        startDate: newPeriod.startDate,
+        endDate: newPeriod.endDate,
+        paymentDate: newPeriod.paymentDate,
+        status: "draft",
+        employeeCount: 0,
+        totalAmount: 0,
+        periodCode: `PAY-${newPeriod.year}-${String(new Date(newPeriod.startDate).getMonth() + 1).padStart(2, "0")}`,
+      };
+
+      await payrollService.payrollPeriods.create(periodData);
+      await loadPeriods();
+
+      setShowAddModal(false);
+      setNewPeriod({
+        month: "",
+        year: new Date().getFullYear(),
+        startDate: "",
+        endDate: "",
+        paymentDate: "",
+      });
+    } catch (error) {
+      console.error("Error creating period:", error);
+      alert("Error creating payroll period: " + error.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -220,16 +389,20 @@ const PayrollPeriods = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payroll Periods</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage monthly payroll processing cycles</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Payroll Periods
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Manage monthly payroll processing cycles
+          </p>
         </div>
-        <Link
-          to="/payroll/periods/new"
+        <button
+          onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" />
           New Period
-        </Link>
+        </button>
       </div>
 
       {/* Filters */}
@@ -270,8 +443,10 @@ const PayrollPeriods = () => {
             className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
             <option value="all">All Years</option>
-            {getUniqueYears().map(year => (
-              <option key={year} value={year}>{year}</option>
+            {getUniqueYears().map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
         </div>
@@ -296,25 +471,40 @@ const PayrollPeriods = () => {
               {filteredPeriods.map((period) => {
                 const nextAction = getNextAction(period.status);
                 return (
-                  <tr key={period.id} className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr
+                    key={period.id}
+                    className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                           <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 dark:text-white">{period.name}</p>
-                          <p className="text-sm text-gray-500">{period.month} {period.year}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {period.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {period.month} {period.year}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <p>{formatDate(period.startDate)}</p>
-                      <p className="text-sm text-gray-500">to {formatDate(period.endDate)}</p>
+                      <p className="text-sm text-gray-500">
+                        to {formatDate(period.endDate)}
+                      </p>
                     </td>
-                    <td className="px-6 py-4">{formatDate(period.paymentDate)}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(period.status)}`}>
+                      {formatDate(period.paymentDate)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                          period.status
+                        )}`}
+                      >
                         {getStatusLabel(period.status)}
                       </span>
                     </td>
@@ -324,7 +514,9 @@ const PayrollPeriods = () => {
                         {period.employeeCount || 0}
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-medium">{formatCurrency(period.totalAmount)}</td>
+                    <td className="px-6 py-4 font-medium">
+                      {formatCurrency(period.totalAmount)}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <Link
@@ -352,7 +544,9 @@ const PayrollPeriods = () => {
                 <tr>
                   <td colSpan="7" className="px-6 py-12 text-center">
                     <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-500 dark:text-gray-400">No payroll periods found</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      No payroll periods found
+                    </p>
                     <Link
                       to="/payroll/periods/new"
                       className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:underline"
@@ -370,10 +564,28 @@ const PayrollPeriods = () => {
 
       {/* Status Legend */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-        <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Workflow Status Legend</h3>
+        <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+          Workflow Status Legend
+        </h3>
         <div className="flex flex-wrap gap-2">
-          {['draft', 'collecting', 'processing', 'hr_review', 'finance_review', 'pending_approval', 'approved', 'disbursing', 'completed', 'locked'].map(status => (
-            <span key={status} className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+          {[
+            "draft",
+            "collecting",
+            "processing",
+            "hr_review",
+            "finance_review",
+            "pending_approval",
+            "approved",
+            "disbursing",
+            "completed",
+            "locked",
+          ].map((status) => (
+            <span
+              key={status}
+              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                status
+              )}`}
+            >
               {getStatusLabel(status)}
             </span>
           ))}
@@ -388,7 +600,11 @@ const PayrollPeriods = () => {
               Confirm Action
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to <strong>{getNextAction(selectedPeriod.status)?.label.toLowerCase()}</strong> the payroll period <strong>{selectedPeriod.name}</strong>?
+              Are you sure you want to{" "}
+              <strong>
+                {getNextAction(selectedPeriod.status)?.label.toLowerCase()}
+              </strong>{" "}
+              the payroll period <strong>{selectedPeriod.name}</strong>?
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -403,7 +619,9 @@ const PayrollPeriods = () => {
               </button>
               <button
                 onClick={executeAction}
-                className={`px-4 py-2 text-white rounded-lg ${getNextAction(selectedPeriod.status)?.color}`}
+                className={`px-4 py-2 text-white rounded-lg ${
+                  getNextAction(selectedPeriod.status)?.color
+                }`}
                 disabled={actionLoading}
               >
                 {actionLoading ? (
@@ -413,6 +631,114 @@ const PayrollPeriods = () => {
                   </span>
                 ) : (
                   getNextAction(selectedPeriod.status)?.label
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New Period Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-lg w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Create New Payroll Period
+            </h3>
+
+            <div className="space-y-4">
+              {/* Month Selector */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Select Month <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="month"
+                  placeholder="e.g. (2025-01)"
+                  onChange={(e) => handleMonthChange(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+
+              {newPeriod.month && (
+                <>
+                  {/* Period Name Preview */}
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <p className="text-sm text-blue-600 dark:text-blue-400">
+                      Period Name: <strong>{newPeriod.month} {newPeriod.year} Payroll</strong>
+                    </p>
+                  </div>
+
+                  {/* Date Fields */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        value={newPeriod.startDate}
+                        onChange={(e) => setNewPeriod({ ...newPeriod, startDate: e.target.value })}
+                        className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        End Date
+                      </label>
+                      <input
+                        type="date"
+                        value={newPeriod.endDate}
+                        onChange={(e) => setNewPeriod({ ...newPeriod, endDate: e.target.value })}
+                        className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Payment Date
+                    </label>
+                    <input
+                      type="date"
+                      value={newPeriod.paymentDate}
+                      onChange={(e) => setNewPeriod({ ...newPeriod, paymentDate: e.target.value })}
+                      className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowAddModal(false);
+                  setNewPeriod({
+                    month: "",
+                    year: new Date().getFullYear(),
+                    startDate: "",
+                    endDate: "",
+                    paymentDate: "",
+                  });
+                }}
+                className="px-4 py-2 border rounded-lg dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddPeriod}
+                disabled={saving || !newPeriod.month}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? (
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Creating...
+                  </span>
+                ) : (
+                  "Create Period"
                 )}
               </button>
             </div>

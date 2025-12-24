@@ -17,6 +17,7 @@ import {
   Award,
   Languages
 } from 'lucide-react';
+import { employeeDB, departmentDB, positionDB } from '../../services/db/indexedDB';
 
 // Afghanistan provinces and their districts - defined OUTSIDE component to prevent re-creation
 const PROVINCES_DISTRICTS = {
@@ -212,48 +213,155 @@ const EmployeeForm = () => {
   }, [id]);
 
   const loadReferenceData = async () => {
-    // Simulated data - replace with API calls
-    setReferenceData({
-      departments: [
+    try {
+      // Load data from IndexedDB
+      const [departments, positions] = await Promise.all([
+        departmentDB.getAll(),
+        positionDB.getAll()
+      ]);
+
+      // Map database data to expected format, with fallback to defaults
+      const departmentList = departments.length > 0 ? departments.map(d => ({ id: d.id, name: d.name })) : [
         { id: 1, name: 'Programs' },
         { id: 2, name: 'Finance' },
         { id: 3, name: 'HR & Administration' },
         { id: 4, name: 'Operations' },
         { id: 5, name: 'IT' },
         { id: 6, name: 'Monitoring & Evaluation' }
-      ],
-      positions: [
+      ];
+
+      const positionList = positions.length > 0 ? positions.map(p => ({ id: p.id, name: p.title || p.name })) : [
         { id: 1, name: 'Program Manager' },
         { id: 2, name: 'Program Officer' },
         { id: 3, name: 'Finance Officer' },
         { id: 4, name: 'HR Manager' },
         { id: 5, name: 'IT Specialist' },
         { id: 6, name: 'Driver' }
-      ],
-      projects: [
-        { id: 1, name: 'Education Support Project' },
-        { id: 2, name: 'Health Initiative' },
-        { id: 3, name: 'Livelihood Program' }
-      ],
-      employees: [
-        { id: 1, name: 'Sara Mohammadi (Program Director)' },
-        { id: 2, name: 'Ali Rezaei (Finance Director)' }
-      ],
-      provinces: [
-        { id: 1, name: 'Kabul' },
-        { id: 2, name: 'Herat' },
-        { id: 3, name: 'Balkh' },
-        { id: 4, name: 'Nangarhar' },
-        { id: 5, name: 'Kandahar' }
-      ]
-    });
+      ];
+
+      setReferenceData({
+        departments: departmentList,
+        positions: positionList,
+        projects: [
+          { id: 1, name: 'Education Support Project' },
+          { id: 2, name: 'Health Initiative' },
+          { id: 3, name: 'Livelihood Program' }
+        ],
+        employees: [
+          { id: 1, name: 'Sara Mohammadi (Program Director)' },
+          { id: 2, name: 'Ali Rezaei (Finance Director)' }
+        ],
+        provinces: [
+          { id: 1, name: 'Kabul' },
+          { id: 2, name: 'Herat' },
+          { id: 3, name: 'Balkh' },
+          { id: 4, name: 'Nangarhar' },
+          { id: 5, name: 'Kandahar' }
+        ]
+      });
+    } catch (error) {
+      console.error('Error loading reference data:', error);
+      // Set default fallback data
+      setReferenceData({
+        departments: [
+          { id: 1, name: 'Programs' },
+          { id: 2, name: 'Finance' },
+          { id: 3, name: 'HR & Administration' },
+          { id: 4, name: 'Operations' },
+          { id: 5, name: 'IT' },
+          { id: 6, name: 'Monitoring & Evaluation' }
+        ],
+        positions: [
+          { id: 1, name: 'Program Manager' },
+          { id: 2, name: 'Program Officer' },
+          { id: 3, name: 'Finance Officer' },
+          { id: 4, name: 'HR Manager' },
+          { id: 5, name: 'IT Specialist' },
+          { id: 6, name: 'Driver' }
+        ],
+        projects: [
+          { id: 1, name: 'Education Support Project' },
+          { id: 2, name: 'Health Initiative' },
+          { id: 3, name: 'Livelihood Program' }
+        ],
+        employees: [
+          { id: 1, name: 'Sara Mohammadi (Program Director)' },
+          { id: 2, name: 'Ali Rezaei (Finance Director)' }
+        ],
+        provinces: [
+          { id: 1, name: 'Kabul' },
+          { id: 2, name: 'Herat' },
+          { id: 3, name: 'Balkh' },
+          { id: 4, name: 'Nangarhar' },
+          { id: 5, name: 'Kandahar' }
+        ]
+      });
+    }
   };
 
   const loadEmployee = async () => {
     setLoading(true);
     try {
-      // API call to load employee data
-      // Simulated for now
+      // Load employee data from IndexedDB
+      const employee = await employeeDB.getById(Number(id));
+
+      if (!employee) {
+        showToast('Employee not found', 'error');
+        navigate('/employee-admin/employees');
+        return;
+      }
+
+      // Map database fields to form fields
+      setFormData(prev => ({
+        ...prev,
+        // Personal Info
+        full_name: employee.full_name || `${employee.firstName || ''} ${employee.lastName || ''}`.trim(),
+        father_name: employee.father_name || employee.fatherName || '',
+        date_of_birth: employee.date_of_birth || employee.dateOfBirth || '',
+        gender: employee.gender || 'male',
+        nationality: employee.nationality || 'Afghan',
+        national_id_type: employee.national_id_type || employee.nationalIdType || 'tazkira',
+        national_id_number: employee.national_id_number || employee.nationalIdNumber || '',
+        tax_id: employee.tax_id || employee.taxId || '',
+        marital_status: employee.marital_status || employee.maritalStatus || 'single',
+        // Contact Info
+        phone_primary: employee.phone_primary || employee.phone || '',
+        phone_secondary: employee.phone_secondary || '',
+        personal_email: employee.personal_email || employee.email || '',
+        current_address: employee.current_address || employee.currentAddress || '',
+        current_city: employee.current_city || '',
+        current_province: employee.current_province || '',
+        current_district: employee.current_district || '',
+        permanent_address: employee.permanent_address || employee.permanentAddress || '',
+        permanent_city: employee.permanent_city || '',
+        permanent_province: employee.permanent_province || '',
+        permanent_district: employee.permanent_district || '',
+        // Employment Info
+        position_id: employee.position_id || employee.positionId || '',
+        department_id: employee.department_id || employee.departmentId || '',
+        project_id: employee.project_id || employee.projectId || '',
+        reporting_to_id: employee.reporting_to_id || employee.reportingToId || '',
+        date_of_hire: employee.date_of_hire || employee.hireDate || '',
+        employment_type: employee.employment_type || employee.employmentType || 'core',
+        probation_period_months: employee.probation_period_months || 3,
+        // Banking Info
+        bank_name: employee.bank_name || employee.bankName || '',
+        bank_branch: employee.bank_branch || employee.bankBranch || '',
+        account_name: employee.account_name || employee.accountName || '',
+        account_number: employee.account_number || employee.accountNumber || '',
+        mobile_money_number: employee.mobile_money_number || employee.mobileMoneyNumber || '',
+        // Emergency Contacts
+        emergency_contacts: employee.emergency_contacts || [
+          { contact_type: 'primary', full_name: '', relationship: '', phone_primary: '', phone_secondary: '', address: '' }
+        ],
+        // Education
+        educations: employee.educations || [],
+        // Skills
+        skills: employee.skills || [],
+        // Medical
+        blood_type: employee.blood_type || employee.bloodType || '',
+        special_needs: employee.special_needs || employee.specialNeeds || ''
+      }));
     } catch (error) {
       console.error('Error loading employee:', error);
       showToast('Failed to load employee', 'error');
@@ -397,8 +505,78 @@ const EmployeeForm = () => {
 
     setSaving(true);
     try {
-      // API call to save employee
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated delay
+      // Prepare employee data for database
+      const employeeData = {
+        // Map form fields to database fields
+        full_name: formData.full_name,
+        firstName: formData.full_name.split(' ')[0] || '',
+        lastName: formData.full_name.split(' ').slice(1).join(' ') || '',
+        father_name: formData.father_name,
+        dateOfBirth: formData.date_of_birth,
+        date_of_birth: formData.date_of_birth,
+        gender: formData.gender,
+        nationality: formData.nationality,
+        nationalIdType: formData.national_id_type,
+        national_id_type: formData.national_id_type,
+        nationalIdNumber: formData.national_id_number,
+        national_id_number: formData.national_id_number,
+        taxId: formData.tax_id,
+        tax_id: formData.tax_id,
+        maritalStatus: formData.marital_status,
+        marital_status: formData.marital_status,
+        phone: formData.phone_primary,
+        phone_primary: formData.phone_primary,
+        phone_secondary: formData.phone_secondary,
+        email: formData.personal_email,
+        personal_email: formData.personal_email,
+        currentAddress: formData.current_address,
+        current_address: formData.current_address,
+        current_city: formData.current_city,
+        current_province: formData.current_province,
+        current_district: formData.current_district,
+        permanentAddress: formData.permanent_address,
+        permanent_address: formData.permanent_address,
+        permanent_city: formData.permanent_city,
+        permanent_province: formData.permanent_province,
+        permanent_district: formData.permanent_district,
+        position: referenceData.positions.find(p => p.id == formData.position_id)?.name || '',
+        position_id: formData.position_id,
+        department: referenceData.departments.find(d => d.id == formData.department_id)?.name || '',
+        department_id: formData.department_id,
+        project: referenceData.projects.find(p => p.id == formData.project_id)?.name || '',
+        project_id: formData.project_id,
+        reporting_to_id: formData.reporting_to_id,
+        hireDate: formData.date_of_hire,
+        date_of_hire: formData.date_of_hire,
+        employmentType: formData.employment_type,
+        employment_type: formData.employment_type,
+        probation_period_months: formData.probation_period_months,
+        bankName: formData.bank_name,
+        bank_name: formData.bank_name,
+        bankBranch: formData.bank_branch,
+        bank_branch: formData.bank_branch,
+        accountName: formData.account_name,
+        account_name: formData.account_name,
+        accountNumber: formData.account_number,
+        account_number: formData.account_number,
+        mobileMoneyNumber: formData.mobile_money_number,
+        mobile_money_number: formData.mobile_money_number,
+        emergency_contacts: formData.emergency_contacts,
+        educations: formData.educations,
+        skills: formData.skills,
+        bloodType: formData.blood_type,
+        blood_type: formData.blood_type,
+        specialNeeds: formData.special_needs,
+        special_needs: formData.special_needs,
+        status: 'active'
+      };
+
+      if (isEditing) {
+        await employeeDB.update(Number(id), employeeData);
+      } else {
+        await employeeDB.create(employeeData);
+      }
+
       showToast(isEditing ? 'Employee updated successfully' : 'Employee created successfully', 'success');
       setTimeout(() => navigate('/employee-admin/employees'), 1500);
     } catch (error) {

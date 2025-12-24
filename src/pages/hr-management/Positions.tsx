@@ -17,13 +17,14 @@ import {
   Users,
   Check,
 } from 'lucide-react';
-import { positionDB, departmentDB, seedAllDefaults } from '../../services/db/indexedDB';
+import { positionDB, departmentDB, officeDB, seedAllDefaults } from '../../services/db/indexedDB';
 
 // ============== Types (synced with DB schema) ==============
 interface Position {
   id?: number;
   title: string;
   department: string;
+  office: string;
   level: string; // Matches DB: "Level 1", "Level 2", etc. or legacy "Junior", "Mid", etc.
   description?: string;
   isCustom?: boolean;
@@ -35,6 +36,13 @@ interface Department {
   name: string;
   code?: string;
   description?: string;
+}
+
+interface Office {
+  id: number;
+  name: string;
+  city?: string;
+  country?: string;
 }
 
 interface PositionLevel {
@@ -160,6 +168,7 @@ const getLevelInfo = (level: string): PositionLevel | undefined => {
 const positionSchema = z.object({
   title: z.string().min(1, 'Position title is required').max(100, 'Title must be less than 100 characters'),
   department: z.string().min(1, 'Department is required'),
+  office: z.string().min(1, 'Office is required'),
   level: z.string().min(1, 'Level is required'),
   description: z.string().max(500, 'Description must be less than 500 characters').optional().or(z.literal('')),
   isCustom: z.boolean().optional(),
@@ -171,16 +180,20 @@ type PositionFormData = z.infer<typeof positionSchema>;
 interface PositionStore {
   positions: Position[];
   departments: Department[];
+  offices: Office[];
   loading: boolean;
   searchTerm: string;
   departmentFilter: string;
+  officeFilter: string;
   levelFilter: string;
   expandedLevels: number[];
   setPositions: (positions: Position[]) => void;
   setDepartments: (departments: Department[]) => void;
+  setOffices: (offices: Office[]) => void;
   setLoading: (loading: boolean) => void;
   setSearchTerm: (term: string) => void;
   setDepartmentFilter: (filter: string) => void;
+  setOfficeFilter: (filter: string) => void;
   setLevelFilter: (filter: string) => void;
   toggleLevel: (levelNumber: number) => void;
   expandAllLevels: () => void;
@@ -190,16 +203,20 @@ interface PositionStore {
 const usePositionStore = create<PositionStore>((set) => ({
   positions: [],
   departments: [],
+  offices: [],
   loading: true,
   searchTerm: '',
   departmentFilter: '',
+  officeFilter: '',
   levelFilter: '',
   expandedLevels: [],
   setPositions: (positions) => set({ positions }),
   setDepartments: (departments) => set({ departments }),
+  setOffices: (offices) => set({ offices }),
   setLoading: (loading) => set({ loading }),
   setSearchTerm: (searchTerm) => set({ searchTerm }),
   setDepartmentFilter: (departmentFilter) => set({ departmentFilter }),
+  setOfficeFilter: (officeFilter) => set({ officeFilter }),
   setLevelFilter: (levelFilter) => set({ levelFilter }),
   toggleLevel: (levelNumber) =>
     set((state) => ({
@@ -216,16 +233,20 @@ const Positions = () => {
   const {
     positions,
     departments,
+    offices,
     loading,
     searchTerm,
     departmentFilter,
+    officeFilter,
     levelFilter,
     expandedLevels,
     setPositions,
     setDepartments,
+    setOffices,
     setLoading,
     setSearchTerm,
     setDepartmentFilter,
+    setOfficeFilter,
     setLevelFilter,
     toggleLevel,
     expandAllLevels,
@@ -255,6 +276,7 @@ const Positions = () => {
     defaultValues: {
       title: '',
       department: '',
+      office: '',
       level: '',
       description: '',
       isCustom: false,
@@ -269,12 +291,14 @@ const Positions = () => {
     setLoading(true);
     try {
       await seedAllDefaults();
-      const [posData, deptData] = await Promise.all([
+      const [posData, deptData, officeData] = await Promise.all([
         positionDB.getAll(),
         departmentDB.getAll(),
+        officeDB.getAll(),
       ]);
       setPositions(posData as Position[]);
       setDepartments(deptData as Department[]);
+      setOffices(officeData as Office[]);
     } catch (error) {
       console.error('Error loading positions:', error);
       toast.error('Failed to load positions');
@@ -292,6 +316,7 @@ const Positions = () => {
       reset({
         title: position.title || '',
         department: position.department || '',
+        office: position.office || '',
         level: position.level || '',
         description: position.description || '',
         isCustom: position.isCustom || false,
@@ -302,6 +327,7 @@ const Positions = () => {
       reset({
         title: '',
         department: '',
+        office: '',
         level: level?.value || '',
         description: '',
         isCustom: false,
@@ -322,6 +348,7 @@ const Positions = () => {
       const submitData = {
         title: data.title,
         department: data.department,
+        office: data.office,
         level: data.level,
         description: data.description || '',
         isCustom: data.isCustom || false,
@@ -361,6 +388,10 @@ const Positions = () => {
       toast.error('Please add a department first');
       return;
     }
+    if (offices.length === 0) {
+      toast.error('Please add an office first');
+      return;
+    }
 
     // Open modal with pre-filled data
     setEditingPosition(null);
@@ -368,6 +399,7 @@ const Positions = () => {
     reset({
       title: positionTitle,
       department: '',
+      office: '',
       level: level.value,
       description: '',
       isCustom: isCustom,
@@ -390,8 +422,9 @@ const Positions = () => {
   const filteredPositions = positions.filter((pos) => {
     const matchesSearch = pos.title?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDept = !departmentFilter || pos.department === departmentFilter;
+    const matchesOffice = !officeFilter || pos.office === officeFilter;
     const matchesLevel = !levelFilter || getLevelNumber(pos.level) === parseInt(levelFilter);
-    return matchesSearch && matchesDept && matchesLevel;
+    return matchesSearch && matchesDept && matchesOffice && matchesLevel;
   });
 
   // Get positions by level number
@@ -468,6 +501,18 @@ const Positions = () => {
             ))}
           </select>
           <select
+            value={officeFilter}
+            onChange={(e) => setOfficeFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="">All Offices</option>
+            {offices.map((office) => (
+              <option key={office.id} value={office.name}>
+                {office.name}
+              </option>
+            ))}
+          </select>
+          <select
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
@@ -518,6 +563,9 @@ const Positions = () => {
                     Department
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-yellow-700 dark:text-yellow-400 uppercase">
+                    Office
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-yellow-700 dark:text-yellow-400 uppercase">
                     Current Level
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-yellow-700 dark:text-yellow-400 uppercase">
@@ -545,6 +593,9 @@ const Positions = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
                       {pos.department || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                      {pos.office || '-'}
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
@@ -695,6 +746,9 @@ const Positions = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                               Department
                             </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                              Office
+                            </th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                               Actions
                             </th>
@@ -727,6 +781,9 @@ const Positions = () => {
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
                                 {pos.department || '-'}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                                {pos.office || '-'}
                               </td>
                               <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end space-x-1">
@@ -858,6 +915,28 @@ const Positions = () => {
                 </select>
                 {errors.department && (
                   <p className="mt-1 text-sm text-red-500">{errors.department.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Office <span className="text-red-500">*</span>
+                </label>
+                <select
+                  {...register('office')}
+                  className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 ${
+                    errors.office ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  }`}
+                >
+                  <option value="">Select Office</option>
+                  {offices.map((office) => (
+                    <option key={office.id} value={office.name}>
+                      {office.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.office && (
+                  <p className="mt-1 text-sm text-red-500">{errors.office.message}</p>
                 )}
               </div>
 
