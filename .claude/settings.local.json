@@ -7,7 +7,12 @@
       "Bash(npm run build:*)",
       "Bash(rm:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(comm -23:*)",
+      "Bash(xargs grep:*)",
+      "Bash(xargs cat:*)",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []
