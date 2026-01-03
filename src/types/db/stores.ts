@@ -43,14 +43,17 @@ import type {
   SeparationHistoryRecord,
 } from "../modules/exit";
 
-// Tracking Types
+// Program Module Types
 import type {
-  InOutTrackingRecord,
-  AccessTrackingRecord,
-  DNRTrackingRecord,
-  MOUTrackingRecord,
+  ProgramDonorRecord,
+  ProgramProjectRecord,
   ProgramWorkPlanRecord,
-} from "../modules/tracking";
+  ProgramCertificateRecord,
+  ProgramDocumentRecord,
+  ProgramReportingRecord,
+  ProgramBeneficiaryRecord,
+  ProgramSafeguardingRecord,
+} from "../modules/program";
 
 // Recruitment Types
 import type {
@@ -188,31 +191,6 @@ import type {
   EmployeeStatusHistoryRecord,
 } from "../modules/employeeAdmin";
 
-// Finance Types
-import type {
-  DonorRecord,
-  ProjectRecord,
-  BankRecord,
-  BankAccountRecord,
-  BankSignatoryRecord,
-  BudgetCategoryRecord,
-  ProjectBudgetRecord,
-  BudgetExpenditureRecord,
-  ProjectStaffCostRecord,
-  ProjectOperationalCostRecord,
-  CashRequestRecord,
-  CashRequestItemRecord,
-  InstallmentRequestRecord,
-  InstallmentReceiptRecord,
-  StaffSalaryAllocationRecord,
-  PayrollDistributionRecord,
-  DonorReportingScheduleRecord,
-  DonorReportPeriodRecord,
-  GovernmentReportingRecord,
-  ProjectAmendmentRecord,
-  SignatoryAssignmentRecord,
-} from "../modules/finance";
-
 // Compliance Types
 import type {
   ComplianceProjectRecord,
@@ -288,18 +266,6 @@ import type {
   StaffWelfareRequestRecord,
   StaffWelfarePaymentRecord,
 } from "../modules/staffAssociation";
-
-// Procurement Types
-import type {
-  VendorRecord,
-  ItemCategoryRecord,
-  PurchaseRequestRecord,
-  RFQRecord,
-  PurchaseOrderRecord,
-  GoodsReceiptRecord,
-  InventoryItemRecord,
-  ProcurementContractRecord,
-} from "../modules/procurement";
 
 // Policy Types
 import type {
@@ -582,63 +548,30 @@ export interface VDODatabase {
     };
   };
 
-  // ========== TRACKING STORES ==========
+  // ========== PROGRAM MODULE STORES ==========
 
-  inOutTracking: {
+  programDonors: {
     key: number;
-    value: InOutTrackingRecord;
+    value: ProgramDonorRecord;
     indexes: {
-      serialNumber: string;
-      date: string;
-      documentType: string;
-      department: string;
+      donorName: string;
+      donorType: string;
       status: string;
-      createdAt: string;
+      country: string;
     };
   };
 
-  accessTracking: {
+  programProjects: {
     key: number;
-    value: AccessTrackingRecord;
+    value: ProgramProjectRecord;
     indexes: {
-      year: number;
-      quarter: number;
-      donor: string;
-      project: string;
+      projectCode: string;
+      donorId: number;
+      status: string;
+      thematicArea: string;
       location: string;
-      lineMinistry: string;
-      projectStatus: string;
-      createdAt: string;
-    };
-  };
-
-  dnrTracking: {
-    key: number;
-    value: DNRTrackingRecord;
-    indexes: {
-      year: number;
-      quarter: number;
-      donor: string;
-      project: string;
-      reportType: string;
-      status: string;
-      dueDate: string;
-      createdAt: string;
-    };
-  };
-
-  mouTracking: {
-    key: number;
-    value: MOUTrackingRecord;
-    indexes: {
-      mouNumber: string;
-      partner: string;
-      type: string;
-      status: string;
       startDate: string;
       endDate: string;
-      department: string;
-      createdAt: string;
     };
   };
 
@@ -646,14 +579,70 @@ export interface VDODatabase {
     key: number;
     value: ProgramWorkPlanRecord;
     indexes: {
+      projectId: number;
+      thematicArea: string;
+      focalPoint: string;
+      location: string;
+    };
+  };
+
+  programCertificates: {
+    key: number;
+    value: ProgramCertificateRecord;
+    indexes: {
+      projectId: number;
+      agency: string;
+      documentType: string;
       year: number;
-      quarter: number;
-      month: number;
-      department: string;
-      responsible: string;
+    };
+  };
+
+  programDocuments: {
+    key: number;
+    value: ProgramDocumentRecord;
+    indexes: {
+      projectId: number;
+      documentType: string;
+      uploadedBy: string;
+      uploadDate: string;
+    };
+  };
+
+  programReporting: {
+    key: number;
+    value: ProgramReportingRecord;
+    indexes: {
+      projectId: number;
+      reportType: string;
+      reportingFormat: string;
       status: string;
-      targetDate: string;
-      createdAt: string;
+      dueDate: string;
+      uploadedBy: string;
+    };
+  };
+
+  programBeneficiaries: {
+    key: number;
+    value: ProgramBeneficiaryRecord;
+    indexes: {
+      projectId: number;
+      beneficiaryType: string;
+      serviceType: string;
+      status: string;
+      district: string;
+      nidNo: string;
+    };
+  };
+
+  programSafeguarding: {
+    key: number;
+    value: ProgramSafeguardingRecord;
+    indexes: {
+      projectId: number;
+      activityType: string;
+      frequency: string;
+      status: string;
+      dueDate: string;
     };
   };
 
@@ -1811,33 +1800,6 @@ export interface VDODatabase {
     };
   };
 
-  // ========== FINANCE STORES ==========
-
-  donors: {
-    key: number;
-    value: DonorRecord;
-    indexes: {
-      name: string;
-      code: string;
-      type: string;
-      status: string;
-    };
-  };
-
-  projects: {
-    key: number;
-    value: ProjectRecord;
-    indexes: {
-      projectCode: string;
-      name: string;
-      donorId: number;
-      department: string;
-      status: string;
-      startDate: string;
-      endDate: string;
-    };
-  };
-
   // ========== COMPLIANCE STORES ==========
 
   complianceProjects: {
@@ -1883,207 +1845,6 @@ export interface VDODatabase {
       status: string;
       result: string;
       createdAt: string;
-    };
-  };
-
-  // ========== EXTENDED FINANCE STORES ==========
-
-  banks: {
-    key: number;
-    value: BankRecord;
-    indexes: {
-      bankName: string;
-      bankCode: string;
-      isActive: boolean;
-    };
-  };
-
-  bankAccounts: {
-    key: number;
-    value: BankAccountRecord;
-    indexes: {
-      bankId: number;
-      accountNumber: string;
-      currency: string;
-      isActive: boolean;
-    };
-  };
-
-  bankSignatories: {
-    key: number;
-    value: BankSignatoryRecord;
-    indexes: {
-      bankAccountId: number;
-      employeeId: number;
-      signatoryType: string;
-      isActive: boolean;
-    };
-  };
-
-  budgetCategories: {
-    key: number;
-    value: BudgetCategoryRecord;
-    indexes: {
-      categoryName: string;
-      categoryCode: string;
-      parentId: number;
-      isActive: boolean;
-    };
-  };
-
-  projectBudgets: {
-    key: number;
-    value: ProjectBudgetRecord;
-    indexes: {
-      projectId: number;
-      budgetCategoryId: number;
-      fiscalYear: string;
-    };
-  };
-
-  budgetExpenditures: {
-    key: number;
-    value: BudgetExpenditureRecord;
-    indexes: {
-      projectBudgetId: number;
-      expenditureDate: string;
-      createdBy: string;
-    };
-  };
-
-  projectStaffCosts: {
-    key: number;
-    value: ProjectStaffCostRecord;
-    indexes: {
-      projectId: number;
-      employeeId: number;
-      amendmentNumber: number;
-      gradeLevel: string;
-    };
-  };
-
-  projectOperationalCosts: {
-    key: number;
-    value: ProjectOperationalCostRecord;
-    indexes: {
-      projectId: number;
-      costCategory: string;
-      amendmentNumber: number;
-    };
-  };
-
-  cashRequests: {
-    key: number;
-    value: CashRequestRecord;
-    indexes: {
-      requestNumber: string;
-      requestMonth: string;
-      status: string;
-      preparedBy: string;
-      approvedBy: string;
-    };
-  };
-
-  cashRequestItems: {
-    key: number;
-    value: CashRequestItemRecord;
-    indexes: {
-      cashRequestId: number;
-      projectId: number;
-      costType: string;
-    };
-  };
-
-  installmentRequests: {
-    key: number;
-    value: InstallmentRequestRecord;
-    indexes: {
-      projectId: number;
-      status: string;
-      dateRequested: string;
-      amendmentNumber: number;
-    };
-  };
-
-  installmentReceipts: {
-    key: number;
-    value: InstallmentReceiptRecord;
-    indexes: {
-      installmentRequestId: number;
-      receiptDate: string;
-      bankAccountId: number;
-    };
-  };
-
-  staffSalaryAllocations: {
-    key: number;
-    value: StaffSalaryAllocationRecord;
-    indexes: {
-      employeeId: number;
-      projectId: number;
-      allocationMonth: string;
-    };
-  };
-
-  payrollDistributions: {
-    key: number;
-    value: PayrollDistributionRecord;
-    indexes: {
-      payrollPeriodId: number;
-      employeeId: number;
-      generationType: string;
-      status: string;
-      createdAt: string;
-    };
-  };
-
-  donorReportingSchedules: {
-    key: number;
-    value: DonorReportingScheduleRecord;
-    indexes: {
-      projectId: number;
-      dueDate: string;
-      status: string;
-    };
-  };
-
-  donorReportPeriods: {
-    key: number;
-    value: DonorReportPeriodRecord;
-    indexes: {
-      reportingScheduleId: number;
-      status: string;
-      submittedBy: string;
-    };
-  };
-
-  governmentReporting: {
-    key: number;
-    value: GovernmentReportingRecord;
-    indexes: {
-      projectId: number;
-      ministryName: string;
-      status: string;
-      dueDate: string;
-    };
-  };
-
-  projectAmendments: {
-    key: number;
-    value: ProjectAmendmentRecord;
-    indexes: {
-      projectId: number;
-      amendmentNumber: number;
-      amendmentDate: string;
-    };
-  };
-
-  signatoryAssignments: {
-    key: number;
-    value: SignatoryAssignmentRecord;
-    indexes: {
-      projectId: number;
-      assignmentMonth: string;
     };
   };
 
@@ -2460,113 +2221,6 @@ export interface VDODatabase {
       amountPaid: number;
       paymentDate: string;
       paymentMethod: string;
-      status: string;
-    };
-  };
-
-  // ========== PROCUREMENT STORES ==========
-
-  vendors: {
-    key: number;
-    value: VendorRecord;
-    indexes: {
-      vendorCode: string;
-      name: string;
-      email: string;
-      category: string;
-      status: string;
-      isPreferred: boolean;
-      isBlacklisted: boolean;
-    };
-  };
-
-  itemCategories: {
-    key: number;
-    value: ItemCategoryRecord;
-    indexes: {
-      categoryCode: string;
-      name: string;
-      parentId: number;
-      isActive: boolean;
-    };
-  };
-
-  purchaseRequests: {
-    key: number;
-    value: PurchaseRequestRecord;
-    indexes: {
-      requestNumber: string;
-      requestedBy: number;
-      department: string;
-      projectId: number;
-      priority: string;
-      status: string;
-      requestDate: string;
-    };
-  };
-
-  rfqs: {
-    key: number;
-    value: RFQRecord;
-    indexes: {
-      rfqNumber: string;
-      purchaseRequestId: number;
-      issueDate: string;
-      closingDate: string;
-      status: string;
-      winningVendorId: number;
-    };
-  };
-
-  purchaseOrders: {
-    key: number;
-    value: PurchaseOrderRecord;
-    indexes: {
-      poNumber: string;
-      rfqId: number;
-      vendorId: number;
-      orderDate: string;
-      deliveryDate: string;
-      totalAmount: number;
-      status: string;
-    };
-  };
-
-  goodsReceipts: {
-    key: number;
-    value: GoodsReceiptRecord;
-    indexes: {
-      receiptNumber: string;
-      purchaseOrderId: number;
-      vendorId: number;
-      receiptDate: string;
-      receivedBy: string;
-      status: string;
-    };
-  };
-
-  inventoryItems: {
-    key: number;
-    value: InventoryItemRecord;
-    indexes: {
-      itemCode: string;
-      name: string;
-      categoryId: number;
-      quantityOnHand: number;
-      location: string;
-      status: string;
-    };
-  };
-
-  procurementContracts: {
-    key: number;
-    value: ProcurementContractRecord;
-    indexes: {
-      contractNumber: string;
-      vendorId: number;
-      contractType: string;
-      startDate: string;
-      endDate: string;
       status: string;
     };
   };

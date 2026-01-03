@@ -20,7 +20,8 @@
       "Bash(done)",
       "Bash(npx tsc:*)",
       "Bash(for db in employeeDB departmentDB donorDB projectDB complianceProjectDB holidaysDB)",
-      "Bash(do echo -n \"$db: \")"
+      "Bash(do echo -n \"$db: \")",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

@@ -23,52 +23,6 @@ import {
   Blacklist
 } from '../pages/compliance';
 
-// Procurement Pages
-import {
-  PurchaseRequests,
-  Vendors,
-  PurchaseOrders,
-  Contracts,
-  Inventory,
-  Receiving
-} from '../pages/procurement';
-
-// Finance Pages
-import {
-  Donors,
-  Projects,
-  Banks,
-  BankAccounts,
-  BudgetCategories,
-  ProjectBudgets,
-  CashRequests,
-  Installments,
-  StaffAllocations,
-  DonorReports,
-  GovernmentReports,
-  Amendments,
-  FinancialReports
-} from '../pages/finance';
-
-// Programm Pages
-import {
-  ProgramWorkPlanList,
-  ProgramWorkPlanForm,
-  ProgramWorkPlanView,
-  DNRTrackingList,
-  DNRTrackingForm,
-  DNRTrackingView,
-  MOUTrackingList,
-  MOUTrackingForm,
-  MOUTrackingView,
-  InOutTrackingList,
-  InOutTrackingForm,
-  InOutTrackingView,
-  AccessTrackingList,
-  AccessTrackingForm,
-  AccessTrackingView
-} from '../pages/programm';
-
 // HR Management Pages
 import Departments from '../pages/hr-management/Departments';
 import Positions from '../pages/hr-management/Positions';
@@ -193,6 +147,35 @@ import {
   PartnerAuditList,
   PartnerAuditForm
 } from '../pages/audit';
+
+// Program Module Pages
+import {
+  ProgramDashboard,
+  DonorList,
+  DonorForm,
+  DonorView,
+  ProjectList,
+  ProjectForm,
+  ProjectView,
+  WorkPlanList,
+  WorkPlanForm,
+  WorkPlanView,
+  CertificateList,
+  CertificateForm,
+  CertificateView,
+  DocumentList,
+  DocumentForm,
+  DocumentView,
+  ReportingList,
+  ReportingForm,
+  ReportingView,
+  BeneficiaryList,
+  BeneficiaryForm,
+  BeneficiaryView,
+  SafeguardingList,
+  SafeguardingForm,
+  SafeguardingView,
+} from '../pages/program';
 import type { JSX } from 'react';
 
 // User Management Routes
@@ -264,57 +247,6 @@ const complianceRoutes: RouteObject[] = [
   { path: 'compliance/donor-outreach', element: <DonorOutreach /> },
   { path: 'compliance/documents', element: <ComplianceDocuments /> },
   { path: 'compliance/blacklist', element: <Blacklist /> },
-];
-
-// Procurement Routes
-const procurementRoutes: RouteObject[] = [
-  { path: 'procurement/purchase-requests', element: <PurchaseRequests /> },
-  { path: 'procurement/vendors', element: <Vendors /> },
-  { path: 'procurement/purchase-orders', element: <PurchaseOrders /> },
-  { path: 'procurement/contracts', element: <Contracts /> },
-  { path: 'procurement/inventory', element: <Inventory /> },
-  { path: 'procurement/receiving', element: <Receiving /> },
-];
-
-// Finance Routes
-const financeRoutes: RouteObject[] = [
-  { path: 'finance/donors', element: <Donors /> },
-  { path: 'finance/projects', element: <Projects /> },
-  { path: 'finance/banks', element: <Banks /> },
-  { path: 'finance/bank-accounts', element: <BankAccounts /> },
-  { path: 'finance/budget-categories', element: <BudgetCategories /> },
-  { path: 'finance/project-budgets', element: <ProjectBudgets /> },
-  { path: 'finance/cash-requests', element: <CashRequests /> },
-  { path: 'finance/installments', element: <Installments /> },
-  { path: 'finance/staff-allocations', element: <StaffAllocations /> },
-  { path: 'finance/donor-reports', element: <DonorReports /> },
-  { path: 'finance/government-reports', element: <GovernmentReports /> },
-  { path: 'finance/amendments', element: <Amendments /> },
-  { path: 'finance/reports', element: <FinancialReports /> },
-];
-
-// Programm Routes
-const programmRoutes: RouteObject[] = [
-  { path: 'programm/work-plans', element: <ProgramWorkPlanList /> },
-  { path: 'programm/work-plans/new', element: <ProgramWorkPlanForm /> },
-  { path: 'programm/work-plans/:id', element: <ProgramWorkPlanView /> },
-  { path: 'programm/work-plans/:id/edit', element: <ProgramWorkPlanForm /> },
-  { path: 'programm/dnr-tracking', element: <DNRTrackingList /> },
-  { path: 'programm/dnr-tracking/new', element: <DNRTrackingForm /> },
-  { path: 'programm/dnr-tracking/:id', element: <DNRTrackingView /> },
-  { path: 'programm/dnr-tracking/:id/edit', element: <DNRTrackingForm /> },
-  { path: 'programm/mou-tracking', element: <MOUTrackingList /> },
-  { path: 'programm/mou-tracking/new', element: <MOUTrackingForm /> },
-  { path: 'programm/mou-tracking/:id', element: <MOUTrackingView /> },
-  { path: 'programm/mou-tracking/:id/edit', element: <MOUTrackingForm /> },
-  { path: 'programm/in-out-tracking', element: <InOutTrackingList /> },
-  { path: 'programm/in-out-tracking/new', element: <InOutTrackingForm /> },
-  { path: 'programm/in-out-tracking/:id', element: <InOutTrackingView /> },
-  { path: 'programm/in-out-tracking/:id/edit', element: <InOutTrackingForm /> },
-  { path: 'programm/access-tracking', element: <AccessTrackingList /> },
-  { path: 'programm/access-tracking/new', element: <AccessTrackingForm /> },
-  { path: 'programm/access-tracking/:id', element: <AccessTrackingView /> },
-  { path: 'programm/access-tracking/:id/edit', element: <AccessTrackingForm /> },
 ];
 
 // Recruitment Module Routes
@@ -426,6 +358,52 @@ const auditRoutes: RouteObject[] = [
   { path: 'audit/partner/:id', element: <PartnerAuditForm /> },
 ];
 
+// Program Module Routes
+const programRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'program', element: <ProgramDashboard /> },
+  // Donors
+  { path: 'program/donors', element: <DonorList /> },
+  { path: 'program/donors/new', element: <DonorForm /> },
+  { path: 'program/donors/:id', element: <DonorView /> },
+  { path: 'program/donors/:id/edit', element: <DonorForm /> },
+  // Projects
+  { path: 'program/projects', element: <ProjectList /> },
+  { path: 'program/projects/new', element: <ProjectForm /> },
+  { path: 'program/projects/:id', element: <ProjectView /> },
+  { path: 'program/projects/:id/edit', element: <ProjectForm /> },
+  // Work Plans
+  { path: 'program/work-plans', element: <WorkPlanList /> },
+  { path: 'program/work-plans/new', element: <WorkPlanForm /> },
+  { path: 'program/work-plans/:id', element: <WorkPlanView /> },
+  { path: 'program/work-plans/:id/edit', element: <WorkPlanForm /> },
+  // Certificates
+  { path: 'program/certificates', element: <CertificateList /> },
+  { path: 'program/certificates/new', element: <CertificateForm /> },
+  { path: 'program/certificates/:id', element: <CertificateView /> },
+  { path: 'program/certificates/:id/edit', element: <CertificateForm /> },
+  // Documents
+  { path: 'program/documents', element: <DocumentList /> },
+  { path: 'program/documents/new', element: <DocumentForm /> },
+  { path: 'program/documents/:id', element: <DocumentView /> },
+  { path: 'program/documents/:id/edit', element: <DocumentForm /> },
+  // Reporting
+  { path: 'program/reporting', element: <ReportingList /> },
+  { path: 'program/reporting/new', element: <ReportingForm /> },
+  { path: 'program/reporting/:id', element: <ReportingView /> },
+  { path: 'program/reporting/:id/edit', element: <ReportingForm /> },
+  // Beneficiaries
+  { path: 'program/beneficiaries', element: <BeneficiaryList /> },
+  { path: 'program/beneficiaries/new', element: <BeneficiaryForm /> },
+  { path: 'program/beneficiaries/:id', element: <BeneficiaryView /> },
+  { path: 'program/beneficiaries/:id/edit', element: <BeneficiaryForm /> },
+  // Safeguarding
+  { path: 'program/safeguarding', element: <SafeguardingList /> },
+  { path: 'program/safeguarding/new', element: <SafeguardingForm /> },
+  { path: 'program/safeguarding/:id', element: <SafeguardingView /> },
+  { path: 'program/safeguarding/:id/edit', element: <SafeguardingForm /> },
+];
+
 // Combine all routes
 const routes: RouteObject[] = [
   {
@@ -437,9 +415,6 @@ const routes: RouteObject[] = [
       ...employeeAdminRoutes,
       ...hrSettingsRoutes,
       ...complianceRoutes,
-      ...procurementRoutes,
-      ...financeRoutes,
-      ...programmRoutes,
       ...recruitmentRoutes,
       ...trainingRoutes,
       ...disciplinaryRoutes,
@@ -447,6 +422,7 @@ const routes: RouteObject[] = [
       ...payrollRoutes,
       ...performanceRoutes,
       ...auditRoutes,
+      ...programRoutes,
     ],
   },
 ];

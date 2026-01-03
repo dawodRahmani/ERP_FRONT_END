@@ -5,8 +5,8 @@
  * Exports the database initialization function and re-exports core utilities.
  *
  * Database: vdo-erp-db
- * Version: 35
- * Total Stores: 200+
+ * Version: 39
+ * Total Stores: 150+
  *
  * Modules:
  * - Core HR (employees, departments, positions, etc.)
@@ -18,15 +18,13 @@
  * - Exit/Separation
  * - Disciplinary
  * - Employee Administration
- * - Tracking (in/out, access, DNR, MOU, work plans)
- * - Finance (donors, projects, budgets, banking, reporting)
  * - Compliance (projects, documents, proposals, registrations, etc.)
  * - Contract Management
  * - Asset Management
  * - Travel Management
  * - Staff Association
- * - Procurement
  * - Policy & Audit
+ * - Program
  */
 
 // Re-export connection utilities
@@ -79,33 +77,6 @@ export {
   ctoRecordDB,
   leaveApprovalDB,
 } from './leaveManagementService';
-
-// Re-export finance services
-export {
-  donorDB,
-  projectDB,
-  bankDB,
-  bankAccountDB,
-  bankSignatoryDB,
-  budgetCategoryDB,
-  projectBudgetDB,
-  budgetExpenditureDB,
-  projectStaffCostDB,
-  projectOperationalCostDB,
-  cashRequestDB,
-  cashRequestItemDB,
-  installmentRequestDB,
-  installmentReceiptDB,
-  staffSalaryAllocationDB,
-  payrollDistributionDB,
-  donorReportingScheduleDB,
-  donorReportPeriodDB,
-  governmentReportingDB,
-  projectAmendmentDB,
-  signatoryAssignmentDB,
-  financeService,
-  seedFinanceDefaults,
-} from './financeService';
 
 // Re-export compliance services
 export {
@@ -391,13 +362,6 @@ export {
   trainingAttendanceService,
 } from './trainingService';
 
-// Re-export tracking services
-export { inOutTrackingService } from './inOutTrackingService';
-export { accessTrackingService, generateTimelineMonths as generateAccessTimelineMonths, groupMonthsByYear } from './accessTrackingService';
-export { dnrTrackingService, generateTimelineMonths as generateDNRTimelineMonths, groupMonthsByYearAndQuarter } from './dnrTrackingService';
-export { mouTrackingService } from './mouTrackingService';
-export { programWorkPlanService, generateTimelineMonths as generateWorkPlanTimelineMonths } from './programWorkPlanService';
-
 // Re-export contract management services
 export {
   contractTypeDB,
@@ -444,19 +408,6 @@ export {
   staffWelfarePaymentDB,
 } from './staffAssociationService';
 
-// Re-export procurement services
-export {
-  vendorDB,
-  itemCategoryDB,
-  purchaseRequestDB,
-  rfqDB,
-  purchaseOrderDB,
-  goodsReceiptDB,
-  inventoryItemDB,
-  procurementContractDB,
-  procurementService,
-} from './procurementService';
-
 // Re-export policy services
 export {
   policyVersionDB,
@@ -478,6 +429,29 @@ export {
   auditDashboardService,
   auditService,
 } from './auditService';
+
+// Re-export program services
+export {
+  programDonorsDB,
+  programProjectsDB,
+  programWorkPlansDB,
+  programCertificatesDB,
+  programDocumentsDB,
+  programReportingDB,
+  programBeneficiariesDB,
+  programSafeguardingDB,
+  programDashboardService,
+  programService,
+  // Backward compatibility aliases
+  programDonorDB,
+  programProjectDB,
+  programWorkPlanDB,
+  programCertificateDB,
+  programDocumentDB,
+  programReportDB,
+  programBeneficiaryDB,
+  programSafeguardDB,
+} from './programService';
 
 // Re-export utility functions
 export {

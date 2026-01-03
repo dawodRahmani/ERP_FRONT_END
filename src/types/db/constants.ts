@@ -10,7 +10,7 @@
  */
 export const DB_CONFIG = {
   NAME: 'vdo-erp-db',
-  VERSION: 36, // Added legacy store support for backward compatibility
+  VERSION: 40, // Recreate program stores with proper indexes
 } as const;
 
 /**

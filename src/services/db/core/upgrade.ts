@@ -21,14 +21,13 @@ import { createPerformanceStores } from './stores/performance';
 import { createRecruitmentStores } from './stores/recruitment';
 import { createTrackingStores } from './stores/tracking';
 import { createTrainingStores } from './stores/training';
-import { createFinanceStores } from './stores/finance';
 import { createContractStores } from './stores/contracts';
 import { createAssetStores } from './stores/assets';
 import { createTravelStores } from './stores/travel';
 import { createStaffAssociationStores } from './stores/staffAssociation';
-import { createProcurementStores } from './stores/procurement';
 import { createPolicyStores } from './stores/policy';
 import { createAuditStores } from './stores/audit';
+import { createProgramStores } from './stores/program';
 
 /**
  * Main database upgrade function
@@ -55,6 +54,11 @@ export function upgradeDatabase(
     // v27: Force delete ALL recruitment stores to fix index issues
     if (oldVersion < 27) {
       deleteAllRecruitmentStores(db);
+    }
+
+    // v40: Recreate program stores with proper indexes
+    if (oldVersion < 40) {
+      deleteProgramStores(db);
     }
 
     // Create all stores (store creators handle "if not exists" logic)
@@ -109,9 +113,6 @@ function createAllStores(db: IDBPDatabase<VDODatabase>): void {
   // Tracking stores (in/out, access, DNR, MOU, work plans)
   createTrackingStores(db);
 
-  // Finance & Compliance stores (donors, projects, compliance)
-  createFinanceStores(db);
-
   // Contract management stores
   createContractStores(db);
 
@@ -124,14 +125,14 @@ function createAllStores(db: IDBPDatabase<VDODatabase>): void {
   // Staff association stores
   createStaffAssociationStores(db);
 
-  // Procurement stores
-  createProcurementStores(db);
-
   // Policy stores
   createPolicyStores(db);
 
   // Audit management stores
   createAuditStores(db);
+
+  // Program module stores (donors, projects, work plans, etc.)
+  createProgramStores(db);
 
   console.log('All database stores created');
 }
@@ -199,6 +200,29 @@ function deleteAllRecruitmentStores(db: IDBPDatabase<VDODatabase>): void {
     // These are stores being deleted for migration, use type assertion
     if ((db.objectStoreNames as DOMStringList).contains(storeName)) {
       console.log(`IndexedDB: Deleting recruitment store ${storeName}`);
+      (db as unknown as IDBDatabase).deleteObjectStore(storeName);
+    }
+  });
+}
+
+/**
+ * Delete all program stores to recreate with proper indexes (v40)
+ */
+function deleteProgramStores(db: IDBPDatabase<VDODatabase>): void {
+  const programStores = [
+    'programDonors',
+    'programProjects',
+    'programWorkPlans',
+    'programCertificates',
+    'programDocuments',
+    'programReporting',
+    'programBeneficiaries',
+    'programSafeguarding',
+  ];
+
+  programStores.forEach((storeName) => {
+    if ((db.objectStoreNames as DOMStringList).contains(storeName)) {
+      console.log(`IndexedDB: Deleting program store ${storeName}`);
       (db as unknown as IDBDatabase).deleteObjectStore(storeName);
     }
   });
