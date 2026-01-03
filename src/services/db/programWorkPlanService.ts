@@ -7,7 +7,7 @@
 
 import { createCRUDService } from './core/crud';
 import { searchRecords, getUniqueValues, sortByCreatedAt } from './core/utils';
-import type { ProgramWorkPlanRecord } from '@/types/modules/tracking';
+import type { ProgramWorkPlanRecord } from '../../types/modules/tracking';
 
 const STORE_NAME = 'programWorkPlans';
 
@@ -75,7 +75,7 @@ export const programWorkPlanService = {
   ): Promise<ProgramWorkPlanRecord> {
     const planData = {
       ...data,
-      status: data.status || 'not_started',
+      status: data.status || 'draft',
     };
     return baseCRUD.create(planData);
   },
@@ -98,10 +98,11 @@ export const programWorkPlanService = {
 
     const allPlans = await this.getAll();
     return searchRecords(allPlans, searchTerm, [
+      'donor',
+      'project',
       'activity',
-      'department',
-      'responsible',
-      'notes',
+      'location',
+      'output',
     ]);
   },
 
@@ -148,12 +149,44 @@ export const programWorkPlanService = {
   },
 
   /**
+   * Filter by donor
+   */
+  async filterByDonor(donor: string): Promise<ProgramWorkPlanRecord[]> {
+    return baseCRUD.getByIndex('donor', donor);
+  },
+
+  /**
+   * Filter by project
+   */
+  async filterByProject(project: string): Promise<ProgramWorkPlanRecord[]> {
+    return baseCRUD.getByIndex('project', project);
+  },
+
+  /**
    * Get unique departments
    */
   async getUniqueDepartments(): Promise<string[]> {
     const allPlans = await this.getAll();
     const departments = getUniqueValues(allPlans, 'department').filter(Boolean) as string[];
     return departments.sort();
+  },
+
+  /**
+   * Get unique donors
+   */
+  async getUniqueDonors(): Promise<string[]> {
+    const allPlans = await this.getAll();
+    const donors = getUniqueValues(allPlans, 'donor').filter(Boolean) as string[];
+    return donors.sort();
+  },
+
+  /**
+   * Get unique projects
+   */
+  async getUniqueProjects(): Promise<string[]> {
+    const allPlans = await this.getAll();
+    const projects = getUniqueValues(allPlans, 'project').filter(Boolean) as string[];
+    return projects.sort();
   },
 
   /**

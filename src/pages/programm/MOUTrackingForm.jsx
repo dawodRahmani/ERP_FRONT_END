@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
-import {
-  createMOUTracking,
-  updateMOUTracking,
-  getMOUTrackingById,
-} from '../../services/db/mouTrackingService';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Save } from "lucide-react";
+import mouTrackingService from "../../services/db/mouTrackingService.ts";
+
+const {
+  create: createMOUTracking,
+  update: updateMOUTracking,
+  getById: getMOUTrackingById,
+} = mouTrackingService;
 
 const MOUTrackingForm = () => {
   const navigate = useNavigate();
@@ -14,13 +16,13 @@ const MOUTrackingForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    serialNumber: '',
-    sectoralAuthority: '',
-    project: '',
-    donor: '',
-    location: '',
-    status: 'project',
-    uploadDocument: '',
+    serialNumber: "",
+    sectoralAuthority: "",
+    project: "",
+    donor: "",
+    location: "",
+    status: "project",
+    uploadDocument: "",
   });
 
   useEffect(() => {
@@ -35,18 +37,18 @@ const MOUTrackingForm = () => {
       const entry = await getMOUTrackingById(Number(id));
       if (entry) {
         setFormData({
-          serialNumber: entry.serialNumber || '',
-          sectoralAuthority: entry.sectoralAuthority || '',
-          project: entry.project || '',
-          donor: entry.donor || '',
-          location: entry.location || '',
-          status: entry.status || 'project',
-          uploadDocument: entry.uploadDocument || '',
+          serialNumber: entry.serialNumber || "",
+          sectoralAuthority: entry.sectoralAuthority || "",
+          project: entry.project || "",
+          donor: entry.donor || "",
+          location: entry.location || "",
+          status: entry.status || "project",
+          uploadDocument: entry.uploadDocument || "",
         });
       }
     } catch (error) {
-      console.error('Error loading MOU entry:', error);
-      alert('Failed to load entry');
+      console.error("Error loading MOU entry:", error);
+      alert("Failed to load entry");
     } finally {
       setLoading(false);
     }
@@ -72,10 +74,10 @@ const MOUTrackingForm = () => {
         await createMOUTracking(formData);
       }
 
-      navigate('/programm/mou-tracking');
+      navigate("/programm/mou-tracking");
     } catch (error) {
-      console.error('Error saving MOU entry:', error);
-      alert('Failed to save entry');
+      console.error("Error saving MOU entry:", error);
+      alert("Failed to save entry");
     } finally {
       setLoading(false);
     }
@@ -86,19 +88,19 @@ const MOUTrackingForm = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/mou-tracking')}
+          onClick={() => navigate("/programm/mou-tracking")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
           Back to MOU Tracking
         </button>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {isEditMode ? 'Edit MOU Entry' : 'New MOU Entry'}
+          {isEditMode ? "Edit MOU Entry" : "New MOU Entry"}
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {isEditMode
-            ? 'Update the MOU tracking details'
-            : 'Create a new MOU tracking entry'}
+            ? "Update the MOU tracking details"
+            : "Create a new MOU tracking entry"}
         </p>
       </div>
 
@@ -140,7 +142,8 @@ const MOUTrackingForm = () => {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Name of Sectoral Authority <span className="text-red-500">*</span>
+                Name of Sectoral Authority{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -225,10 +228,11 @@ const MOUTrackingForm = () => {
             About MOU Tracking
           </h3>
           <p className="text-sm text-blue-800 dark:text-blue-400">
-            This form tracks all formal agreements with government authorities, essential for
-            legal compliance and access to implementation areas. It distinguishes between
-            original MOUs (Project status) and amendments (Amendment status), maintaining a
-            complete record of official permissions.
+            This form tracks all formal agreements with government authorities,
+            essential for legal compliance and access to implementation areas.
+            It distinguishes between original MOUs (Project status) and
+            amendments (Amendment status), maintaining a complete record of
+            official permissions.
           </p>
         </div>
 
@@ -236,7 +240,7 @@ const MOUTrackingForm = () => {
         <div className="flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => navigate('/programm/mou-tracking')}
+            onClick={() => navigate("/programm/mou-tracking")}
             className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Cancel
@@ -247,7 +251,7 @@ const MOUTrackingForm = () => {
             className="flex items-center gap-2 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-5 w-5" />
-            {loading ? 'Saving...' : isEditMode ? 'Update' : 'Create'}
+            {loading ? "Saving..." : isEditMode ? "Update" : "Create"}
           </button>
         </div>
       </form>

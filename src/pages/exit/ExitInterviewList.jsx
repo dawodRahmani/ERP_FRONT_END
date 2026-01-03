@@ -15,7 +15,7 @@ import {
   Edit,
   BarChart3,
 } from 'lucide-react';
-import { exitInterviewService, separationService, initializeExitModule } from '../../services/db/exitService';
+import { exitInterviewService, separationService } from '../../services/db/exitService';
 
 const ExitInterviewList = () => {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ const ExitInterviewList = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      await initializeExitModule();
+      // await initializeExitModule();
 
       const [interviewData, sepData, statsData] = await Promise.all([
         exitInterviewService.getAll({ status: statusFilter }),

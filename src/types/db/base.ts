@@ -24,14 +24,19 @@ export interface BaseRecord {
  */
 export type CreateInput<T extends BaseRecord> = Omit<
   T,
-  'id' | 'createdAt' | 'updatedAt'
+  "id" | "createdAt" | "updatedAt"
 >;
+
+/**
+ * IndexType to create DB indexes
+ */
+export type CreateIndex<T extends BaseRecord> = Partial<T>;
 
 /**
  * Input type for updating existing records
  * Omits id, allows partial updates
  */
-export type UpdateInput<T extends BaseRecord> = Partial<Omit<T, 'id'>>;
+export type UpdateInput<T extends BaseRecord> = Partial<Omit<T, "id">>;
 
 /**
  * Generic CRUD service interface
@@ -86,7 +91,7 @@ export interface CRUDService<T extends BaseRecord> {
 /**
  * Transaction mode types for IndexedDB operations
  */
-export type TransactionMode = 'readonly' | 'readwrite';
+export type TransactionMode = "readonly" | "readwrite";
 
 /**
  * Base filter interface for query operations
@@ -130,7 +135,7 @@ export interface PaginatedResult<T> {
 /**
  * Sort direction
  */
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = "asc" | "desc";
 
 /**
  * Sort parameters
@@ -146,14 +151,14 @@ export interface SortParams<T> {
  * Common status types used across multiple modules
  */
 export type CommonStatus =
-  | 'draft'
-  | 'pending'
-  | 'approved'
-  | 'rejected'
-  | 'active'
-  | 'inactive'
-  | 'completed'
-  | 'cancelled';
+  | "draft"
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "active"
+  | "inactive"
+  | "completed"
+  | "cancelled";
 
 /**
  * Utility type for extracting values from const objects

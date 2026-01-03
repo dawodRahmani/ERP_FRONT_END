@@ -7,7 +7,7 @@
 
 import { createCRUDService } from './core/crud';
 import { searchRecords, filterByDateRange, getUniqueValues } from './core/utils';
-import type { InOutTrackingRecord, InOutDocumentType } from '@/types/modules/tracking';
+import type { InOutTrackingRecord, InOutDocumentType } from '../../types/modules/tracking';
 
 const STORE_NAME = 'inOutTracking';
 
@@ -60,11 +60,11 @@ export const inOutTrackingService = {
 
     const allEntries = await this.getAll();
     return searchRecords(allEntries, searchTerm, [
-      'subject',
-      'serialNumber',
+      'documentTitle',
+      'referenceNumber',
       'from',
       'to',
-      'documentType',
+      'subject',
     ]);
   },
 

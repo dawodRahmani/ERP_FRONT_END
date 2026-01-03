@@ -5,7 +5,7 @@
  * Provides common operations like code generation, searching, and filtering.
  */
 
-import type { BaseRecord, SortDirection } from '@/types/db/base';
+import type { BaseRecord, SortDirection } from "../../../types/db/base";
 
 /**
  * Generate a formatted code/number
@@ -31,7 +31,7 @@ export function generateFormattedCode(
   paddingLength = 5
 ): string {
   const year = new Date().getFullYear();
-  const paddedCount = String(count).padStart(paddingLength, '0');
+  const paddedCount = String(count).padStart(paddingLength, "0");
 
   return includeYear
     ? `${prefix}-${year}-${paddedCount}`
@@ -52,8 +52,8 @@ export function generateFormattedCode(
  * ```
  */
 export function generateUniqueCode(length = 6): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
 
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * chars.length);
@@ -78,25 +78,23 @@ export function generateUniqueCode(length = 6): string {
  * sortRecords(requests, 'createdAt', 'desc')
  * ```
  */
-export function sortRecords<T extends Record<string, any>>(
-  records: T[],
-  field: keyof T,
-  direction: SortDirection = 'asc'
-): T[] {
+export function sortRecords<
+  T extends Record<string, string | number | boolean | Date>
+>(records: T[], field: keyof T, direction: SortDirection = "asc"): T[] {
   return [...records].sort((a, b) => {
     const aValue = a[field];
     const bValue = b[field];
 
     // Handle null/undefined
     if (aValue == null && bValue == null) return 0;
-    if (aValue == null) return direction === 'asc' ? 1 : -1;
-    if (bValue == null) return direction === 'asc' ? -1 : 1;
+    if (aValue == null) return direction === "asc" ? 1 : -1;
+    if (bValue == null) return direction === "asc" ? -1 : 1;
 
     // Compare values
     let comparison = 0;
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
+    if (typeof aValue === "string" && typeof bValue === "string") {
       comparison = aValue.localeCompare(bValue);
-    } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+    } else if (typeof aValue === "number" && typeof bValue === "number") {
       comparison = aValue - bValue;
     } else if (aValue instanceof Date && bValue instanceof Date) {
       comparison = aValue.getTime() - bValue.getTime();
@@ -105,7 +103,7 @@ export function sortRecords<T extends Record<string, any>>(
       comparison = String(aValue).localeCompare(String(bValue));
     }
 
-    return direction === 'asc' ? comparison : -comparison;
+    return direction === "asc" ? comparison : -comparison;
   });
 }
 
@@ -120,9 +118,9 @@ export function sortRecords<T extends Record<string, any>>(
  */
 export function sortByCreatedAt<T extends BaseRecord>(
   records: T[],
-  direction: SortDirection = 'desc'
+  direction: SortDirection = "desc"
 ): T[] {
-  return sortRecords(records, 'createdAt', direction);
+  return sortRecords(records as Record<string, any>[], "createdAt", direction) as T[];
 }
 
 /**
@@ -146,14 +144,14 @@ export function searchRecords<T extends Record<string, any>>(
   searchTerm: string,
   fields: (keyof T)[]
 ): T[] {
-  if (!searchTerm || searchTerm.trim() === '') {
+  if (!searchTerm || searchTerm.trim() === "") {
     return records;
   }
 
   const term = searchTerm.toLowerCase().trim();
 
-  return records.filter(record =>
-    fields.some(field => {
+  return records.filter((record) =>
+    fields.some((field) => {
       const value = record[field];
       if (value == null) return false;
 
@@ -177,7 +175,7 @@ export function filterByStatus<T extends { status: string }>(
   status: string | string[]
 ): T[] {
   const statuses = Array.isArray(status) ? status : [status];
-  return records.filter(record => statuses.includes(record.status));
+  return records.filter((record) => statuses.includes(record.status));
 }
 
 /**
@@ -209,7 +207,7 @@ export function filterByDateRange<T extends Record<string, any>>(
   start.setHours(0, 0, 0, 0);
   end.setHours(23, 59, 59, 999);
 
-  return records.filter(record => {
+  return records.filter((record) => {
     const value = record[field];
     if (!value) return false;
 
@@ -233,11 +231,7 @@ export function filterByDateRange<T extends Record<string, any>>(
  * paginate(employees, 2, 20)  // Employees 21-40
  * ```
  */
-export function paginate<T>(
-  records: T[],
-  page: number,
-  pageSize: number
-): T[] {
+export function paginate<T>(records: T[], page: number, pageSize: number): T[] {
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   return records.slice(startIndex, endIndex);
@@ -277,8 +271,8 @@ export function getUniqueValues<T extends Record<string, any>>(
   field: keyof T
 ): any[] {
   const values = records
-    .map(record => record[field])
-    .filter(value => value != null);
+    .map((record) => record[field])
+    .filter((value) => value != null);
 
   return Array.from(new Set(values));
 }
@@ -302,7 +296,7 @@ export function groupBy<T extends Record<string, any>>(
   field: keyof T
 ): Record<string, T[]> {
   return records.reduce((groups, record) => {
-    const key = String(record[field] ?? 'undefined');
+    const key = String(record[field] ?? "undefined");
     if (!groups[key]) {
       groups[key] = [];
     }
@@ -359,7 +353,7 @@ export function daysBetween(
  */
 export function formatISODate(date: Date | string): string {
   const d = new Date(date);
-  return d.toISOString().split('T')[0];
+  return d.toISOString().split("T")[0];
 }
 
 /**

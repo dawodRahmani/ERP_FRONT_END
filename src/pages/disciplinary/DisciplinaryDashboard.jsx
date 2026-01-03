@@ -1,36 +1,30 @@
-import { useState, useEffect } from 'react';
+import {
+  AlertOctagon,
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  Clock,
+  FileText,
+  FileWarning,
+  MessageSquare,
+  PieChart,
+  RefreshCw,
+  Scale,
+  Search,
+  Shield,
+  XCircle
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  AlertTriangle,
-  FileText,
-  Search,
-  Gavel,
-  Scale,
-  MessageSquare,
-  Clock,
-  CheckCircle,
-  XCircle,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  ArrowRight,
-  RefreshCw,
-  Shield,
-  AlertOctagon,
-  FileWarning,
-  Users
-} from 'lucide-react';
-import {
-  initDisciplinaryDB,
-  misconductReportsDB,
-  investigationsDB,
-  disciplinaryActionsDB,
   appealsDB,
-  grievancesDB,
-  suspensionsDB,
   complianceIncidentsDB,
-  warningHistoryDB
+  disciplinaryActionsDB,
+  grievancesDB,
+  initDisciplinaryDB,
+  investigationsDB,
+  misconductReportsDB,
+  suspensionsDB
 } from '../../services/db/disciplinaryService';
 
 const DisciplinaryDashboard = () => {

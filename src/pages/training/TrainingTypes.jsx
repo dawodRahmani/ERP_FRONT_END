@@ -9,7 +9,7 @@ import {
   XCircle,
   AlertCircle,
 } from 'lucide-react';
-import { trainingTypeService } from '../../services/db/trainingService';
+import { trainingTypeDB } from '../../services/db/trainingService';
 import Modal from '../../components/Modal';
 
 const CATEGORIES = [
@@ -52,7 +52,7 @@ const TrainingTypes = () => {
   const loadTypes = async () => {
     try {
       setLoading(true);
-      const data = await trainingTypeService.getAll();
+      const data = await trainingTypeDB.getAll();
       setTypes(data);
       setFilteredTypes(data);
     } catch (error) {
@@ -86,9 +86,9 @@ const TrainingTypes = () => {
     e.preventDefault();
     try {
       if (editingType) {
-        await trainingTypeService.update(editingType.id, formData);
+        await trainingTypeDB.update(editingType.id, formData);
       } else {
-        await trainingTypeService.create(formData);
+        await trainingTypeDB.create(formData);
       }
       setShowModal(false);
       resetForm();
@@ -116,7 +116,7 @@ const TrainingTypes = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this training type?')) {
       try {
-        await trainingTypeService.delete(id);
+        await trainingTypeDB.delete(id);
         loadTypes();
       } catch (error) {
         console.error('Error deleting training type:', error);

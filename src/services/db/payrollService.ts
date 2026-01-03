@@ -34,7 +34,11 @@ import type {
   AdvanceStatus,
   LoanStatus,
   OvertimeStatus,
-} from '@/types/modules/payroll';
+} from '../../types/modules/payroll';
+import type {
+  SalaryComponentRecord,
+  PayrollRecord,
+} from '../../types/modules/legacy';
 
 // ========== PAYROLL PERIODS ==========
 
@@ -975,6 +979,68 @@ export const cashPaymentsDB = {
       status: 'failed',
       notes,
     });
+  },
+};
+
+// ========== LEGACY BACKWARD COMPATIBILITY ==========
+
+/**
+ * Legacy salary components (backward compatibility)
+ * Maps to salaryComponents store
+ */
+const salaryComponentsCRUD = createCRUDService<SalaryComponentRecord>('salaryComponents');
+
+export const salaryComponentDB = {
+  ...salaryComponentsCRUD,
+
+  /**
+   * Get components by type
+   */
+  async getByType(componentType: string): Promise<SalaryComponentRecord[]> {
+    return salaryComponentsCRUD.getByIndex('componentType', componentType);
+  },
+
+  /**
+   * Get active components
+   */
+  async getActive(): Promise<SalaryComponentRecord[]> {
+    return salaryComponentsCRUD.getByIndex('isActive', true);
+  },
+};
+
+/**
+ * Legacy payrolls (backward compatibility)
+ * Maps to payrolls store
+ * Note: This is the old simple payroll format, different from payrollPeriods
+ */
+const payrollsCRUD = createCRUDService<PayrollRecord>('payrolls');
+
+export const payrollDB = {
+  ...payrollsCRUD,
+
+  /**
+   * Get payrolls by employee
+   */
+  async getByEmployee(employeeId: number): Promise<PayrollRecord[]> {
+    return payrollsCRUD.getByIndex('employeeId', employeeId);
+  },
+
+  /**
+   * Get payrolls by month and year
+   */
+  async getByMonthYear(month: number, year: number): Promise<PayrollRecord[]> {
+    const db = await getDB();
+    const tx = db.transaction('payrolls', 'readonly');
+    const store = tx.objectStore('payrolls');
+    const all = await store.getAll();
+    return all.filter(p => p.month === month && p.year === year);
+  },
+
+  /**
+   * Get payrolls by status
+   */
+  async getByStatus(status: string): Promise<PayrollRecord[]> {
+    return payrollsCRUD.getByIndex('status', status);
   },
 };
 

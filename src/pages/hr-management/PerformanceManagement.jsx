@@ -20,13 +20,13 @@ import {
   Clock,
 } from 'lucide-react';
 import {
-  appraisalPeriodDB,
+  appraisalCyclesDB,
   appraisalCriteriaDB,
-  performanceAppraisalDB,
-  appraisalScoreDB,
-  pipDB,
-  pipGoalDB,
-  pipProgressReviewDB,
+  employeeAppraisalsDB,
+  appraisalRatingsDB,
+  performanceImprovementPlansDB,
+  pipGoalsDB,
+  pipCheckInsDB,
   employeeDB,
   seedAllDefaults,
 } from '../../services/db/indexedDB';
@@ -125,12 +125,12 @@ export default function PerformanceManagement() {
         goalsData,
         employeesData,
       ] = await Promise.all([
-        appraisalPeriodDB.getAll(),
+        appraisalCyclesDB.getAll(),
         appraisalCriteriaDB.getAll(),
-        performanceAppraisalDB.getAll(),
-        appraisalScoreDB.getAll(),
-        pipDB.getAll(),
-        pipGoalDB.getAll(),
+        employeeAppraisalsDB.getAll(),
+        appraisalRatingsDB.getAll(),
+        performanceImprovementPlansDB.getAll(),
+        pipGoalsDB.getAll(),
         employeeDB.getAll(),
       ]);
 
@@ -255,10 +255,10 @@ export default function PerformanceManagement() {
       };
 
       if (isEditing && selectedRecord) {
-        await appraisalPeriodDB.update(selectedRecord.id, data);
+        await appraisalCyclesDB.update(selectedRecord.id, data);
         showToast('Period updated successfully');
       } else {
-        await appraisalPeriodDB.add(data);
+        await appraisalCyclesDB.create(data);
         showToast('Period created successfully');
       }
 
@@ -315,10 +315,10 @@ export default function PerformanceManagement() {
       };
 
       if (isEditing && selectedRecord) {
-        await performanceAppraisalDB.update(selectedRecord.id, data);
+        await employeeAppraisalsDB.update(selectedRecord.id, data);
         showToast('Appraisal updated successfully');
       } else {
-        await performanceAppraisalDB.add(data);
+        await employeeAppraisalsDB.create(data);
         showToast('Appraisal created successfully');
       }
 
@@ -346,10 +346,10 @@ export default function PerformanceManagement() {
       delete data.goals;
 
       if (isEditing && selectedRecord) {
-        await pipDB.update(selectedRecord.id, data);
+        await performanceImprovementPlansDB.update(selectedRecord.id, data);
         showToast('PIP updated successfully');
       } else {
-        await pipDB.add(data);
+        await performanceImprovementPlansDB.create(data);
         showToast('PIP created successfully');
       }
 
@@ -366,16 +366,16 @@ export default function PerformanceManagement() {
     try {
       switch (activeTab) {
         case 'periods':
-          await appraisalPeriodDB.delete(selectedRecord.id);
+          await appraisalCyclesDB.delete(selectedRecord.id);
           break;
         case 'appraisals':
-          await performanceAppraisalDB.delete(selectedRecord.id);
+          await employeeAppraisalsDB.delete(selectedRecord.id);
           break;
         case 'criteria':
           await appraisalCriteriaDB.delete(selectedRecord.id);
           break;
         case 'pips':
-          await pipDB.delete(selectedRecord.id);
+          await performanceImprovementPlansDB.delete(selectedRecord.id);
           break;
       }
       showToast('Record deleted successfully');

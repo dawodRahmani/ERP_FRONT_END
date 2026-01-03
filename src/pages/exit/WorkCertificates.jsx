@@ -15,7 +15,7 @@ import {
   Download,
   Printer,
 } from 'lucide-react';
-import { workCertificateService, separationService, initializeExitModule } from '../../services/db/exitService';
+import { workCertificateService, separationService } from '../../services/db/exitService';
 
 const WorkCertificates = () => {
   const [certificates, setCertificates] = useState([]);
@@ -40,7 +40,7 @@ const WorkCertificates = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      await initializeExitModule();
+      // await initializeExitModule();
 
       const [certData, sepData, statsData] = await Promise.all([
         workCertificateService.getAll({ status: statusFilter, certificateType: typeFilter }),

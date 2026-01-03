@@ -20,10 +20,11 @@ import {
 } from 'lucide-react';
 import {
   separationTypeDB,
-  separationRecordDB,
+  separationDB,
   exitClearanceDepartmentDB,
   exitClearanceDB,
   exitInterviewDB,
+  exitInterviewService,
   finalSettlementDB,
   workCertificateDB,
   employeeDB,
@@ -143,7 +144,7 @@ export default function ExitManagement() {
         departmentsData,
       ] = await Promise.all([
         separationTypeDB.getAll(),
-        separationRecordDB.getAll(),
+        separationDB.getAll(),
         exitClearanceDepartmentDB.getAll(),
         exitClearanceDB.getAll(),
         exitInterviewDB.getAll(),
@@ -276,10 +277,10 @@ export default function ExitManagement() {
       };
 
       if (isEditing && selectedRecord) {
-        await separationRecordDB.update(selectedRecord.id, data);
+        await separationDB.update(selectedRecord.id, data);
         showToast('Separation record updated successfully');
       } else {
-        await separationRecordDB.add(data);
+        await separationDB.add(data);
         showToast('Separation record created successfully');
       }
 
@@ -425,7 +426,7 @@ export default function ExitManagement() {
     try {
       switch (activeTab) {
         case 'separations':
-          await separationRecordDB.delete(selectedRecord.id);
+          await separationDB.delete(selectedRecord.id);
           break;
         case 'clearances':
           await exitClearanceDB.delete(selectedRecord.id);

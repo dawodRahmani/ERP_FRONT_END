@@ -6,12 +6,48 @@
  */
 
 import type { IDBPDatabase } from 'idb';
-import type { VDODatabase } from '@/types/db/stores';
+import type { VDODatabase } from '../../../../types/db/stores';
 
 /**
  * Create all leave management object stores
  */
 export function createLeaveStores(db: IDBPDatabase<VDODatabase>): void {
+  // Allowance Types store (Legacy support)
+  if (!db.objectStoreNames.contains('allowanceTypes')) {
+    const store = db.createObjectStore('allowanceTypes', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('code', 'code', { unique: true });
+    store.createIndex('name', 'name', { unique: false });
+    store.createIndex('isActive', 'isActive', { unique: false });
+    console.log('Created store: allowanceTypes');
+  }
+
+  // Employee Rewards store (Legacy support)
+  if (!db.objectStoreNames.contains('employeeRewards')) {
+    const store = db.createObjectStore('employeeRewards', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('employeeId', 'employeeId', { unique: false });
+    store.createIndex('rewardType', 'rewardType', { unique: false });
+    store.createIndex('rewardDate', 'rewardDate', { unique: false });
+    console.log('Created store: employeeRewards');
+  }
+
+  // CTO Records store (Compensatory Time Off)
+  if (!db.objectStoreNames.contains('ctoRecords')) {
+    const store = db.createObjectStore('ctoRecords', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('employeeId', 'employeeId', { unique: false });
+    store.createIndex('earnedDate', 'earnedDate', { unique: false });
+    store.createIndex('status', 'status', { unique: false });
+    console.log('Created store: ctoRecords');
+  }
+
   // Leave Types store
   if (!db.objectStoreNames.contains('leaveTypes')) {
     const store = db.createObjectStore('leaveTypes', {

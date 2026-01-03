@@ -28,7 +28,14 @@ import type {
   EmployeeGrievanceRecord,
   ComplianceIncidentRecord,
   MisconductCaseNoteRecord,
-} from '@/types/modules/disciplinary';
+} from '../../types/modules/disciplinary';
+import type {
+  DisciplinaryTypeRecord,
+  GrievanceTypeRecord,
+  GrievanceRecord,
+  GrievanceInvestigationRecord,
+  GrievanceResolutionRecord,
+} from '../../types/modules/legacy';
 
 // ========== MISCONDUCT REPORTS ==========
 
@@ -443,6 +450,140 @@ export const caseNotesDB = {
     return notes.filter(n => n.caseType === caseType && n.caseId === caseId);
   },
 };
+
+// ========== LEGACY BACKWARD COMPATIBILITY ==========
+
+/**
+ * Legacy disciplinary types (backward compatibility)
+ * Maps to disciplinaryTypes store
+ */
+const disciplinaryTypesCRUD = createCRUDService<DisciplinaryTypeRecord>('disciplinaryTypes');
+
+export const disciplinaryTypeDB = {
+  ...disciplinaryTypesCRUD,
+
+  /**
+   * Get active disciplinary types
+   */
+  async getActive(): Promise<DisciplinaryTypeRecord[]> {
+    return disciplinaryTypesCRUD.getByIndex('isActive', true);
+  },
+};
+
+/**
+ * Legacy disciplinary action DB (backward compatibility alias)
+ * Maps to existing disciplinaryActionsDB
+ */
+export const disciplinaryActionDB = disciplinaryActionsDB;
+
+/**
+ * Legacy grievance types (backward compatibility)
+ * Maps to grievanceTypes store
+ */
+const grievanceTypesCRUD = createCRUDService<GrievanceTypeRecord>('grievanceTypes');
+
+export const grievanceTypeDB = {
+  ...grievanceTypesCRUD,
+
+  /**
+   * Get active grievance types
+   */
+  async getActive(): Promise<GrievanceTypeRecord[]> {
+    return grievanceTypesCRUD.getByIndex('isActive', true);
+  },
+};
+
+/**
+ * Legacy grievances (backward compatibility)
+ * Maps to grievances store (simple legacy version)
+ */
+const legacyGrievancesCRUD = createCRUDService<GrievanceRecord>('grievances');
+
+export const grievanceDB = {
+  ...legacyGrievancesCRUD,
+
+  /**
+   * Get grievances by employee ID
+   */
+  async getByEmployee(employeeId: number): Promise<GrievanceRecord[]> {
+    return legacyGrievancesCRUD.getByIndex('employeeId', employeeId);
+  },
+
+  /**
+   * Get grievances by status
+   */
+  async getByStatus(status: string): Promise<GrievanceRecord[]> {
+    return legacyGrievancesCRUD.getByIndex('status', status);
+  },
+
+  /**
+   * Get grievances by type
+   */
+  async getByType(grievanceType: string): Promise<GrievanceRecord[]> {
+    return legacyGrievancesCRUD.getByIndex('grievanceType', grievanceType);
+  },
+};
+
+/**
+ * Legacy grievance investigations (backward compatibility)
+ * Maps to grievanceInvestigations store
+ */
+const grievanceInvestigationsCRUD = createCRUDService<GrievanceInvestigationRecord>('grievanceInvestigations');
+
+export const grievanceInvestigationDB = {
+  ...grievanceInvestigationsCRUD,
+
+  /**
+   * Get investigations by grievance ID
+   */
+  async getByGrievance(grievanceId: number): Promise<GrievanceInvestigationRecord[]> {
+    return grievanceInvestigationsCRUD.getByIndex('grievanceId', grievanceId);
+  },
+
+  /**
+   * Get investigations by investigator
+   */
+  async getByInvestigator(investigatorId: number): Promise<GrievanceInvestigationRecord[]> {
+    return grievanceInvestigationsCRUD.getByIndex('investigatorId', investigatorId);
+  },
+
+  /**
+   * Get investigations by status
+   */
+  async getByStatus(status: string): Promise<GrievanceInvestigationRecord[]> {
+    return grievanceInvestigationsCRUD.getByIndex('status', status);
+  },
+};
+
+/**
+ * Legacy grievance resolutions (backward compatibility)
+ * Maps to grievanceResolutions store
+ */
+const grievanceResolutionsCRUD = createCRUDService<GrievanceResolutionRecord>('grievanceResolutions');
+
+export const grievanceResolutionDB = {
+  ...grievanceResolutionsCRUD,
+
+  /**
+   * Get resolutions by grievance ID
+   */
+  async getByGrievance(grievanceId: number): Promise<GrievanceResolutionRecord[]> {
+    return grievanceResolutionsCRUD.getByIndex('grievanceId', grievanceId);
+  },
+};
+
+// ========== INITIALIZATION ==========
+
+/**
+ * Initialize the Disciplinary module
+ * This is a no-op since database initialization is handled by initDB()
+ * but kept for backward compatibility
+ */
+export async function initDisciplinaryDB(): Promise<void> {
+  // Database is already initialized by initDB() in connection.ts
+  // This function exists for backward compatibility
+  return Promise.resolve();
+}
 
 // ========== MAIN EXPORT ==========
 

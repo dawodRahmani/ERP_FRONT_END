@@ -20,13 +20,12 @@ import {
 import {
   conductAcknowledgmentDB,
   pseaDeclarationDB,
-  coiDeclarationDB,
-  disciplinaryTypeDB,
-  disciplinaryActionDB,
-  grievanceTypeDB,
-  grievanceDB,
-  grievanceInvestigationDB,
-  grievanceResolutionDB,
+  coiDB,
+  // TODO: disciplinaryTypeDB and grievanceTypeDB don't exist - types not implemented
+  disciplinaryActionsDB,
+  grievancesDB,
+  investigationsDB,
+  // TODO: grievanceInvestigationDB and grievanceResolutionDB don't exist separately
   employeeDB,
   seedAllDefaults,
 } from '../../services/db/indexedDB';
@@ -95,9 +94,14 @@ export default function DisciplinaryGrievance() {
       setLoading(true);
       await seedAllDefaults();
       const [acksData, pseaData, coiData, discTypesData, discActionsData, grTypes, grData, invData, resData, empData] = await Promise.all([
-        conductAcknowledgmentDB.getAll(), pseaDeclarationDB.getAll(), coiDeclarationDB.getAll(),
-        disciplinaryTypeDB.getAll(), disciplinaryActionDB.getAll(), grievanceTypeDB.getAll(),
-        grievanceDB.getAll(), grievanceInvestigationDB.getAll(), grievanceResolutionDB.getAll(), employeeDB.getAll(),
+        conductAcknowledgmentDB.getAll(), pseaDeclarationDB.getAll(), coiDB.getAll(),
+        Promise.resolve([]), // TODO: disciplinaryTypeDB not implemented
+        disciplinaryActionsDB.getAll(),
+        Promise.resolve([]), // TODO: grievanceTypeDB not implemented
+        grievancesDB.getAll(),
+        investigationsDB.getAll(),
+        Promise.resolve([]), // TODO: grievanceResolutionDB not implemented
+        employeeDB.getAll(),
       ]);
       setConductAcks(acksData); setPseaDeclarations(pseaData); setCoiDeclarations(coiData);
       setDisciplinaryTypes(discTypesData); setDisciplinaryActions(discActionsData);
@@ -169,8 +173,8 @@ export default function DisciplinaryGrievance() {
     try {
       if (!disciplinaryForm.employeeId || !disciplinaryForm.incidentDate) { showToast('Please fill required fields', 'error'); return; }
       const data = { ...disciplinaryForm, employeeId: parseInt(disciplinaryForm.employeeId), typeId: disciplinaryForm.typeId ? parseInt(disciplinaryForm.typeId) : null, issuedBy: disciplinaryForm.issuedBy ? parseInt(disciplinaryForm.issuedBy) : null };
-      if (isEditing && selectedRecord) { await disciplinaryActionDB.update(selectedRecord.id, data); showToast('Updated successfully'); }
-      else { await disciplinaryActionDB.add(data); showToast('Created successfully'); }
+      if (isEditing && selectedRecord) { await disciplinaryActionsDB.update(selectedRecord.id, data); showToast('Updated successfully'); }
+      else { await disciplinaryActionsDB.create(data); showToast('Created successfully'); }
       await loadData(); closeDisciplinaryModal();
     } catch (error) { showToast('Error saving', 'error'); }
   };
@@ -179,8 +183,8 @@ export default function DisciplinaryGrievance() {
     try {
       if (!grievanceForm.employeeId || !grievanceForm.filedDate) { showToast('Please fill required fields', 'error'); return; }
       const data = { ...grievanceForm, employeeId: parseInt(grievanceForm.employeeId), typeId: grievanceForm.typeId ? parseInt(grievanceForm.typeId) : null };
-      if (isEditing && selectedRecord) { await grievanceDB.update(selectedRecord.id, data); showToast('Updated successfully'); }
-      else { await grievanceDB.add(data); showToast('Created successfully'); }
+      if (isEditing && selectedRecord) { await grievancesDB.update(selectedRecord.id, data); showToast('Updated successfully'); }
+      else { await grievancesDB.create(data); showToast('Created successfully'); }
       await loadData(); closeGrievanceModal();
     } catch (error) { showToast('Error saving', 'error'); }
   };
@@ -190,7 +194,7 @@ export default function DisciplinaryGrievance() {
       if (!conductForm.employeeId || !conductForm.acknowledgedDate) { showToast('Please fill required fields', 'error'); return; }
       const data = { ...conductForm, employeeId: parseInt(conductForm.employeeId) };
       if (isEditing && selectedRecord) { await conductAcknowledgmentDB.update(selectedRecord.id, data); showToast('Updated successfully'); }
-      else { await conductAcknowledgmentDB.add(data); showToast('Created successfully'); }
+      else { await conductAcknowledgmentDB.create(data); showToast('Created successfully'); }
       await loadData(); closeConductModal();
     } catch (error) { showToast('Error saving', 'error'); }
   };
@@ -200,7 +204,7 @@ export default function DisciplinaryGrievance() {
       if (!pseaForm.employeeId || !pseaForm.declarationDate) { showToast('Please fill required fields', 'error'); return; }
       const data = { ...pseaForm, employeeId: parseInt(pseaForm.employeeId) };
       if (isEditing && selectedRecord) { await pseaDeclarationDB.update(selectedRecord.id, data); showToast('Updated successfully'); }
-      else { await pseaDeclarationDB.add(data); showToast('Created successfully'); }
+      else { await pseaDeclarationDB.create(data); showToast('Created successfully'); }
       await loadData(); closePseaModal();
     } catch (error) { showToast('Error saving', 'error'); }
   };
@@ -209,8 +213,8 @@ export default function DisciplinaryGrievance() {
     try {
       if (!coiForm.employeeId || !coiForm.declarationDate) { showToast('Please fill required fields', 'error'); return; }
       const data = { ...coiForm, employeeId: parseInt(coiForm.employeeId) };
-      if (isEditing && selectedRecord) { await coiDeclarationDB.update(selectedRecord.id, data); showToast('Updated successfully'); }
-      else { await coiDeclarationDB.add(data); showToast('Created successfully'); }
+      if (isEditing && selectedRecord) { await coiDB.update(selectedRecord.id, data); showToast('Updated successfully'); }
+      else { await coiDB.create(data); showToast('Created successfully'); }
       await loadData(); closeCoiModal();
     } catch (error) { showToast('Error saving', 'error'); }
   };
@@ -218,11 +222,11 @@ export default function DisciplinaryGrievance() {
   const handleDelete = async () => {
     try {
       switch (activeTab) {
-        case 'disciplinary': await disciplinaryActionDB.delete(selectedRecord.id); break;
-        case 'grievances': await grievanceDB.delete(selectedRecord.id); break;
+        case 'disciplinary': await disciplinaryActionsDB.delete(selectedRecord.id); break;
+        case 'grievances': await grievancesDB.delete(selectedRecord.id); break;
         case 'conduct': await conductAcknowledgmentDB.delete(selectedRecord.id); break;
         case 'psea': await pseaDeclarationDB.delete(selectedRecord.id); break;
-        case 'coi': await coiDeclarationDB.delete(selectedRecord.id); break;
+        case 'coi': await coiDB.delete(selectedRecord.id); break;
       }
       showToast('Deleted successfully'); await loadData();
       setShowDeleteModal(false); setSelectedRecord(null);

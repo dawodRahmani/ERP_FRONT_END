@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -12,15 +12,15 @@ import {
   Sun,
   Moon,
   Star,
-} from 'lucide-react';
-import { holidayService } from '../../services/db/leaveManagementService';
+} from "lucide-react";
+import { holidaysDB } from "../../services/db/leaveManagementService";
 
 const Holidays = () => {
   const [holidays, setHolidays] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
-  const [filterType, setFilterType] = useState('');
+  const [filterType, setFilterType] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -28,23 +28,35 @@ const Holidays = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '',
-    nameDari: '',
-    namePashto: '',
-    date: '',
-    holidayType: 'national',
+    name: "",
+    nameDari: "",
+    namePashto: "",
+    date: "",
+    holidayType: "national",
     isRecurring: false,
     isActive: true,
   });
 
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
-  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+  const years = Array.from(
+    { length: 5 },
+    (_, i) => new Date().getFullYear() - 2 + i
+  );
 
   const holidayTypes = [
-    { value: 'national', label: 'National', icon: Flag, color: 'blue' },
-    { value: 'religious', label: 'Religious', icon: Moon, color: 'purple' },
-    { value: 'organizational', label: 'Organizational', icon: Star, color: 'orange' },
+    { value: "national", label: "National", icon: Flag, color: "blue" },
+    { value: "religious", label: "Religious", icon: Moon, color: "purple" },
+    {
+      value: "organizational",
+      label: "Organizational",
+      icon: Star,
+      color: "orange",
+    },
   ];
 
   useEffect(() => {
@@ -54,38 +66,41 @@ const Holidays = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      await holidayService.seedDefaults(filterYear);
-      const data = await holidayService.getByYear(filterYear);
+      await holidaysDB.seedDefaults(filterYear);
+      const data = await holidaysDB.getByYear(filterYear);
       setHolidays(data);
     } catch (error) {
-      console.error('Error loading holidays:', error);
-      showToast('Failed to load holidays', 'error');
+      console.error("Error loading holidays:", error);
+      showToast("Failed to load holidays", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const showToast = (message, type = 'success') => {
+  const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+    setTimeout(
+      () => setToast({ show: false, message: "", type: "success" }),
+      3000
+    );
   };
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleAddNew = () => {
     setIsEditing(false);
     setFormData({
-      name: '',
-      nameDari: '',
-      namePashto: '',
-      date: '',
-      holidayType: 'national',
+      name: "",
+      nameDari: "",
+      namePashto: "",
+      date: "",
+      holidayType: "national",
       isRecurring: false,
       isActive: true,
     });
@@ -96,11 +111,11 @@ const Holidays = () => {
     setIsEditing(true);
     setSelectedHoliday(holiday);
     setFormData({
-      name: holiday.name || '',
-      nameDari: holiday.nameDari || '',
-      namePashto: holiday.namePashto || '',
-      date: holiday.date || '',
-      holidayType: holiday.holidayType || 'national',
+      name: holiday.name || "",
+      nameDari: holiday.nameDari || "",
+      namePashto: holiday.namePashto || "",
+      date: holiday.date || "",
+      holidayType: holiday.holidayType || "national",
       isRecurring: holiday.isRecurring || false,
       isActive: holiday.isActive !== false,
     });
@@ -111,7 +126,7 @@ const Holidays = () => {
     e.preventDefault();
 
     if (!formData.name || !formData.date) {
-      showToast('Please fill in all required fields', 'error');
+      showToast("Please fill in all required fields", "error");
       return;
     }
 
@@ -122,18 +137,18 @@ const Holidays = () => {
       };
 
       if (isEditing && selectedHoliday) {
-        await holidayService.update(selectedHoliday.id, data);
-        showToast('Holiday updated successfully');
+        await holidaysDB.update(selectedHoliday.id, data);
+        showToast("Holiday updated successfully");
       } else {
-        await holidayService.create(data);
-        showToast('Holiday created successfully');
+        await holidaysDB.create(data);
+        showToast("Holiday created successfully");
       }
 
       setShowModal(false);
       loadData();
     } catch (error) {
-      console.error('Error saving holiday:', error);
-      showToast(error.message || 'Failed to save holiday', 'error');
+      console.error("Error saving holiday:", error);
+      showToast(error.message || "Failed to save holiday", "error");
     }
   };
 
@@ -141,40 +156,42 @@ const Holidays = () => {
     if (!selectedHoliday) return;
 
     try {
-      await holidayService.delete(selectedHoliday.id);
-      showToast('Holiday deleted successfully');
+      await holidaysDB.delete(selectedHoliday.id);
+      showToast("Holiday deleted successfully");
       setShowDeleteModal(false);
       setSelectedHoliday(null);
       loadData();
     } catch (error) {
-      console.error('Error deleting holiday:', error);
-      showToast('Failed to delete holiday', 'error');
+      console.error("Error deleting holiday:", error);
+      showToast("Failed to delete holiday", "error");
     }
   };
 
   const getHolidayTypeConfig = (type) => {
-    return holidayTypes.find(t => t.value === type) || holidayTypes[0];
+    return holidayTypes.find((t) => t.value === type) || holidayTypes[0];
   };
 
-  const filteredHolidays = holidays.filter(holiday => {
-    const matchesSearch = holiday.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredHolidays = holidays.filter((holiday) => {
+    const matchesSearch = holiday.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesType = !filterType || holiday.holidayType === filterType;
     return matchesSearch && matchesType;
   });
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   const getDayOfWeek = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
+    return date.toLocaleDateString("en-US", { weekday: "short" });
   };
 
   const isUpcoming = (dateStr) => {
@@ -195,16 +212,20 @@ const Holidays = () => {
   return (
     <div className="p-6 space-y-6">
       {toast.show && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg ${
-          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-        } text-white`}>
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg ${
+            toast.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+        >
           {toast.message}
         </div>
       )}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Holidays</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Holidays
+          </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage official and public holidays for leave calculations
           </p>
@@ -227,22 +248,37 @@ const Holidays = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{holidays.length}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {holidays.length}
+              </p>
             </div>
           </div>
         </div>
-        {holidayTypes.map(type => {
-          const count = holidays.filter(h => h.holidayType === type.value).length;
+        {holidayTypes.map((type) => {
+          const count = holidays.filter(
+            (h) => h.holidayType === type.value
+          ).length;
           const TypeIcon = type.icon;
           return (
-            <div key={type.value} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <div
+              key={type.value}
+              className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+            >
               <div className="flex items-center gap-3">
-                <div className={`p-2 bg-${type.color}-100 dark:bg-${type.color}-900/30 rounded-lg`}>
-                  <TypeIcon className={`w-5 h-5 text-${type.color}-600 dark:text-${type.color}-400`} />
+                <div
+                  className={`p-2 bg-${type.color}-100 dark:bg-${type.color}-900/30 rounded-lg`}
+                >
+                  <TypeIcon
+                    className={`w-5 h-5 text-${type.color}-600 dark:text-${type.color}-400`}
+                  />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{type.label}</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">{count}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {type.label}
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                    {count}
+                  </p>
                 </div>
               </div>
             </div>
@@ -268,8 +304,10 @@ const Holidays = () => {
             onChange={(e) => setFilterYear(Number(e.target.value))}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            {years.map(year => (
-              <option key={year} value={year}>{year}</option>
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
           <select
@@ -278,8 +316,10 @@ const Holidays = () => {
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">All Types</option>
-            {holidayTypes.map(type => (
-              <option key={type.value} value={type.value}>{type.label}</option>
+            {holidayTypes.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
             ))}
           </select>
         </div>
@@ -289,10 +329,12 @@ const Holidays = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredHolidays.length === 0 ? (
           <div className="col-span-full bg-white dark:bg-gray-800 rounded-xl p-12 border border-gray-200 dark:border-gray-700 text-center">
-            <p className="text-gray-500 dark:text-gray-400">No holidays found</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              No holidays found
+            </p>
           </div>
         ) : (
-          filteredHolidays.map(holiday => {
+          filteredHolidays.map((holiday) => {
             const typeConfig = getHolidayTypeConfig(holiday.holidayType);
             const TypeIcon = typeConfig.icon;
             const upcoming = isUpcoming(holiday.date);
@@ -301,14 +343,20 @@ const Holidays = () => {
               <div
                 key={holiday.id}
                 className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden ${
-                  !holiday.isActive ? 'opacity-60' : ''
-                } ${upcoming ? 'ring-2 ring-primary-200 dark:ring-primary-800' : ''}`}
+                  !holiday.isActive ? "opacity-60" : ""
+                } ${
+                  upcoming
+                    ? "ring-2 ring-primary-200 dark:ring-primary-800"
+                    : ""
+                }`}
               >
                 <div className={`h-2 bg-${typeConfig.color}-500`} />
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
-                      <TypeIcon className={`w-5 h-5 text-${typeConfig.color}-500`} />
+                      <TypeIcon
+                        className={`w-5 h-5 text-${typeConfig.color}-500`}
+                      />
                       <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                         {typeConfig.label}
                       </span>
@@ -320,9 +368,16 @@ const Holidays = () => {
                     )}
                   </div>
 
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{holiday.name}</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                    {holiday.name}
+                  </h3>
                   {holiday.nameDari && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400" dir="rtl">{holiday.nameDari}</p>
+                    <p
+                      className="text-sm text-gray-500 dark:text-gray-400"
+                      dir="rtl"
+                    >
+                      {holiday.nameDari}
+                    </p>
                   )}
 
                   <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400">
@@ -338,13 +393,19 @@ const Holidays = () => {
                   )}
 
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <span className={`inline-flex items-center gap-1 text-xs ${
-                      holiday.isActive
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}>
-                      {holiday.isActive ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                      {holiday.isActive ? 'Active' : 'Inactive'}
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs ${
+                        holiday.isActive
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-gray-500 dark:text-gray-400"
+                      }`}
+                    >
+                      {holiday.isActive ? (
+                        <CheckCircle className="w-3 h-3" />
+                      ) : (
+                        <XCircle className="w-3 h-3" />
+                      )}
+                      {holiday.isActive ? "Active" : "Inactive"}
                     </span>
                     <div className="flex items-center gap-2">
                       <button
@@ -379,7 +440,7 @@ const Holidays = () => {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg m-4">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                {isEditing ? 'Edit Holiday' : 'Add Holiday'}
+                {isEditing ? "Edit Holiday" : "Add Holiday"}
               </h2>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -451,8 +512,10 @@ const Holidays = () => {
                     onChange={handleFormChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    {holidayTypes.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
+                    {holidayTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -467,7 +530,9 @@ const Holidays = () => {
                     onChange={handleFormChange}
                     className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Recurring Annually</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Recurring Annually
+                  </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -477,7 +542,9 @@ const Holidays = () => {
                     onChange={handleFormChange}
                     className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Active
+                  </span>
                 </label>
               </div>
 
@@ -493,7 +560,7 @@ const Holidays = () => {
                   type="submit"
                   className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
                 >
-                  {isEditing ? 'Update' : 'Create'}
+                  {isEditing ? "Update" : "Create"}
                 </button>
               </div>
             </form>
@@ -511,7 +578,9 @@ const Holidays = () => {
                   <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Delete Holiday</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    Delete Holiday
+                  </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Are you sure you want to delete "{selectedHoliday.name}"?
                   </p>

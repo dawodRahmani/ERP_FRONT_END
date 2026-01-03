@@ -11,12 +11,15 @@ import {
   ArrowUp,
   FileText,
 } from 'lucide-react';
-import {
-  getAllInOutTracking,
-  deleteInOutTracking,
-  searchInOutTracking,
-  getInOutStatistics,
-} from '../../services/db/inOutTrackingService';
+
+import inOutTrackingService from "../../services/db/inOutTrackingService.ts";
+
+const {
+  getAll: getAllInOutTracking,
+  delete: deleteInOutTracking,
+  search: searchInOutTracking,
+  getStatistics: getInOutStatistics,
+} = inOutTrackingService;
 
 const InOutTrackingList = () => {
   const [entries, setEntries] = useState([]);

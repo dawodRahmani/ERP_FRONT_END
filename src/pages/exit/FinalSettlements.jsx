@@ -15,7 +15,7 @@ import {
   CreditCard,
   Building,
 } from 'lucide-react';
-import { settlementService, separationService, initializeExitModule } from '../../services/db/exitService';
+import { settlementService, separationService } from '../../services/db/exitService';
 
 const FinalSettlements = () => {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ const FinalSettlements = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      await initializeExitModule();
+      // await initializeExitModule();
 
       const [settlementData, sepData, statsData] = await Promise.all([
         settlementService.getAll({ status: statusFilter }),

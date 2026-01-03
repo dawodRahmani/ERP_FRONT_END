@@ -6,12 +6,38 @@
  */
 
 import type { IDBPDatabase } from 'idb';
-import type { VDODatabase } from '@/types/db/stores';
+import type { VDODatabase } from '../../../../types/db/stores';
 
 /**
  * Create all payroll-related object stores
  */
 export function createPayrollStores(db: IDBPDatabase<VDODatabase>): void {
+  // Salary Components store (Legacy support)
+  if (!db.objectStoreNames.contains('salaryComponents')) {
+    const store = db.createObjectStore('salaryComponents', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('componentCode', 'componentCode', { unique: true });
+    store.createIndex('componentType', 'componentType', { unique: false });
+    store.createIndex('isActive', 'isActive', { unique: false });
+    console.log('Created store: salaryComponents');
+  }
+
+  // Payrolls store (Legacy support)
+  if (!db.objectStoreNames.contains('payrolls')) {
+    const store = db.createObjectStore('payrolls', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('payrollId', 'payrollId', { unique: true });
+    store.createIndex('employeeId', 'employeeId', { unique: false });
+    store.createIndex('month', 'month', { unique: false });
+    store.createIndex('year', 'year', { unique: false });
+    store.createIndex('status', 'status', { unique: false });
+    console.log('Created store: payrolls');
+  }
+
   // Payroll Periods store
   if (!db.objectStoreNames.contains('payrollPeriods')) {
     const store = db.createObjectStore('payrollPeriods', {

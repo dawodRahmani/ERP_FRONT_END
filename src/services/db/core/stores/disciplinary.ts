@@ -6,12 +6,71 @@
  */
 
 import type { IDBPDatabase } from 'idb';
-import type { VDODatabase } from '@/types/db/stores';
+import type { VDODatabase } from '../../../../types/db/stores';
 
 /**
  * Create all disciplinary-related object stores
  */
 export function createDisciplinaryStores(db: IDBPDatabase<VDODatabase>): void {
+  // Disciplinary Types store (Legacy support)
+  if (!db.objectStoreNames.contains('disciplinaryTypes')) {
+    const store = db.createObjectStore('disciplinaryTypes', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('code', 'code', { unique: true });
+    store.createIndex('name', 'name', { unique: false });
+    store.createIndex('isActive', 'isActive', { unique: false });
+    console.log('Created store: disciplinaryTypes');
+  }
+
+  // Grievance Types store (Legacy support)
+  if (!db.objectStoreNames.contains('grievanceTypes')) {
+    const store = db.createObjectStore('grievanceTypes', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('code', 'code', { unique: true });
+    store.createIndex('name', 'name', { unique: false });
+    store.createIndex('isActive', 'isActive', { unique: false });
+    console.log('Created store: grievanceTypes');
+  }
+
+  // Grievances store (Legacy support - simple version)
+  if (!db.objectStoreNames.contains('grievances')) {
+    const store = db.createObjectStore('grievances', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('employeeId', 'employeeId', { unique: false });
+    store.createIndex('status', 'status', { unique: false });
+    store.createIndex('grievanceType', 'grievanceType', { unique: false });
+    console.log('Created store: grievances');
+  }
+
+  // Grievance Investigations store (Legacy support)
+  if (!db.objectStoreNames.contains('grievanceInvestigations')) {
+    const store = db.createObjectStore('grievanceInvestigations', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('grievanceId', 'grievanceId', { unique: false });
+    store.createIndex('investigatorId', 'investigatorId', { unique: false });
+    store.createIndex('status', 'status', { unique: false });
+    console.log('Created store: grievanceInvestigations');
+  }
+
+  // Grievance Resolutions store (Legacy support)
+  if (!db.objectStoreNames.contains('grievanceResolutions')) {
+    const store = db.createObjectStore('grievanceResolutions', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('grievanceId', 'grievanceId', { unique: false });
+    store.createIndex('resolutionDate', 'resolutionDate', { unique: false });
+    console.log('Created store: grievanceResolutions');
+  }
+
   // Misconduct Reports store
   if (!db.objectStoreNames.contains('misconductReports')) {
     const store = db.createObjectStore('misconductReports', {

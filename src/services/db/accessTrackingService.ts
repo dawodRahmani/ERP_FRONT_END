@@ -5,9 +5,9 @@
  * Tracks donors, projects, locations, line ministries, and timeline data.
  */
 
+import type { AccessTrackingRecord, TimelineMonth } from '../../types/modules/tracking';
 import { createCRUDService } from './core/crud';
-import { searchRecords, filterByDateRange, getUniqueValues, sortByCreatedAt } from './core/utils';
-import type { AccessTrackingRecord, TimelineMonth } from '@/types/modules/tracking';
+import { getUniqueValues, searchRecords } from './core/utils';
 
 const STORE_NAME = 'accessTracking';
 

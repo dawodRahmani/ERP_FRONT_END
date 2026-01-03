@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Edit, Trash2, FileText } from 'lucide-react';
-import {
-  getMOUTrackingById,
-  deleteMOUTracking,
-} from '../../services/db/mouTrackingService';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { ArrowLeft, Edit, Trash2, FileText } from "lucide-react";
+import mouTrackingService from "../../services/db/mouTrackingService";
 
+const { getById: getMOUTrackingById, delete: deleteMOUTracking } =
+  mouTrackingService;
+
+  
 const MOUTrackingView = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -22,28 +23,29 @@ const MOUTrackingView = () => {
       const data = await getMOUTrackingById(Number(id));
       setEntry(data);
     } catch (error) {
-      console.error('Error loading MOU entry:', error);
+      console.error("Error loading MOU entry:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this MOU entry?')) {
+    if (window.confirm("Are you sure you want to delete this MOU entry?")) {
       try {
         await deleteMOUTracking(Number(id));
-        navigate('/programm/mou-tracking');
+        navigate("/programm/mou-tracking");
       } catch (error) {
-        console.error('Error deleting entry:', error);
-        alert('Failed to delete entry');
+        console.error("Error deleting entry:", error);
+        alert("Failed to delete entry");
       }
     }
   };
 
   const getStatusBadgeClass = (status) => {
     const classes = {
-      project: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      amendment: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+      project: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+      amendment:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
     };
     return classes[status?.toLowerCase()] || classes.project;
   };
@@ -71,7 +73,7 @@ const MOUTrackingView = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/mou-tracking')}
+          onClick={() => navigate("/programm/mou-tracking")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -118,7 +120,9 @@ const MOUTrackingView = () => {
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Serial Number (S/N)
               </label>
-              <p className="text-gray-900 dark:text-white">{entry.serialNumber}</p>
+              <p className="text-gray-900 dark:text-white">
+                {entry.serialNumber}
+              </p>
             </div>
           )}
 
@@ -131,7 +135,9 @@ const MOUTrackingView = () => {
                 entry.status
               )}`}
             >
-              {entry.status === 'project' ? 'Project (Initial MOU)' : 'Amendment'}
+              {entry.status === "project"
+                ? "Project (Initial MOU)"
+                : "Amendment"}
             </span>
           </div>
 
@@ -165,7 +171,9 @@ const MOUTrackingView = () => {
             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Location
             </label>
-            <p className="text-gray-900 dark:text-white">{entry.location || '-'}</p>
+            <p className="text-gray-900 dark:text-white">
+              {entry.location || "-"}
+            </p>
           </div>
         </div>
       </div>
@@ -200,9 +208,10 @@ const MOUTrackingView = () => {
           About This MOU
         </h3>
         <p className="text-sm text-blue-800 dark:text-blue-400">
-          This entry tracks formal agreements with government authorities, essential for legal
-          compliance and access to implementation areas. The status indicates whether this is
-          an original MOU (Project) or a modification to an existing agreement (Amendment).
+          This entry tracks formal agreements with government authorities,
+          essential for legal compliance and access to implementation areas. The
+          status indicates whether this is an original MOU (Project) or a
+          modification to an existing agreement (Amendment).
         </p>
       </div>
 

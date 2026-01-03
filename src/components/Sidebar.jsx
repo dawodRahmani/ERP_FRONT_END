@@ -100,7 +100,12 @@ import {
   // Payroll icons
   Banknote,
   Coins,
-  Calculator
+  Calculator,
+  // Audit icons
+  ClipboardCheck as AuditIcon,
+  Settings,
+  FileSearch2,
+  Building2 as PartnerIcon
 } from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -369,6 +374,21 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         { icon: FileSignature, label: 'MOU Tracking', path: '/programm/mou-tracking' },
         { icon: ArrowLeftRight, label: 'In-Out Tracking', path: '/programm/in-out-tracking' },
         { icon: ShieldCheck, label: 'Access Tracking', path: '/programm/access-tracking' },
+      ]
+    },
+    {
+      icon: FileSearch2,
+      label: 'Audit',
+      type: 'dropdown',
+      key: 'audit',
+      subItems: [
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/audit' },
+        { icon: Settings, label: 'Settings', path: '/audit/settings' },
+        { icon: ShieldCheck, label: 'HACT Assessments', path: '/audit/hact' },
+        { icon: FolderKanban, label: 'Donor Project Audits', path: '/audit/donor-project' },
+        { icon: FileSearch2, label: 'External Audits', path: '/audit/external' },
+        { icon: ClipboardCheck, label: 'Internal Audits', path: '/audit/internal' },
+        { icon: Handshake, label: 'Partner Audits', path: '/audit/partner' },
       ]
     },
   ];

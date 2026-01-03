@@ -19,10 +19,10 @@ import {
   ListChecks,
 } from 'lucide-react';
 import {
-  orientationChecklistDB,
-  orientationItemDB,
-  probationRecordDB,
-  probationEvaluationDB,
+  onboardingChecklistsDB,
+  onboardingItemsDB,
+  probationRecordsDB,
+  probationKPIsDB,
   employeeDB,
   seedAllDefaults,
 } from '../../services/db/indexedDB';
@@ -98,10 +98,10 @@ export default function ProbationOrientation() {
       await seedAllDefaults();
 
       const [recordsData, evalsData, checklistsData, itemsData, employeesData] = await Promise.all([
-        probationRecordDB.getAll(),
-        probationEvaluationDB.getAll(),
-        orientationChecklistDB.getAll(),
-        orientationItemDB.getAll(),
+        probationRecordsDB.getAll(),
+        probationKPIsDB.getAll(), // TODO: probationEvaluationDB doesn't exist - using KPIs instead
+        onboardingChecklistsDB.getAll(),
+        onboardingItemsDB.getAll(),
         employeeDB.getAll(),
       ]);
 
@@ -213,10 +213,10 @@ export default function ProbationOrientation() {
       };
 
       if (isEditing && selectedRecord) {
-        await probationRecordDB.update(selectedRecord.id, data);
+        await probationRecordsDB.update(selectedRecord.id, data);
         showToast('Probation record updated successfully');
       } else {
-        await probationRecordDB.add(data);
+        await probationRecordsDB.create(data);
         showToast('Probation record created successfully');
       }
 
@@ -230,7 +230,7 @@ export default function ProbationOrientation() {
 
   const handleDeleteProbation = async () => {
     try {
-      await probationRecordDB.delete(selectedRecord.id);
+      await probationRecordsDB.delete(selectedRecord.id);
       showToast('Probation record deleted successfully');
       await loadData();
       setShowDeleteModal(false);
@@ -261,10 +261,10 @@ export default function ProbationOrientation() {
       };
 
       if (isEditing && selectedRecord) {
-        await probationEvaluationDB.update(selectedRecord.id, data);
+        await probationKPIsDB.update(selectedRecord.id, data);
         showToast('Evaluation updated successfully');
       } else {
-        await probationEvaluationDB.add(data);
+        await probationKPIsDB.create(data);
 
         // Update probation record status based on recommendation
         const probRecord = probationRecords.find(
@@ -279,7 +279,7 @@ export default function ProbationOrientation() {
           } else if (evaluationForm.recommendation === 'terminate') {
             newStatus = 'terminated';
           }
-          await probationRecordDB.update(probRecord.id, { ...probRecord, status: newStatus });
+          await probationRecordsDB.update(probRecord.id, { ...probRecord, status: newStatus });
         }
 
         showToast('Evaluation submitted successfully');
@@ -302,13 +302,13 @@ export default function ProbationOrientation() {
       }
 
       if (isEditing && selectedRecord) {
-        await orientationChecklistDB.update(selectedRecord.id, {
+        await onboardingChecklistsDB.update(selectedRecord.id, {
           name: checklistForm.name,
           description: checklistForm.description,
         });
         showToast('Checklist updated successfully');
       } else {
-        await orientationChecklistDB.add({
+        await onboardingChecklistsDB.create({
           name: checklistForm.name,
           description: checklistForm.description,
           isActive: true,

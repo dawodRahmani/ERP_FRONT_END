@@ -3,3 +3,10 @@ pages/performance/PerformanceDashboard is not used
 specify gender in staff requisition and number of male and female required.
 specify SMT position in new recruitment?
 in application step, some fields are missing.
+
+trainingService.ts line 738 (generateFromTraining)
+performanceService.ts line 57 (getTemplateWithSections)
+
+install NodeJS
+
+add audit to sidebar

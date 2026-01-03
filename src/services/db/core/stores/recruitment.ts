@@ -7,12 +7,94 @@
  */
 
 import type { IDBPDatabase } from 'idb';
-import type { VDODatabase } from '@/types/db/stores';
+import type { VDODatabase } from '../../../../types/db/stores';
 
 /**
  * Create all recruitment-related object stores
  */
 export function createRecruitmentStores(db: IDBPDatabase<VDODatabase>): void {
+  // Job Requisitions store (Legacy support)
+  if (!db.objectStoreNames.contains('jobRequisitions')) {
+    const store = db.createObjectStore('jobRequisitions', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('requisitionId', 'requisitionId', { unique: true });
+    store.createIndex('status', 'status', { unique: false });
+    store.createIndex('department', 'department', { unique: false });
+    store.createIndex('priority', 'priority', { unique: false });
+    store.createIndex('createdAt', 'createdAt', { unique: false });
+    console.log('Created store: jobRequisitions');
+  }
+
+  // Job Announcements store (Legacy support)
+  if (!db.objectStoreNames.contains('jobAnnouncements')) {
+    const store = db.createObjectStore('jobAnnouncements', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('requisitionId', 'requisitionId', { unique: false });
+    store.createIndex('status', 'status', { unique: false });
+    store.createIndex('closingDate', 'closingDate', { unique: false });
+    console.log('Created store: jobAnnouncements');
+  }
+
+  // Job Offers store (Legacy support)
+  if (!db.objectStoreNames.contains('jobOffers')) {
+    const store = db.createObjectStore('jobOffers', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('candidateId', 'candidateId', { unique: false });
+    store.createIndex('requisitionId', 'requisitionId', { unique: false });
+    store.createIndex('status', 'status', { unique: false });
+    console.log('Created store: jobOffers');
+  }
+
+  // Test Results store
+  if (!db.objectStoreNames.contains('testResults')) {
+    const store = db.createObjectStore('testResults', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('writtenTestId', 'writtenTestId', { unique: false });
+    store.createIndex('candidateId', 'candidateId', { unique: false });
+    console.log('Created store: testResults');
+  }
+
+  // Reference Checks store
+  if (!db.objectStoreNames.contains('referenceChecks')) {
+    const store = db.createObjectStore('referenceChecks', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('candidateId', 'candidateId', { unique: false });
+    store.createIndex('recruitmentId', 'recruitmentId', { unique: false });
+    console.log('Created store: referenceChecks');
+  }
+
+  // Shortlisting Scores store
+  if (!db.objectStoreNames.contains('shortlistingScores')) {
+    const store = db.createObjectStore('shortlistingScores', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('candidateApplicationId', 'candidateApplicationId', { unique: false });
+    store.createIndex('recruitmentId', 'recruitmentId', { unique: false });
+    console.log('Created store: shortlistingScores');
+  }
+
+  // Probation Evaluations store
+  if (!db.objectStoreNames.contains('probationEvaluations')) {
+    const store = db.createObjectStore('probationEvaluations', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('probationRecordId', 'probationRecordId', { unique: false });
+    store.createIndex('employeeId', 'employeeId', { unique: false });
+    console.log('Created store: probationEvaluations');
+  }
+
   // Recruitments store (Main table)
   if (!db.objectStoreNames.contains('recruitments')) {
     const store = db.createObjectStore('recruitments', {

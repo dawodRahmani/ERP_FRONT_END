@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, CheckCircle2 } from 'lucide-react';
-import {
-  createDNRTracking,
-  updateDNRTracking,
-  getDNRTrackingById,
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Save, CheckCircle2 } from "lucide-react";
+import dnrTrackingService from "../../services/db/dnrTrackingService.ts";
+const {
+  create: create,
+  update: update,
+  getById: getById,
   groupMonthsByYearAndQuarter,
-} from '../../services/db/dnrTrackingService';
-
+} = dnrTrackingService;
 const DNRTrackingForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -15,18 +15,18 @@ const DNRTrackingForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    serialNumber: '',
-    donor: '',
-    projectName: '',
-    location: '',
-    startDate: '',
-    endDate: '',
-    projectStatus: 'active',
-    reportType: '',
-    reportingDescription: '',
-    reportingFormat: '',
-    dueDate: '',
-    reports: '',
+    serialNumber: "",
+    donor: "",
+    projectName: "",
+    location: "",
+    startDate: "",
+    endDate: "",
+    projectStatus: "active",
+    reportType: "",
+    reportingDescription: "",
+    reportingFormat: "",
+    dueDate: "",
+    reports: "",
     timelineData: {},
   });
 
@@ -41,27 +41,27 @@ const DNRTrackingForm = () => {
   const loadEntry = async () => {
     try {
       setLoading(true);
-      const entry = await getDNRTrackingById(Number(id));
+      const entry = await getById(Number(id));
       if (entry) {
         setFormData({
-          serialNumber: entry.serialNumber || '',
-          donor: entry.donor || '',
-          projectName: entry.projectName || '',
-          location: entry.location || '',
-          startDate: entry.startDate || '',
-          endDate: entry.endDate || '',
-          projectStatus: entry.projectStatus || 'active',
-          reportType: entry.reportType || '',
-          reportingDescription: entry.reportingDescription || '',
-          reportingFormat: entry.reportingFormat || '',
-          dueDate: entry.dueDate || '',
-          reports: entry.reports || '',
+          serialNumber: entry.serialNumber || "",
+          donor: entry.donor || "",
+          projectName: entry.projectName || "",
+          location: entry.location || "",
+          startDate: entry.startDate || "",
+          endDate: entry.endDate || "",
+          projectStatus: entry.projectStatus || "active",
+          reportType: entry.reportType || "",
+          reportingDescription: entry.reportingDescription || "",
+          reportingFormat: entry.reportingFormat || "",
+          dueDate: entry.dueDate || "",
+          reports: entry.reports || "",
           timelineData: entry.timelineData || {},
         });
       }
     } catch (error) {
-      console.error('Error loading DNR entry:', error);
-      alert('Failed to load entry');
+      console.error("Error loading DNR entry:", error);
+      alert("Failed to load entry");
     } finally {
       setLoading(false);
     }
@@ -92,15 +92,15 @@ const DNRTrackingForm = () => {
       setLoading(true);
 
       if (isEditMode) {
-        await updateDNRTracking(Number(id), formData);
+        await update(Number(id), formData);
       } else {
-        await createDNRTracking(formData);
+        await create(formData);
       }
 
-      navigate('/programm/dnr-tracking');
+      navigate("/programm/dnr-tracking");
     } catch (error) {
-      console.error('Error saving DNR entry:', error);
-      alert('Failed to save entry');
+      console.error("Error saving DNR entry:", error);
+      alert("Failed to save entry");
     } finally {
       setLoading(false);
     }
@@ -111,19 +111,19 @@ const DNRTrackingForm = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/dnr-tracking')}
+          onClick={() => navigate("/programm/dnr-tracking")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
           Back to DNR Tracking
         </button>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {isEditMode ? 'Edit DNR Entry' : 'New DNR Entry'}
+          {isEditMode ? "Edit DNR Entry" : "New DNR Entry"}
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {isEditMode
-            ? 'Update the donor reporting tracking details'
-            : 'Create a new donor reporting tracking entry'}
+            ? "Update the donor reporting tracking details"
+            : "Create a new donor reporting tracking entry"}
         </p>
       </div>
 
@@ -327,7 +327,10 @@ const DNRTrackingForm = () => {
 
           <div className="space-y-6">
             {Object.entries(monthsByYearQuarter).map(([year, quarters]) => (
-              <div key={year} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div
+                key={year}
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+              >
                 <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
                   {year}
                 </h3>
@@ -345,8 +348,8 @@ const DNRTrackingForm = () => {
                               key={month.key}
                               className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
                                 formData.timelineData[month.key]
-                                  ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700'
-                                  : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                  ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700"
+                                  : "bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                               }`}
                               onClick={() =>
                                 handleTimelineChange(
@@ -361,11 +364,11 @@ const DNRTrackingForm = () => {
                               <span
                                 className={`text-xs ${
                                   formData.timelineData[month.key]
-                                    ? 'text-green-900 dark:text-green-300 font-medium'
-                                    : 'text-gray-600 dark:text-gray-400'
+                                    ? "text-green-900 dark:text-green-300 font-medium"
+                                    : "text-gray-600 dark:text-gray-400"
                                 }`}
                               >
-                                {month.label.split(' ')[0]}
+                                {month.label.split(" ")[0]}
                               </span>
                             </div>
                           ))}
@@ -383,7 +386,7 @@ const DNRTrackingForm = () => {
         <div className="flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => navigate('/programm/dnr-tracking')}
+            onClick={() => navigate("/programm/dnr-tracking")}
             className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Cancel
@@ -394,7 +397,7 @@ const DNRTrackingForm = () => {
             className="flex items-center gap-2 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-5 w-5" />
-            {loading ? 'Saving...' : isEditMode ? 'Update' : 'Create'}
+            {loading ? "Saving..." : isEditMode ? "Update" : "Create"}
           </button>
         </div>
       </form>

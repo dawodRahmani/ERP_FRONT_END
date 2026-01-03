@@ -1,12 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
-import {
-  createAccessTracking,
-  updateAccessTracking,
-  getAccessTrackingById,
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Save } from "lucide-react";
+
+import accessTrackingService, {
   groupMonthsByYear,
-} from '../../services/db/accessTrackingService';
+} from "../../services/db/accessTrackingService";
+
+const {
+  create: createAccessTracking,
+  update: updateAccessTracking,
+  getById: getAccessTrackingById,
+} = accessTrackingService;
 
 const AccessTrackingForm = () => {
   const navigate = useNavigate();
@@ -16,19 +20,19 @@ const AccessTrackingForm = () => {
   const [loading, setLoading] = useState(false);
   const [monthsByYear, setMonthsByYear] = useState({});
   const [formData, setFormData] = useState({
-    serialNumber: '',
-    donor: '',
-    projectName: '',
-    location: '',
-    startDate: '',
-    endDate: '',
-    reportingFormat: '',
-    activities: '',
-    lineMinistry: '',
+    serialNumber: "",
+    donor: "",
+    projectName: "",
+    location: "",
+    startDate: "",
+    endDate: "",
+    reportingFormat: "",
+    activities: "",
+    lineMinistry: "",
     typeOfCorrespondence: [],
-    dateProcessStarted: '',
-    mouStartDate: '',
-    mouEndDate: '',
+    dateProcessStarted: "",
+    mouStartDate: "",
+    mouEndDate: "",
     timelineData: {},
   });
 
@@ -47,25 +51,25 @@ const AccessTrackingForm = () => {
       const entry = await getAccessTrackingById(Number(id));
       if (entry) {
         setFormData({
-          serialNumber: entry.serialNumber || '',
-          donor: entry.donor || '',
-          projectName: entry.projectName || '',
-          location: entry.location || '',
-          startDate: entry.startDate || '',
-          endDate: entry.endDate || '',
-          reportingFormat: entry.reportingFormat || '',
-          activities: entry.activities || '',
-          lineMinistry: entry.lineMinistry || '',
+          serialNumber: entry.serialNumber || "",
+          donor: entry.donor || "",
+          projectName: entry.projectName || "",
+          location: entry.location || "",
+          startDate: entry.startDate || "",
+          endDate: entry.endDate || "",
+          reportingFormat: entry.reportingFormat || "",
+          activities: entry.activities || "",
+          lineMinistry: entry.lineMinistry || "",
           typeOfCorrespondence: entry.typeOfCorrespondence || [],
-          dateProcessStarted: entry.dateProcessStarted || '',
-          mouStartDate: entry.mouStartDate || '',
-          mouEndDate: entry.mouEndDate || '',
+          dateProcessStarted: entry.dateProcessStarted || "",
+          mouStartDate: entry.mouStartDate || "",
+          mouEndDate: entry.mouEndDate || "",
           timelineData: entry.timelineData || {},
         });
       }
     } catch (error) {
-      console.error('Error loading entry:', error);
-      alert('Failed to load entry');
+      console.error("Error loading entry:", error);
+      alert("Failed to load entry");
     } finally {
       setLoading(false);
     }
@@ -111,23 +115,23 @@ const AccessTrackingForm = () => {
         await createAccessTracking(formData);
       }
 
-      navigate('/programm/access-tracking');
+      navigate("/programm/access-tracking");
     } catch (error) {
-      console.error('Error saving entry:', error);
-      alert('Failed to save entry');
+      console.error("Error saving entry:", error);
+      alert("Failed to save entry");
     } finally {
       setLoading(false);
     }
   };
 
   const correspondenceTypes = [
-    'Registration Forms',
-    'Introduction Letters',
-    'Agreements',
-    'Proposals',
-    'Budgets',
-    'Work Plans',
-    'MOUs',
+    "Registration Forms",
+    "Introduction Letters",
+    "Agreements",
+    "Proposals",
+    "Budgets",
+    "Work Plans",
+    "MOUs",
   ];
 
   return (
@@ -135,19 +139,21 @@ const AccessTrackingForm = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/access-tracking')}
+          onClick={() => navigate("/programm/access-tracking")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
           Back to Access Tracking
         </button>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {isEditMode ? 'Edit Access Tracking Entry' : 'New Access Tracking Entry'}
+          {isEditMode
+            ? "Edit Access Tracking Entry"
+            : "New Access Tracking Entry"}
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {isEditMode
-            ? 'Update the access tracking details'
-            : 'Create a new access tracking entry'}
+            ? "Update the access tracking details"
+            : "Create a new access tracking entry"}
         </p>
       </div>
 
@@ -386,12 +392,17 @@ const AccessTrackingForm = () => {
                       <input
                         type="checkbox"
                         checked={formData.timelineData[month.key] || false}
-                        onChange={(e) => handleTimelineChange(month.key, e.target.checked)}
+                        onChange={(e) =>
+                          handleTimelineChange(month.key, e.target.checked)
+                        }
                         className="w-4 h-4 text-primary-500 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500"
                       />
                       <span className="text-xs">
-                        {new Date(month.year, month.month - 1).toLocaleDateString('en-US', {
-                          month: 'short',
+                        {new Date(
+                          month.year,
+                          month.month - 1
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
                         })}
                       </span>
                     </label>
@@ -408,9 +419,9 @@ const AccessTrackingForm = () => {
             About Access Tracking
           </h3>
           <p className="text-sm text-blue-800 dark:text-blue-400">
-            This system tracks project access requirements and government coordination processes.
-            Use it to monitor registration, permissions, and MOU status with line ministries and
-            authorities.
+            This system tracks project access requirements and government
+            coordination processes. Use it to monitor registration, permissions,
+            and MOU status with line ministries and authorities.
           </p>
         </div>
 
@@ -418,7 +429,7 @@ const AccessTrackingForm = () => {
         <div className="flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => navigate('/programm/access-tracking')}
+            onClick={() => navigate("/programm/access-tracking")}
             className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Cancel
@@ -429,7 +440,7 @@ const AccessTrackingForm = () => {
             className="flex items-center gap-2 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-5 w-5" />
-            {loading ? 'Saving...' : isEditMode ? 'Update' : 'Create'}
+            {loading ? "Saving..." : isEditMode ? "Update" : "Create"}
           </button>
         </div>
       </form>

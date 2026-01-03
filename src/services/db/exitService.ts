@@ -15,7 +15,7 @@
 import { createCRUDService } from './core/crud';
 import { getDB } from './core/connection';
 import { generateFormattedCode } from './core/utils';
-import { RecordNotFoundError } from '@/types/db/errors';
+import { RecordNotFoundError } from '../../types/db/errors';
 import type {
   SeparationRecord,
   SeparationTypeRecord,
@@ -37,7 +37,7 @@ import type {
   PAYMENT_STATUS,
   CERTIFICATE_STATUS,
   HANDOVER_STATUS,
-} from '@/types/modules/exit';
+} from '../../types/modules/exit';
 
 // ========== SEPARATION RECORDS SERVICE ==========
 
@@ -228,7 +228,7 @@ export const separationTypesService = {
     return results[0];
   },
 };
-
+export const separationTypeService = separationTypesService;
 // ========== CLEARANCE SERVICE ==========
 
 const clearanceCRUD = createCRUDService<ExitClearanceRecord>('exitClearances');
@@ -990,6 +990,123 @@ export const separationHistoryService = {
       action,
       comments,
     });
+  },
+};
+
+// ========== EXIT DASHBOARD SERVICE ==========
+
+/**
+ * Exit Dashboard Service - Aggregate data for dashboard views
+ */
+export const exitDashboardService = {
+  /**
+   * Get dashboard summary statistics
+   */
+  async getSummaryStats(): Promise<{
+    totalSeparations: number;
+    pendingSeparations: number;
+    pendingClearances: number;
+    pendingSettlements: number;
+    completedThisMonth: number;
+  }> {
+    const separations = await separationService.getAll();
+    const clearances = await clearanceService.getAll();
+    const settlements = await settlementService.getAll();
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const completedThisMonth = separations.filter((s) => {
+      if (!s.completedAt) return false;
+      const completedDate = new Date(s.completedAt);
+      return completedDate.getMonth() === currentMonth && completedDate.getFullYear() === currentYear;
+    }).length;
+
+    return {
+      totalSeparations: separations.length,
+      pendingSeparations: separations.filter((s) => s.status !== 'completed' && s.status !== 'cancelled').length,
+      pendingClearances: clearances.filter((c) => c.status === 'pending').length,
+      pendingSettlements: settlements.filter((s) => s.status === 'pending_hr' || s.status === 'pending_finance' || s.status === 'pending_approval').length,
+      completedThisMonth,
+    };
+  },
+
+  /**
+   * Get recent separations
+   */
+  async getRecentSeparations(limit = 10): Promise<SeparationRecord[]> {
+    const all = await separationService.getAll();
+    return all
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+      .slice(0, limit);
+  },
+
+  /**
+   * Get pending clearances summary
+   */
+  async getPendingClearances(limit = 10): Promise<ExitClearanceRecord[]> {
+    const pending = await clearanceService.getPending();
+    return pending.slice(0, limit);
+  },
+
+  /**
+   * Get pending settlements
+   */
+  async getPendingSettlements(limit = 10): Promise<FinalSettlementRecord[]> {
+    const all = await settlementService.getAll();
+    const pending = all.filter((s) =>
+      s.status === 'pending_hr' ||
+      s.status === 'pending_finance' ||
+      s.status === 'pending_approval'
+    );
+    return pending.slice(0, limit);
+  },
+
+  /**
+   * Get separations by type breakdown
+   */
+  async getSeparationsByType(): Promise<Record<string, number>> {
+    const separations = await separationService.getAll();
+    const breakdown: Record<string, number> = {};
+
+    separations.forEach((sep) => {
+      const type = sep.separationType || 'Unknown';
+      breakdown[type] = (breakdown[type] || 0) + 1;
+    });
+
+    return breakdown;
+  },
+
+  /**
+   * Get monthly separation trends
+   */
+  async getMonthlySeparationTrends(months = 6): Promise<Array<{ month: string; count: number }>> {
+    const separations = await separationService.getAll();
+    const now = new Date();
+    const trends: Array<{ month: string; count: number }> = [];
+
+    for (let i = months - 1; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthStr = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      const count = separations.filter((s) => {
+        if (!s.separationDate) return false;
+        const sepDate = new Date(s.separationDate);
+        return sepDate.getMonth() === date.getMonth() && sepDate.getFullYear() === date.getFullYear();
+      }).length;
+
+      trends.push({ month: monthStr, count });
+    }
+
+    return trends;
+  },
+
+  /**
+   * Get pending exit interviews
+   */
+  async getPendingExitInterviews(limit = 10): Promise<ExitInterviewRecord[]> {
+    const interviews = await exitInterviewService.getByStatus('pending');
+    return interviews.slice(0, limit);
   },
 };
 

@@ -6,12 +6,34 @@
  */
 
 import type { IDBPDatabase } from 'idb';
-import type { VDODatabase } from '@/types/db/stores';
+import type { VDODatabase } from '../../../../types/db/stores';
 
 /**
  * Create all employee administration object stores
  */
 export function createEmployeeAdminStores(db: IDBPDatabase<VDODatabase>): void {
+  // Orientation Checklists store (Legacy support)
+  if (!db.objectStoreNames.contains('orientationChecklists')) {
+    const store = db.createObjectStore('orientationChecklists', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('employeeId', 'employeeId', { unique: false });
+    store.createIndex('status', 'status', { unique: false });
+    console.log('Created store: orientationChecklists');
+  }
+
+  // Orientation Items store (Legacy support)
+  if (!db.objectStoreNames.contains('orientationItems')) {
+    const store = db.createObjectStore('orientationItems', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+    store.createIndex('checklistId', 'checklistId', { unique: false });
+    store.createIndex('status', 'status', { unique: false });
+    console.log('Created store: orientationItems');
+  }
+
   // Emergency Contacts store
   if (!db.objectStoreNames.contains('emergencyContacts')) {
     const store = db.createObjectStore('emergencyContacts', {

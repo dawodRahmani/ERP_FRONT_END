@@ -1,11 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Edit, Trash2, Calendar, Building2, MapPin } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import {
-  getAccessTrackingById,
-  deleteAccessTracking,
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Calendar,
+  Building2,
+  MapPin,
+} from "lucide-react";
+
+import accessTrackingService, {
   groupMonthsByYear,
-} from '../../services/db/accessTrackingService';
+} from "../../services/db/accessTrackingService";
+
+const { getById: getAccessTrackingById, delete: deleteAccessTracking } =
+  accessTrackingService;
 
 const AccessTrackingView = () => {
   const navigate = useNavigate();
@@ -26,20 +35,24 @@ const AccessTrackingView = () => {
       const data = await getAccessTrackingById(Number(id));
       setEntry(data);
     } catch (error) {
-      console.error('Error loading entry:', error);
+      console.error("Error loading entry:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this access tracking entry?')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this access tracking entry?"
+      )
+    ) {
       try {
         await deleteAccessTracking(Number(id));
-        navigate('/programm/access-tracking');
+        navigate("/programm/access-tracking");
       } catch (error) {
-        console.error('Error deleting entry:', error);
-        alert('Failed to delete entry');
+        console.error("Error deleting entry:", error);
+        alert("Failed to delete entry");
       }
     }
   };
@@ -67,7 +80,7 @@ const AccessTrackingView = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/access-tracking')}
+          onClick={() => navigate("/programm/access-tracking")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -114,7 +127,9 @@ const AccessTrackingView = () => {
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Serial Number
               </label>
-              <p className="text-gray-900 dark:text-white">{entry.serialNumber}</p>
+              <p className="text-gray-900 dark:text-white">
+                {entry.serialNumber}
+              </p>
             </div>
           )}
 
@@ -122,14 +137,18 @@ const AccessTrackingView = () => {
             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Donor
             </label>
-            <p className="text-gray-900 dark:text-white font-medium">{entry.donor}</p>
+            <p className="text-gray-900 dark:text-white font-medium">
+              {entry.donor}
+            </p>
           </div>
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Project Name
             </label>
-            <p className="text-gray-900 dark:text-white font-medium">{entry.projectName}</p>
+            <p className="text-gray-900 dark:text-white font-medium">
+              {entry.projectName}
+            </p>
           </div>
 
           {entry.location && (
@@ -139,7 +158,9 @@ const AccessTrackingView = () => {
                 <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                   Location
                 </label>
-                <p className="text-gray-900 dark:text-white">{entry.location}</p>
+                <p className="text-gray-900 dark:text-white">
+                  {entry.location}
+                </p>
               </div>
             </div>
           )}
@@ -151,7 +172,9 @@ const AccessTrackingView = () => {
                 <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                   Line Ministry
                 </label>
-                <p className="text-gray-900 dark:text-white">{entry.lineMinistry}</p>
+                <p className="text-gray-900 dark:text-white">
+                  {entry.lineMinistry}
+                </p>
               </div>
             </div>
           )}
@@ -171,12 +194,12 @@ const AccessTrackingView = () => {
             </label>
             <p className="text-gray-900 dark:text-white">
               {entry.startDate
-                ? new Date(entry.startDate).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
+                ? new Date(entry.startDate).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
                   })
-                : '-'}
+                : "-"}
             </p>
           </div>
 
@@ -186,12 +209,12 @@ const AccessTrackingView = () => {
             </label>
             <p className="text-gray-900 dark:text-white">
               {entry.endDate
-                ? new Date(entry.endDate).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
+                ? new Date(entry.endDate).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
                   })
-                : '-'}
+                : "-"}
             </p>
           </div>
 
@@ -225,23 +248,24 @@ const AccessTrackingView = () => {
           Correspondence Details
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {entry.typeOfCorrespondence && entry.typeOfCorrespondence.length > 0 && (
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Type of Correspondence
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {entry.typeOfCorrespondence.map((type) => (
-                  <span
-                    key={type}
-                    className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 text-sm rounded-full"
-                  >
-                    {type}
-                  </span>
-                ))}
+          {entry.typeOfCorrespondence &&
+            entry.typeOfCorrespondence.length > 0 && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                  Type of Correspondence
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {entry.typeOfCorrespondence.map((type) => (
+                    <span
+                      key={type}
+                      className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 text-sm rounded-full"
+                    >
+                      {type}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {entry.dateProcessStarted && (
             <div>
@@ -249,11 +273,14 @@ const AccessTrackingView = () => {
                 Date Process Started
               </label>
               <p className="text-gray-900 dark:text-white">
-                {new Date(entry.dateProcessStarted).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
+                {new Date(entry.dateProcessStarted).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  }
+                )}
               </p>
             </div>
           )}
@@ -266,10 +293,10 @@ const AccessTrackingView = () => {
                 MOU Start Date
               </label>
               <p className="text-gray-900 dark:text-white">
-                {new Date(entry.mouStartDate).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
+                {new Date(entry.mouStartDate).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
                 })}
               </p>
             </div>
@@ -281,10 +308,10 @@ const AccessTrackingView = () => {
                 MOU End Date
               </label>
               <p className="text-gray-900 dark:text-white">
-                {new Date(entry.mouEndDate).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
+                {new Date(entry.mouEndDate).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
                 })}
               </p>
             </div>
@@ -300,7 +327,9 @@ const AccessTrackingView = () => {
           </h2>
           <div className="space-y-6">
             {Object.entries(monthsByYear).map(([year, months]) => {
-              const selectedMonths = months.filter((month) => entry.timelineData[month.key]);
+              const selectedMonths = months.filter(
+                (month) => entry.timelineData[month.key]
+              );
               if (selectedMonths.length === 0) return null;
 
               return (
@@ -314,9 +343,12 @@ const AccessTrackingView = () => {
                         key={month.key}
                         className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-sm rounded-full"
                       >
-                        {new Date(month.year, month.month - 1).toLocaleDateString('en-US', {
-                          month: 'short',
-                          year: 'numeric',
+                        {new Date(
+                          month.year,
+                          month.month - 1
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          year: "numeric",
                         })}
                       </span>
                     ))}

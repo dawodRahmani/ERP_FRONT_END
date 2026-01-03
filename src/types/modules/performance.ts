@@ -135,6 +135,7 @@ export interface AppraisalTemplateRecord extends BaseRecord {
   requiresCommitteeReview: boolean;
   version: number;
   notes?: string;
+  sections?: AppraisalSectionRecord[];
 }
 
 /**

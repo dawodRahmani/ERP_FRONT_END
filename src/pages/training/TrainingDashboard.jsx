@@ -14,7 +14,7 @@ import {
   DollarSign,
   BookOpen,
 } from 'lucide-react';
-import { trainingDashboardService, trainingService, tnaService } from '../../services/db/trainingService';
+import { trainingDashboardService } from '../../services/db/trainingService';
 
 const TrainingDashboard = () => {
   const [stats, setStats] = useState(null);

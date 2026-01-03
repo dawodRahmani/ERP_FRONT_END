@@ -12,31 +12,31 @@
  * - Training Reports & Dashboard
  */
 
+import type {
+  BondStatus,
+  BudgetStatus,
+  EmployeeTrainingHistoryRecord,
+  TNAStatus,
+  TNATrainingNeedRecord,
+  TrainingBondRecord,
+  TrainingBudgetProposalRecord,
+  TrainingCalendarRecord,
+  TrainingCategory,
+  TrainingCertificateRecord,
+  TrainingEvaluationRecord,
+  TrainingLevel,
+  TrainingNeedsAssessmentRecord,
+  TrainingParticipantRecord,
+  TrainingProgramRecord,
+  TrainingRecord,
+  TrainingReportRecord,
+  TrainingSessionRecord,
+  TrainingStatus,
+  TrainingTypeRecord
+} from '../../types/modules/training';
 import { createCRUDService } from './core/crud';
 import { generateFormattedCode } from './core/utils';
-import { getDB } from './core/connection';
-import type {
-  TrainingTypeRecord,
-  TrainingProgramRecord,
-  TrainingNeedsAssessmentRecord,
-  TNATrainingNeedRecord,
-  TrainingCalendarRecord,
-  TrainingBudgetProposalRecord,
-  TrainingRecord,
-  TrainingParticipantRecord,
-  TrainingSessionRecord,
-  TrainingEvaluationRecord,
-  TrainingCertificateRecord,
-  TrainingBondRecord,
-  EmployeeTrainingHistoryRecord,
-  TrainingReportRecord,
-  TrainingCategory,
-  TrainingStatus,
-  TNAStatus,
-  BudgetStatus,
-  TrainingLevel,
-  BondStatus,
-} from '@/types/modules/training';
+import type { CreateInput } from './indexedDB';
 
 // ========== TRAINING TYPES ==========
 
@@ -200,7 +200,7 @@ export const tnasDB = {
   /**
    * Override create to calculate scores
    */
-  async create(data: Partial<TrainingNeedsAssessmentRecord>): Promise<TrainingNeedsAssessmentRecord> {
+  async create(data: CreateInput<TrainingNeedsAssessmentRecord>): Promise<TrainingNeedsAssessmentRecord> {
     const scores = this.calculateScores(data);
     return tnasCRUD.create({
       ...data,
@@ -303,7 +303,7 @@ export const trainingBudgetsDB = {
   /**
    * Override create to calculate totals
    */
-  async create(data: Partial<TrainingBudgetProposalRecord>): Promise<TrainingBudgetProposalRecord> {
+  async create(data: CreateInput<TrainingBudgetProposalRecord>): Promise<TrainingBudgetProposalRecord> {
     const totals = this.calculateTotals(data);
     return trainingBudgetsCRUD.create({
       ...data,
@@ -384,7 +384,7 @@ export const trainingParticipantsDB = {
   /**
    * Override create to update training participant count
    */
-  async create(data: Partial<TrainingParticipantRecord>): Promise<TrainingParticipantRecord> {
+  async create(data: CreateInput<TrainingParticipantRecord>): Promise<TrainingParticipantRecord> {
     const participant = await trainingParticipantsCRUD.create({
       ...data,
       invitationStatus: data.invitationStatus || 'pending',
@@ -493,7 +493,7 @@ export const trainingEvaluationsDB = {
   /**
    * Override create to update participant feedback status
    */
-  async create(data: Partial<TrainingEvaluationRecord>): Promise<TrainingEvaluationRecord> {
+  async create(data: CreateInput<TrainingEvaluationRecord>): Promise<TrainingEvaluationRecord> {
     const evaluation = await trainingEvaluationsCRUD.create({
       ...data,
       evaluationDate: data.evaluationDate || new Date().toISOString().split('T')[0],
@@ -661,7 +661,7 @@ export const trainingBondsDB = {
     recoveryAmount: number;
   } {
     const startDate = new Date(bond.bondStartDate);
-    const endDate = new Date(bond.bondEndDate);
+    // const endDate = new Date(bond.bondEndDate);
     const termDate = new Date(terminationDate);
 
     const totalMonths = bond.bondDurationMonths;
@@ -723,9 +723,8 @@ export const trainingReportsDB = {
   async generateFromTraining(trainingId: number): Promise<TrainingReportRecord> {
     const training = await trainingsDB.getById(trainingId);
     if (!training) throw new Error('Training not found');
-
     const participants = await trainingParticipantsDB.getByTraining(trainingId);
-    const evaluations = await trainingEvaluationsDB.getByTraining(trainingId);
+    // const evaluations = await trainingEvaluationsDB.getByTraining(trainingId);
     const evalRatings = await trainingEvaluationsDB.getAverageRatings(trainingId);
 
     const attended = participants.filter(p => p.attended);
@@ -736,8 +735,11 @@ export const trainingReportsDB = {
     const avgPostScore =
       attended.length > 0 ? attended.reduce((sum, p) => sum + (p.postAssessmentScore || 0), 0) / attended.length : 0;
 
-    const reportData = {
+    const reportData: CreateInput<TrainingReportRecord> = {
       trainingId,
+      reportNumber: training.trainingCode,
+      reportDate: training.endDate,
+      status: "draft",
       totalInvited: participants.length,
       totalAttended: attended.length,
       attendanceRate: participants.length > 0 ? Math.round((attended.length / participants.length) * 100) : 0,
@@ -759,7 +761,6 @@ export const trainingDashboardService = {
    * Get training dashboard statistics
    */
   async getStats() {
-    const db = await getDB();
 
     const [trainings, tnas, budgets, certificates, bonds] = await Promise.all([
       trainingsDB.getAll(),
@@ -808,6 +809,58 @@ export const trainingDashboardService = {
     return upcoming.slice(0, limit);
   },
 };
+
+// ========== BACKWARD COMPATIBILITY ALIASES ==========
+
+/**
+ * Backward compatibility aliases for renamed services
+ * Maps old naming conventions to new ones (plural to singular, *DB to *Service, alternative names)
+ */
+
+// Singular variations (*DB pattern)
+export const trainingTypeDB = trainingTypesDB;
+export const trainingProgramDB = trainingProgramsDB;
+export const tnaDB = tnasDB;
+export const trainingBudgetDB = trainingBudgetsDB;
+export const trainingDB = trainingsDB;
+export const trainingParticipantDB = trainingParticipantsDB;
+export const trainingSessionDB = trainingSessionsDB;
+export const trainingEvaluationDB = trainingEvaluationsDB;
+export const trainingCertificateDB = trainingCertificatesDB;
+export const trainingBondDB = trainingBondsDB;
+export const trainingReportDB = trainingReportsDB;
+
+// Service pattern aliases (*Service instead of *DB)
+export const trainingTypesService = trainingTypesDB;
+export const trainingTypeService = trainingTypesDB;
+export const trainingProgramsService = trainingProgramsDB;
+export const trainingProgramService = trainingProgramsDB;
+export const tnasService = tnasDB;
+export const tnaService = tnasDB;
+export const tnaTrainingNeedsService = tnaTrainingNeedsDB;
+export const trainingCalendarService = trainingCalendarDB;
+export const trainingBudgetsService = trainingBudgetsDB;
+export const trainingBudgetService = trainingBudgetsDB;
+export const trainingsService = trainingsDB;
+export const trainingParticipantsService = trainingParticipantsDB;
+export const trainingParticipantService = trainingParticipantsDB;
+export const trainingSessionsService = trainingSessionsDB;
+export const trainingSessionService = trainingSessionsDB;
+export const trainingEvaluationsService = trainingEvaluationsDB;
+export const trainingEvaluationService = trainingEvaluationsDB;
+export const trainingCertificatesService = trainingCertificatesDB;
+export const trainingCertificateService = trainingCertificatesDB;
+export const trainingBondsService = trainingBondsDB;
+export const trainingBondService = trainingBondsDB;
+export const employeeTrainingHistoryService = employeeTrainingHistoryDB;
+export const trainingReportsService = trainingReportsDB;
+export const trainingReportService = trainingReportsDB;
+
+// Alternative naming conventions
+export const tnaItemDB = tnaTrainingNeedsDB;
+export const tnaItemService = tnaTrainingNeedsDB;
+export const trainingAttendanceDB = trainingParticipantsDB;
+export const trainingAttendanceService = trainingParticipantsDB;
 
 // ========== MAIN EXPORT ==========
 

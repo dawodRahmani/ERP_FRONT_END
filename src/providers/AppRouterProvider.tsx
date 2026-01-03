@@ -177,6 +177,22 @@ import {
   ProbationTracking,
   PIPs
 } from '../pages/performance';
+
+// Audit Module Pages
+import {
+  AuditDashboard,
+  AuditSettings,
+  HACTList,
+  HACTForm,
+  DonorProjectAuditList,
+  DonorProjectAuditForm,
+  ExternalAuditList,
+  ExternalAuditForm,
+  InternalAuditList,
+  InternalAuditForm,
+  PartnerAuditList,
+  PartnerAuditForm
+} from '../pages/audit';
 import type { JSX } from 'react';
 
 // User Management Routes
@@ -389,6 +405,27 @@ const performanceRoutes: RouteObject[] = [
   { path: 'hr/performance/pips', element: <PIPs /> },
 ];
 
+// Audit Module Routes
+const auditRoutes: RouteObject[] = [
+  { path: 'audit', element: <AuditDashboard /> },
+  { path: 'audit/settings', element: <AuditSettings /> },
+  { path: 'audit/hact', element: <HACTList /> },
+  { path: 'audit/hact/new', element: <HACTForm /> },
+  { path: 'audit/hact/:id', element: <HACTForm /> },
+  { path: 'audit/donor-project', element: <DonorProjectAuditList /> },
+  { path: 'audit/donor-project/new', element: <DonorProjectAuditForm /> },
+  { path: 'audit/donor-project/:id', element: <DonorProjectAuditForm /> },
+  { path: 'audit/external', element: <ExternalAuditList /> },
+  { path: 'audit/external/new', element: <ExternalAuditForm /> },
+  { path: 'audit/external/:id', element: <ExternalAuditForm /> },
+  { path: 'audit/internal', element: <InternalAuditList /> },
+  { path: 'audit/internal/new', element: <InternalAuditForm /> },
+  { path: 'audit/internal/:id', element: <InternalAuditForm /> },
+  { path: 'audit/partner', element: <PartnerAuditList /> },
+  { path: 'audit/partner/new', element: <PartnerAuditForm /> },
+  { path: 'audit/partner/:id', element: <PartnerAuditForm /> },
+];
+
 // Combine all routes
 const routes: RouteObject[] = [
   {
@@ -409,6 +446,7 @@ const routes: RouteObject[] = [
       ...exitRoutes,
       ...payrollRoutes,
       ...performanceRoutes,
+      ...auditRoutes,
     ],
   },
 ];

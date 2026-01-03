@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -13,50 +13,69 @@ import {
   Eye,
   Check,
   AlertCircle,
-} from 'lucide-react';
-import { timesheetService } from '../../services/db/leaveManagementService';
-import { employeeDB, departmentDB, seedAllDefaults } from '../../services/db/indexedDB';
+} from "lucide-react";
+import { timesheetsDB } from "../../services/db/leaveManagementService";
+import {
+  employeeDB,
+  departmentDB,
+  seedAllDefaults,
+} from "../../services/db/indexedDB";
 
 const Timesheets = () => {
   const [timesheets, setTimesheets] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
-  const [filterStatus, setFilterStatus] = useState('');
+  const [filterStatus, setFilterStatus] = useState("");
 
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedTimesheet, setSelectedTimesheet] = useState(null);
-  const [generateEmployeeId, setGenerateEmployeeId] = useState('');
+  const [generateEmployeeId, setGenerateEmployeeId] = useState("");
 
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   const months = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' },
+    { value: 1, label: "January" },
+    { value: 2, label: "February" },
+    { value: 3, label: "March" },
+    { value: 4, label: "April" },
+    { value: 5, label: "May" },
+    { value: 6, label: "June" },
+    { value: 7, label: "July" },
+    { value: 8, label: "August" },
+    { value: 9, label: "September" },
+    { value: 10, label: "October" },
+    { value: 11, label: "November" },
+    { value: 12, label: "December" },
   ];
 
-  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+  const years = Array.from(
+    { length: 5 },
+    (_, i) => new Date().getFullYear() - 2 + i
+  );
 
   const statusConfig = {
-    draft: { label: 'Draft', color: 'gray', icon: FileText },
-    submitted: { label: 'Submitted', color: 'blue', icon: Send },
-    manager_approved: { label: 'Manager Approved', color: 'yellow', icon: Check },
-    hr_verified: { label: 'HR Verified', color: 'green', icon: CheckCircle },
-    sent_to_payroll: { label: 'Sent to Payroll', color: 'purple', icon: CheckCircle },
+    draft: { label: "Draft", color: "gray", icon: FileText },
+    submitted: { label: "Submitted", color: "blue", icon: Send },
+    manager_approved: {
+      label: "Manager Approved",
+      color: "yellow",
+      icon: Check,
+    },
+    hr_verified: { label: "HR Verified", color: "green", icon: CheckCircle },
+    sent_to_payroll: {
+      label: "Sent to Payroll",
+      color: "purple",
+      icon: CheckCircle,
+    },
   };
 
   useEffect(() => {
@@ -68,105 +87,115 @@ const Timesheets = () => {
       setLoading(true);
       await seedAllDefaults();
 
-      const [timesheetsData, employeesData, departmentsData] = await Promise.all([
-        timesheetService.getAll(),
-        employeeDB.getAll(),
-        departmentDB.getAll(),
-      ]);
+      const [timesheetsData, employeesData, departmentsData] =
+        await Promise.all([
+          timesheetsDB.getAll(),
+          employeeDB.getAll(),
+          departmentDB.getAll(),
+        ]);
 
       setTimesheets(timesheetsData);
       setEmployees(employeesData);
       setDepartments(departmentsData);
     } catch (error) {
-      console.error('Error loading data:', error);
-      showToast('Failed to load data', 'error');
+      console.error("Error loading data:", error);
+      showToast("Failed to load data", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const showToast = (message, type = 'success') => {
+  const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+    setTimeout(
+      () => setToast({ show: false, message: "", type: "success" }),
+      3000
+    );
   };
 
   const getEmployeeName = (id) => {
-    const employee = employees.find(e => e.id === id);
-    return employee ? `${employee.firstName} ${employee.lastName}` : 'Unknown';
+    const employee = employees.find((e) => e.id === id);
+    return employee ? `${employee.firstName} ${employee.lastName}` : "Unknown";
   };
 
   const getEmployeeDepartment = (id) => {
-    const employee = employees.find(e => e.id === id);
-    if (!employee) return 'Unknown';
-    const dept = departments.find(d => d.id === employee.departmentId || d.id === employee.department);
-    return dept?.name || 'Unknown';
+    const employee = employees.find((e) => e.id === id);
+    if (!employee) return "Unknown";
+    const dept = departments.find(
+      (d) => d.id === employee.departmentId || d.id === employee.department
+    );
+    return dept?.name || "Unknown";
   };
 
   const handleGenerate = async (e) => {
     e.preventDefault();
 
     if (!generateEmployeeId) {
-      showToast('Please select an employee', 'error');
+      showToast("Please select an employee", "error");
       return;
     }
 
     try {
-      await timesheetService.generate(Number(generateEmployeeId), filterMonth, filterYear);
-      showToast('Timesheet generated successfully');
+      await timesheetsDB.generate(
+        Number(generateEmployeeId),
+        filterMonth,
+        filterYear
+      );
+      showToast("Timesheet generated successfully");
       setShowGenerateModal(false);
-      setGenerateEmployeeId('');
+      setGenerateEmployeeId("");
       loadData();
     } catch (error) {
-      console.error('Error generating timesheet:', error);
-      showToast(error.message || 'Failed to generate timesheet', 'error');
+      console.error("Error generating timesheet:", error);
+      showToast(error.message || "Failed to generate timesheet", "error");
     }
   };
 
   const handleSubmit = async (id) => {
     try {
-      await timesheetService.submit(id);
-      showToast('Timesheet submitted successfully');
+      await timesheetsDB.submit(id);
+      showToast("Timesheet submitted successfully");
       loadData();
     } catch (error) {
-      console.error('Error submitting timesheet:', error);
-      showToast('Failed to submit timesheet', 'error');
+      console.error("Error submitting timesheet:", error);
+      showToast("Failed to submit timesheet", "error");
     }
   };
 
   const handleManagerApprove = async (id) => {
     try {
-      await timesheetService.managerApprove(id, 'Manager');
-      showToast('Timesheet approved by manager');
+      await timesheetsDB.managerApprove(id, "Manager");
+      showToast("Timesheet approved by manager");
       loadData();
     } catch (error) {
-      console.error('Error approving timesheet:', error);
-      showToast('Failed to approve timesheet', 'error');
+      console.error("Error approving timesheet:", error);
+      showToast("Failed to approve timesheet", "error");
     }
   };
 
   const handleHRVerify = async (id) => {
     try {
-      await timesheetService.hrVerify(id, 'HR Admin');
-      showToast('Timesheet verified by HR');
+      await timesheetsDB.hrVerify(id, "HR Admin");
+      showToast("Timesheet verified by HR");
       loadData();
     } catch (error) {
-      console.error('Error verifying timesheet:', error);
-      showToast('Failed to verify timesheet', 'error');
+      console.error("Error verifying timesheet:", error);
+      showToast("Failed to verify timesheet", "error");
     }
   };
 
   const handleSendToPayroll = async (id) => {
     try {
-      await timesheetService.sendToPayroll(id);
-      showToast('Timesheet sent to payroll');
+      await timesheetsDB.sendToPayroll(id);
+      showToast("Timesheet sent to payroll");
       loadData();
     } catch (error) {
-      console.error('Error sending to payroll:', error);
-      showToast('Failed to send to payroll', 'error');
+      console.error("Error sending to payroll:", error);
+      showToast("Failed to send to payroll", "error");
     }
   };
 
-  const filteredTimesheets = timesheets.filter(ts => {
+  const filteredTimesheets = timesheets.filter((ts) => {
     const employeeName = getEmployeeName(ts.employeeId).toLowerCase();
     const matchesSearch = employeeName.includes(searchTerm.toLowerCase());
     const matchesMonth = ts.month === filterMonth;
@@ -178,9 +207,12 @@ const Timesheets = () => {
   // Statistics
   const stats = {
     total: filteredTimesheets.length,
-    draft: filteredTimesheets.filter(t => t.status === 'draft').length,
-    submitted: filteredTimesheets.filter(t => t.status === 'submitted').length,
-    verified: filteredTimesheets.filter(t => t.status === 'hr_verified' || t.status === 'sent_to_payroll').length,
+    draft: filteredTimesheets.filter((t) => t.status === "draft").length,
+    submitted: filteredTimesheets.filter((t) => t.status === "submitted")
+      .length,
+    verified: filteredTimesheets.filter(
+      (t) => t.status === "hr_verified" || t.status === "sent_to_payroll"
+    ).length,
   };
 
   if (loading) {
@@ -194,9 +226,11 @@ const Timesheets = () => {
   return (
     <div className="p-6 space-y-6">
       {toast.show && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg ${
-          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-        } text-white`}>
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg ${
+            toast.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+        >
           {toast.message}
         </div>
       )}
@@ -204,7 +238,9 @@ const Timesheets = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Timesheets</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Timesheets
+          </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage employee monthly timesheets
           </p>
@@ -227,7 +263,9 @@ const Timesheets = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.total}
+              </p>
             </div>
           </div>
         </div>
@@ -238,7 +276,9 @@ const Timesheets = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Draft</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.draft}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.draft}
+              </p>
             </div>
           </div>
         </div>
@@ -248,8 +288,12 @@ const Timesheets = () => {
               <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Pending</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.submitted}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Pending
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.submitted}
+              </p>
             </div>
           </div>
         </div>
@@ -259,8 +303,12 @@ const Timesheets = () => {
               <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Verified</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.verified}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Verified
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.verified}
+              </p>
             </div>
           </div>
         </div>
@@ -284,8 +332,10 @@ const Timesheets = () => {
             onChange={(e) => setFilterMonth(Number(e.target.value))}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            {months.map(m => (
-              <option key={m.value} value={m.value}>{m.label}</option>
+            {months.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
             ))}
           </select>
           <select
@@ -293,8 +343,10 @@ const Timesheets = () => {
             onChange={(e) => setFilterYear(Number(e.target.value))}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            {years.map(year => (
-              <option key={year} value={year}>{year}</option>
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
           <select
@@ -304,14 +356,16 @@ const Timesheets = () => {
           >
             <option value="">All Status</option>
             {Object.entries(statusConfig).map(([key, config]) => (
-              <option key={key} value={key}>{config.label}</option>
+              <option key={key} value={key}>
+                {config.label}
+              </option>
             ))}
           </select>
           {(searchTerm || filterStatus) && (
             <button
               onClick={() => {
-                setSearchTerm('');
-                setFilterStatus('');
+                setSearchTerm("");
+                setFilterStatus("");
               }}
               className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
             >
@@ -350,17 +404,23 @@ const Timesheets = () => {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {filteredTimesheets.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                  <td
+                    colSpan="6"
+                    className="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
+                  >
                     No timesheets found for the selected period
                   </td>
                 </tr>
               ) : (
-                filteredTimesheets.map(ts => {
+                filteredTimesheets.map((ts) => {
                   const status = statusConfig[ts.status] || statusConfig.draft;
                   const StatusIcon = status.icon;
 
                   return (
-                    <tr key={ts.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <tr
+                      key={ts.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-full">
@@ -380,24 +440,35 @@ const Timesheets = () => {
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-gray-400" />
                           <span className="text-gray-900 dark:text-white">
-                            {months.find(m => m.value === ts.month)?.label} {ts.year}
+                            {months.find((m) => m.value === ts.month)?.label}{" "}
+                            {ts.year}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-gray-900 dark:text-white">{ts.totalWorkingDays}</span>
+                        <span className="text-gray-900 dark:text-white">
+                          {ts.totalWorkingDays}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-sm">
-                          <span className="text-green-600">{ts.totalPresentDays || 0}</span>
+                          <span className="text-green-600">
+                            {ts.totalPresentDays || 0}
+                          </span>
                           <span className="text-gray-400">/</span>
-                          <span className="text-blue-600">{ts.totalLeaveDays || 0}</span>
+                          <span className="text-blue-600">
+                            {ts.totalLeaveDays || 0}
+                          </span>
                           <span className="text-gray-400">/</span>
-                          <span className="text-red-600">{ts.totalAbsentDays || 0}</span>
+                          <span className="text-red-600">
+                            {ts.totalAbsentDays || 0}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-${status.color}-100 text-${status.color}-800 dark:bg-${status.color}-900/30 dark:text-${status.color}-400`}>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-${status.color}-100 text-${status.color}-800 dark:bg-${status.color}-900/30 dark:text-${status.color}-400`}
+                        >
                           <StatusIcon className="w-3 h-3" />
                           {status.label}
                         </span>
@@ -414,7 +485,7 @@ const Timesheets = () => {
                           >
                             <Eye className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                           </button>
-                          {ts.status === 'draft' && (
+                          {ts.status === "draft" && (
                             <button
                               onClick={() => handleSubmit(ts.id)}
                               className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
@@ -423,7 +494,7 @@ const Timesheets = () => {
                               <Send className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                             </button>
                           )}
-                          {ts.status === 'submitted' && (
+                          {ts.status === "submitted" && (
                             <button
                               onClick={() => handleManagerApprove(ts.id)}
                               className="p-2 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-colors"
@@ -432,7 +503,7 @@ const Timesheets = () => {
                               <Check className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
                             </button>
                           )}
-                          {ts.status === 'manager_approved' && (
+                          {ts.status === "manager_approved" && (
                             <button
                               onClick={() => handleHRVerify(ts.id)}
                               className="p-2 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
@@ -441,7 +512,7 @@ const Timesheets = () => {
                               <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
                             </button>
                           )}
-                          {ts.status === 'hr_verified' && (
+                          {ts.status === "hr_verified" && (
                             <button
                               onClick={() => handleSendToPayroll(ts.id)}
                               className="p-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
@@ -466,7 +537,9 @@ const Timesheets = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md m-4">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Generate Timesheet</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Generate Timesheet
+              </h2>
             </div>
             <form onSubmit={handleGenerate} className="p-6 space-y-4">
               <div>
@@ -480,9 +553,13 @@ const Timesheets = () => {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Select Employee</option>
-                  {employees.filter(e => e.status === 'active').map(emp => (
-                    <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
-                  ))}
+                  {employees
+                    .filter((e) => e.status === "active")
+                    .map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.firstName} {emp.lastName}
+                      </option>
+                    ))}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -495,8 +572,10 @@ const Timesheets = () => {
                     onChange={(e) => setFilterMonth(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    {months.map(m => (
-                      <option key={m.value} value={m.value}>{m.label}</option>
+                    {months.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -509,15 +588,18 @@ const Timesheets = () => {
                     onChange={(e) => setFilterYear(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    {years.map(year => (
-                      <option key={year} value={year}>{year}</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  This will generate a timesheet based on attendance records for the selected period.
+                  This will generate a timesheet based on attendance records for
+                  the selected period.
                 </p>
               </div>
               <div className="flex justify-end gap-3 pt-4">
@@ -525,7 +607,7 @@ const Timesheets = () => {
                   type="button"
                   onClick={() => {
                     setShowGenerateModal(false);
-                    setGenerateEmployeeId('');
+                    setGenerateEmployeeId("");
                   }}
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 >
@@ -549,66 +631,113 @@ const Timesheets = () => {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Timesheet Details</h2>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-${statusConfig[selectedTimesheet.status]?.color || 'gray'}-100 text-${statusConfig[selectedTimesheet.status]?.color || 'gray'}-800`}>
-                  {statusConfig[selectedTimesheet.status]?.label || 'Unknown'}
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Timesheet Details
+                </h2>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-${
+                    statusConfig[selectedTimesheet.status]?.color || "gray"
+                  }-100 text-${
+                    statusConfig[selectedTimesheet.status]?.color || "gray"
+                  }-800`}
+                >
+                  {statusConfig[selectedTimesheet.status]?.label || "Unknown"}
                 </span>
               </div>
             </div>
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Employee</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Employee
+                  </p>
                   <p className="font-medium text-gray-900 dark:text-white">
                     {getEmployeeName(selectedTimesheet.employeeId)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Period</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Period
+                  </p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {months.find(m => m.value === selectedTimesheet.month)?.label} {selectedTimesheet.year}
+                    {
+                      months.find((m) => m.value === selectedTimesheet.month)
+                        ?.label
+                    }{" "}
+                    {selectedTimesheet.year}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Working Days</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedTimesheet.totalWorkingDays || 0}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Working Days
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {selectedTimesheet.totalWorkingDays || 0}
+                  </p>
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <p className="text-sm text-green-600 dark:text-green-400">Present</p>
-                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">{selectedTimesheet.totalPresentDays || 0}</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    Present
+                  </p>
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                    {selectedTimesheet.totalPresentDays || 0}
+                  </p>
                 </div>
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <p className="text-sm text-blue-600 dark:text-blue-400">Leave</p>
-                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{selectedTimesheet.totalLeaveDays || 0}</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">
+                    Leave
+                  </p>
+                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                    {selectedTimesheet.totalLeaveDays || 0}
+                  </p>
                 </div>
                 <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                  <p className="text-sm text-red-600 dark:text-red-400">Absent</p>
-                  <p className="text-2xl font-bold text-red-700 dark:text-red-300">{selectedTimesheet.totalAbsentDays || 0}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    Absent
+                  </p>
+                  <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                    {selectedTimesheet.totalAbsentDays || 0}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Holidays</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">{selectedTimesheet.totalHolidays || 0}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Holidays
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                    {selectedTimesheet.totalHolidays || 0}
+                  </p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Weekends</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">{selectedTimesheet.totalWeekends || 0}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Weekends
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                    {selectedTimesheet.totalWeekends || 0}
+                  </p>
                 </div>
                 <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                  <p className="text-sm text-purple-600 dark:text-purple-400">Overtime Hours</p>
-                  <p className="text-xl font-bold text-purple-700 dark:text-purple-300">{selectedTimesheet.totalOvertimeHours || 0}</p>
+                  <p className="text-sm text-purple-600 dark:text-purple-400">
+                    Overtime Hours
+                  </p>
+                  <p className="text-xl font-bold text-purple-700 dark:text-purple-300">
+                    {selectedTimesheet.totalOvertimeHours || 0}
+                  </p>
                 </div>
               </div>
 
               {selectedTimesheet.managerApprovedAt && (
                 <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                   <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                    Manager Approved: {new Date(selectedTimesheet.managerApprovedAt).toLocaleString()}
+                    Manager Approved:{" "}
+                    {new Date(
+                      selectedTimesheet.managerApprovedAt
+                    ).toLocaleString()}
                   </p>
                 </div>
               )}
@@ -616,7 +745,8 @@ const Timesheets = () => {
               {selectedTimesheet.hrVerifiedAt && (
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <p className="text-sm text-green-700 dark:text-green-300">
-                    HR Verified: {new Date(selectedTimesheet.hrVerifiedAt).toLocaleString()}
+                    HR Verified:{" "}
+                    {new Date(selectedTimesheet.hrVerifiedAt).toLocaleString()}
                   </p>
                 </div>
               )}
@@ -624,7 +754,10 @@ const Timesheets = () => {
               {selectedTimesheet.sentToPayrollAt && (
                 <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                   <p className="text-sm text-purple-700 dark:text-purple-300">
-                    Sent to Payroll: {new Date(selectedTimesheet.sentToPayrollAt).toLocaleString()}
+                    Sent to Payroll:{" "}
+                    {new Date(
+                      selectedTimesheet.sentToPayrollAt
+                    ).toLocaleString()}
                   </p>
                 </div>
               )}

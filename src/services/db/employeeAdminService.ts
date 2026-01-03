@@ -33,7 +33,11 @@ import type {
   InterimHiringApprovalRecord,
   MahramRegistrationRecord,
   EmployeeStatusHistoryRecord,
-} from '@/types/modules/employeeAdmin';
+} from '../../types/modules/employeeAdmin';
+import type {
+  OrientationChecklistRecord,
+  OrientationItemRecord,
+} from '../../types/modules/legacy';
 
 // ========== EMERGENCY CONTACTS ==========
 
@@ -428,6 +432,69 @@ export const employeeStatusHistoryDB = {
     });
   },
 };
+
+// ========== LEGACY BACKWARD COMPATIBILITY ==========
+
+/**
+ * Legacy orientation checklists (backward compatibility)
+ * Maps to orientationChecklists store
+ */
+const orientationChecklistsCRUD = createCRUDService<OrientationChecklistRecord>('orientationChecklists');
+
+export const orientationChecklistDB = {
+  ...orientationChecklistsCRUD,
+
+  /**
+   * Get checklist by employee ID
+   */
+  async getByEmployee(employeeId: number): Promise<OrientationChecklistRecord[]> {
+    return orientationChecklistsCRUD.getByIndex('employeeId', employeeId);
+  },
+
+  /**
+   * Get checklists by status
+   */
+  async getByStatus(status: string): Promise<OrientationChecklistRecord[]> {
+    return orientationChecklistsCRUD.getByIndex('status', status);
+  },
+};
+
+/**
+ * Legacy orientation items (backward compatibility)
+ * Maps to orientationItems store
+ */
+const orientationItemsCRUD = createCRUDService<OrientationItemRecord>('orientationItems');
+
+export const orientationItemDB = {
+  ...orientationItemsCRUD,
+
+  /**
+   * Get items by checklist ID
+   */
+  async getByChecklist(checklistId: number): Promise<OrientationItemRecord[]> {
+    return orientationItemsCRUD.getByIndex('checklistId', checklistId);
+  },
+
+  /**
+   * Get items by status
+   */
+  async getByStatus(status: string): Promise<OrientationItemRecord[]> {
+    return orientationItemsCRUD.getByIndex('status', status);
+  },
+};
+
+// ========== INITIALIZATION ==========
+
+/**
+ * Initialize the Employee Admin module
+ * This is a no-op since database initialization is handled by initDB()
+ * but kept for backward compatibility
+ */
+export async function initEmployeeAdminDB(): Promise<void> {
+  // Database is already initialized by initDB() in connection.ts
+  // This function exists for backward compatibility
+  return Promise.resolve();
+}
 
 // ========== MAIN EXPORT ==========
 

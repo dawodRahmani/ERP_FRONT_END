@@ -31,8 +31,12 @@ import type {
   PIPCheckInRecord,
   AppraisalOutcomeRecord,
   PerformanceLevel,
-} from '@/types/modules/performance';
-import { RATING_SCALE } from '@/types/modules/performance';
+} from '../../types/modules/performance';
+import { RATING_SCALE } from '../../types/modules/performance';
+import type {
+  IDPRecord,
+  IDPGoalRecord,
+} from '../../types/modules/legacy';
 
 // ========== APPRAISAL CYCLES ==========
 
@@ -57,10 +61,10 @@ export const appraisalTemplatesDB = {
     const template = await this.getById(templateId);
     if (!template) return null;
 
-    const sections = await db.getAllFromIndex('appraisalSections', 'by_template', templateId);
+    const sections = await db.getAllFromIndex('appraisalSections', 'templateId', templateId);
 
     for (const section of sections) {
-      const criteria = await db.getAllFromIndex('appraisalCriteria', 'by_section', section.id);
+      const criteria = await db.getAllFromIndex('appraisalCriteria', 'sectionId', section.id);
       (section as any).criteria = criteria.sort((a: any, b: any) => a.displayOrder - b.displayOrder);
     }
 
@@ -106,7 +110,7 @@ export const employeeAppraisalsDB = {
    */
   async calculateScore(appraisalId: number): Promise<{ totalScore: number; maxScore: number; percentage: number }> {
     const db = await getDB();
-    const ratings = await db.getAllFromIndex('appraisalRatings', 'by_appraisal', appraisalId);
+    const ratings = await db.getAllFromIndex('appraisalRatings', 'appraisalId', appraisalId);
 
     if (ratings.length === 0) return { totalScore: 0, maxScore: 0, percentage: 0 };
 
@@ -235,10 +239,10 @@ export const employeeAppraisalsDB = {
     const appraisal = await this.getById(appraisalId);
     if (!appraisal) return null;
 
-    const ratings = await db.getAllFromIndex('appraisalRatings', 'by_appraisal', appraisalId);
-    const committeeMembers = await db.getAllFromIndex('appraisalCommitteeMembers', 'by_appraisal', appraisalId);
-    const goals = await db.getAllFromIndex('appraisalGoals', 'by_appraisal', appraisalId);
-    const trainingNeeds = await db.getAllFromIndex('appraisalTrainingNeeds', 'by_appraisal', appraisalId);
+    const ratings = await db.getAllFromIndex('appraisalRatings', 'appraisalId', appraisalId);
+    const committeeMembers = await db.getAllFromIndex('appraisalCommitteeMembers', 'appraisalId', appraisalId);
+    const goals = await db.getAllFromIndex('appraisalGoals', 'appraisalId', appraisalId);
+    const trainingNeeds = await db.getAllFromIndex('appraisalTrainingNeeds', 'appraisalId', appraisalId);
 
     return {
       ...appraisal,
@@ -404,8 +408,8 @@ export const performanceImprovementPlansDB = {
     const pip = await this.getById(pipId);
     if (!pip) return null;
 
-    const goals = await db.getAllFromIndex('pipGoals', 'by_pip', pipId);
-    const checkIns = await db.getAllFromIndex('pipCheckIns', 'by_pip', pipId);
+    const goals = await db.getAllFromIndex('pipGoals', 'pipId', pipId);
+    const checkIns = await db.getAllFromIndex('pipCheckIns', 'pipId', pipId);
 
     return {
       ...pip,
@@ -435,7 +439,7 @@ export const pipCheckInsDB = {
    */
   async record(pipId: number, checkInData: Omit<PIPCheckInRecord, 'id' | 'createdAt' | 'updatedAt' | 'pipId' | 'checkInNumber' | 'checkInDate'>): Promise<PIPCheckInRecord> {
     const db = await getDB();
-    const existingCheckIns = await db.getAllFromIndex('pipCheckIns', 'by_pip', pipId);
+    const existingCheckIns = await db.getAllFromIndex('pipCheckIns', 'pipId', pipId);
 
     return this.create({
       pipId,
@@ -453,6 +457,75 @@ const appraisalOutcomesCRUD = createCRUDService<AppraisalOutcomeRecord>('apprais
 export const appraisalOutcomesDB = {
   ...appraisalOutcomesCRUD,
 };
+
+// ========== LEGACY BACKWARD COMPATIBILITY ==========
+
+/**
+ * Legacy Individual Development Plans (backward compatibility)
+ * Maps to individualDevelopmentPlans store
+ */
+const idpsCRUD = createCRUDService<IDPRecord>('individualDevelopmentPlans');
+
+export const idpDB = {
+  ...idpsCRUD,
+
+  /**
+   * Generate unique IDP ID
+   */
+  async generateIDPId(): Promise<string> {
+    const all = await this.getAll();
+    return generateFormattedCode('IDP', all.length + 1, true, 4);
+  },
+
+  /**
+   * Get IDPs by employee ID
+   */
+  async getByEmployee(employeeId: number): Promise<IDPRecord[]> {
+    return idpsCRUD.getByIndex('employeeId', employeeId);
+  },
+
+  /**
+   * Get IDPs by status
+   */
+  async getByStatus(status: string): Promise<IDPRecord[]> {
+    return idpsCRUD.getByIndex('status', status);
+  },
+};
+
+/**
+ * Legacy IDP Goals (backward compatibility)
+ * Maps to idpGoals store
+ */
+const idpGoalsCRUD = createCRUDService<IDPGoalRecord>('idpGoals');
+
+export const idpGoalDB = {
+  ...idpGoalsCRUD,
+
+  /**
+   * Get goals by IDP ID
+   */
+  async getByIDP(idpId: number): Promise<IDPGoalRecord[]> {
+    return idpGoalsCRUD.getByIndex('idpId', idpId);
+  },
+
+  /**
+   * Get goals by status
+   */
+  async getByStatus(status: string): Promise<IDPGoalRecord[]> {
+    return idpGoalsCRUD.getByIndex('status', status);
+  },
+};
+
+// ========== BACKWARD COMPATIBILITY ALIASES ==========
+
+/**
+ * Backward compatibility aliases for renamed services
+ * Maps old naming conventions to new ones
+ */
+export const appraisalPeriodDB = appraisalCyclesDB;
+export const performanceAppraisalDB = employeeAppraisalsDB;
+export const appraisalScoreDB = appraisalRatingsDB;
+export const pipProgressReviewDB = pipCheckInsDB;
 
 // ========== MAIN EXPORT ==========
 

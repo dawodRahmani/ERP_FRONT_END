@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Edit, Trash2, CheckCircle2 } from 'lucide-react';
-import {
-  getProgramWorkPlanById,
-  deleteProgramWorkPlan,
+import programWorkService, {
   generateTimelineMonths,
-} from '../../services/db/programWorkPlanService';
 
+} from '../../services/db/programWorkPlanService';
+const { getById, delete: deleteWorkPlanService } = programWorkService;
 const ProgramWorkPlanView = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -22,7 +21,7 @@ const ProgramWorkPlanView = () => {
   const loadWorkPlan = async () => {
     try {
       setLoading(true);
-      const plan = await getProgramWorkPlanById(Number(id));
+      const plan = await getById(Number(id));
       setWorkPlan(plan);
     } catch (error) {
       console.error('Error loading work plan:', error);
@@ -34,7 +33,7 @@ const ProgramWorkPlanView = () => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this work plan?')) {
       try {
-        await deleteProgramWorkPlan(Number(id));
+        await deleteWorkPlanService(Number(id));
         navigate('/programm/work-plans');
       } catch (error) {
         console.error('Error deleting work plan:', error);

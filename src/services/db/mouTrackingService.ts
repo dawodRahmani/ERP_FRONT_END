@@ -7,7 +7,7 @@
 
 import { createCRUDService } from './core/crud';
 import { searchRecords, filterByDateRange, getUniqueValues, sortByCreatedAt } from './core/utils';
-import type { MOUTrackingRecord } from '@/types/modules/tracking';
+import type { MOUTrackingRecord } from '../../types/modules/tracking';
 
 const STORE_NAME = 'mouTracking';
 
@@ -26,7 +26,7 @@ export const mouTrackingService = {
   async create(data: Omit<MOUTrackingRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<MOUTrackingRecord> {
     const entryData = {
       ...data,
-      status: data.status || 'draft',
+      status: data.status || 'project',
     };
     return baseCRUD.create(entryData);
   },
@@ -123,6 +123,32 @@ export const mouTrackingService = {
     const allEntries = await this.getAll();
     const departments = getUniqueValues(allEntries, 'department').filter(Boolean) as string[];
     return departments.sort();
+  },
+  /**
+   * Get unique donors
+   */
+  async getUniqueDonors(): Promise<string[]> {
+    const allEntries = await this.getAll();
+    const donors = getUniqueValues(allEntries, 'donor').filter(Boolean) as string[];
+    return donors.sort();
+  },
+
+  /**
+   * Get unique projects
+   */
+  async getUniqueProjects(): Promise<string[]> {
+    const allEntries = await this.getAll();
+    const projects = getUniqueValues(allEntries, 'project').filter(Boolean) as string[];
+    return projects.sort();
+  },
+
+  /**
+   * Get unique sectoralAuthority
+   */
+  async getUniqueSectoralAuthorities(): Promise<string[]> {
+    const allEntries = await this.getAll();
+    const sectoralAuthority = getUniqueValues(allEntries, 'sectoralAuthority').filter(Boolean) as string[];
+    return sectoralAuthority.sort();
   },
 
   /**

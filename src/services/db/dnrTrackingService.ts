@@ -7,7 +7,7 @@
 
 import { createCRUDService } from './core/crud';
 import { searchRecords, getUniqueValues } from './core/utils';
-import type { DNRTrackingRecord, DNRTimelineMonth, QuarterlyTimeline } from '@/types/modules/tracking';
+import type { DNRTrackingRecord, DNRTimelineMonth, QuarterlyTimeline } from '../../types/modules/tracking';
 
 const STORE_NAME = 'dnrTracking';
 

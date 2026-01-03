@@ -16,7 +16,7 @@ import {
   FileText,
   AlertTriangle,
 } from 'lucide-react';
-import { separationService, initializeExitModule } from '../../services/db/exitService';
+import { separationService } from '../../services/db/exitService';
 
 const SeparationsList = () => {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ const SeparationsList = () => {
   const loadSeparations = async () => {
     try {
       setLoading(true);
-      await initializeExitModule();
+      // await initializeExitModule();
       const data = await separationService.getAll({
         search,
         status: statusFilter,

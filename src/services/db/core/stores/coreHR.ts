@@ -5,7 +5,7 @@
  */
 
 import type { IDBPDatabase } from 'idb';
-import type { VDODatabase } from '@/types/db/stores';
+import type { VDODatabase } from '../../../../types/db/stores';
 
 /**
  * Create all core HR object stores
@@ -36,8 +36,8 @@ export function createCoreHRStores(db: IDBPDatabase<VDODatabase>): void {
     positionHistoryStore.createIndex('project', 'project', { unique: false });
     positionHistoryStore.createIndex('startDate', 'startDate', { unique: false });
     positionHistoryStore.createIndex('endDate', 'endDate', { unique: false });
-    positionHistoryStore.createIndex('isCurrent', 'isCurrent', { unique: false });
     positionHistoryStore.createIndex('createdAt', 'createdAt', { unique: false });
+
   }
 
   // Departments store
@@ -166,7 +166,5 @@ export function createCoreHRStores(db: IDBPDatabase<VDODatabase>): void {
     attendanceStore.createIndex('employeeId', 'employeeId', { unique: false });
     attendanceStore.createIndex('date', 'date', { unique: false });
     attendanceStore.createIndex('status', 'status', { unique: false });
-    // Compound index for employee + date (ensure one record per day per employee)
-    attendanceStore.createIndex('employeeDate', ['employeeId', 'date'], { unique: true });
   }
 }

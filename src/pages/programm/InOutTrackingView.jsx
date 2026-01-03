@@ -1,10 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Edit, Trash2, FileText, ArrowDown, ArrowUp } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import {
-  getInOutTrackingById,
-  deleteInOutTracking,
-} from '../../services/db/inOutTrackingService';
+  ArrowLeft,
+  Edit,
+  Trash2,
+  FileText,
+  ArrowDown,
+  ArrowUp,
+} from "lucide-react";
+
+import inOutTrackingService from "../../services/db/inOutTrackingService.ts";
+
+const { getById: getInOutTrackingById, delete: deleteInOutTracking } =
+  inOutTrackingService;
 
 const InOutTrackingView = () => {
   const navigate = useNavigate();
@@ -22,38 +30,44 @@ const InOutTrackingView = () => {
       const data = await getInOutTrackingById(Number(id));
       setEntry(data);
     } catch (error) {
-      console.error('Error loading entry:', error);
+      console.error("Error loading entry:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this document entry?')) {
+    if (
+      window.confirm("Are you sure you want to delete this document entry?")
+    ) {
       try {
         await deleteInOutTracking(Number(id));
-        navigate('/programm/in-out-tracking');
+        navigate("/programm/in-out-tracking");
       } catch (error) {
-        console.error('Error deleting entry:', error);
-        alert('Failed to delete entry');
+        console.error("Error deleting entry:", error);
+        alert("Failed to delete entry");
       }
     }
   };
 
   const getDocumentTypeBadgeClass = (type) => {
     const classes = {
-      incoming: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      outgoing: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+      incoming:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+      outgoing: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
     };
     return classes[type?.toLowerCase()] || classes.incoming;
   };
 
   const getStatusBadgeClass = (status) => {
     const classes = {
-      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      processed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+      processed:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+      completed:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+      cancelled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     };
     return classes[status?.toLowerCase()] || classes.pending;
   };
@@ -81,7 +95,7 @@ const InOutTrackingView = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/in-out-tracking')}
+          onClick={() => navigate("/programm/in-out-tracking")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -128,7 +142,9 @@ const InOutTrackingView = () => {
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Serial Number
               </label>
-              <p className="text-gray-900 dark:text-white">{entry.serialNumber}</p>
+              <p className="text-gray-900 dark:text-white">
+                {entry.serialNumber}
+              </p>
             </div>
           )}
 
@@ -141,7 +157,7 @@ const InOutTrackingView = () => {
                 entry.documentType
               )}`}
             >
-              {entry.documentType === 'incoming' ? (
+              {entry.documentType === "incoming" ? (
                 <ArrowDown className="h-4 w-4" />
               ) : (
                 <ArrowUp className="h-4 w-4" />
@@ -155,7 +171,9 @@ const InOutTrackingView = () => {
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Reference Number
               </label>
-              <p className="text-gray-900 dark:text-white">{entry.referenceNumber}</p>
+              <p className="text-gray-900 dark:text-white">
+                {entry.referenceNumber}
+              </p>
             </div>
           )}
 
@@ -165,12 +183,12 @@ const InOutTrackingView = () => {
             </label>
             <p className="text-gray-900 dark:text-white">
               {entry.date
-                ? new Date(entry.date).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
+                ? new Date(entry.date).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
                   })
-                : '-'}
+                : "-"}
             </p>
           </div>
 
@@ -178,7 +196,9 @@ const InOutTrackingView = () => {
             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Document Title
             </label>
-            <p className="text-gray-900 dark:text-white font-medium">{entry.documentTitle}</p>
+            <p className="text-gray-900 dark:text-white font-medium">
+              {entry.documentTitle}
+            </p>
           </div>
 
           {entry.subject && (
@@ -186,7 +206,9 @@ const InOutTrackingView = () => {
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Subject
               </label>
-              <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{entry.subject}</p>
+              <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+                {entry.subject}
+              </p>
             </div>
           )}
 
@@ -213,7 +235,7 @@ const InOutTrackingView = () => {
                 entry.status
               )}`}
             >
-              {entry.status || 'pending'}
+              {entry.status || "pending"}
             </span>
           </div>
         </div>
@@ -240,7 +262,9 @@ const InOutTrackingView = () => {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Notes / Remarks
           </h2>
-          <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{entry.notes}</p>
+          <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+            {entry.notes}
+          </p>
         </div>
       )}
 

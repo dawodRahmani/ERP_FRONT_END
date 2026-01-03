@@ -6,9 +6,9 @@
  */
 
 import { openDB, type IDBPDatabase } from 'idb';
-import type { VDODatabase } from '@/types/db/stores';
-import { DB_CONFIG } from '@/types/db/constants';
-import { ConnectionError } from '@/types/db/errors';
+import type { VDODatabase } from '../../../types/db/stores';
+import { DB_CONFIG } from '../../../types/db/constants';
+import { ConnectionError } from '../../../types/db/errors';
 
 /** Singleton database instance */
 let dbInstance: IDBPDatabase<VDODatabase> | null = null;
@@ -43,8 +43,8 @@ export async function initDB(): Promise<IDBPDatabase<VDODatabase>> {
       DB_CONFIG.NAME,
       DB_CONFIG.VERSION,
       {
-        upgrade(db, oldVersion, newVersion, transaction) {
-          upgradeDatabase(db, oldVersion, newVersion, transaction);
+        upgrade(db, oldVersion, newVersion) {
+          upgradeDatabase(db, oldVersion, newVersion);
         },
         blocked() {
           console.warn(
@@ -134,4 +134,17 @@ export async function deleteDatabase(): Promise<void> {
     const message = error instanceof Error ? error.message : 'Unknown error';
     throw new ConnectionError(`Failed to delete database: ${message}`, error);
   }
+}
+
+/**
+ * Delete and recreate the database
+ * WARNING: This will permanently delete all data and reinitialize
+ * Useful for complete reset during development/testing
+ *
+ * @returns Promise resolving to the new database instance
+ */
+export async function deleteAndRecreateDB(): Promise<IDBPDatabase<VDODatabase>> {
+  await deleteDatabase();
+  dbInstance = await initDB();
+  return dbInstance;
 }

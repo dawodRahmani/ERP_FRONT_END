@@ -11,7 +11,7 @@ import {
   AlertCircle,
   RefreshCw,
 } from 'lucide-react';
-import { separationService, separationTypeService, initializeExitModule } from '../../services/db/exitService';
+import { separationService, separationTypeService } from '../../services/db/exitService';
 import { employeeDB } from '../../services/db/indexedDB';
 
 const SeparationForm = () => {
@@ -65,7 +65,7 @@ const SeparationForm = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      await initializeExitModule();
+      // await initializeExitModule();
 
       const [emps, types] = await Promise.all([
         employeeDB.getAll({ status: 'active' }),

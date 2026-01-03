@@ -5,22 +5,30 @@
  * Calls modular store creators to maintain clean separation of concerns.
  */
 
-import type { IDBPDatabase, IDBPTransaction} from 'idb';
-import type { VDODatabase } from '@/types/db/stores';
-import { UpgradeError } from '@/types/db/errors';
-import { DB_CONFIG } from '@/types/db/constants';
+import type { IDBPDatabase } from 'idb';
+import { DB_CONFIG } from '../../../types/db/constants';
+import { UpgradeError } from '../../../types/db/errors';
+import type { VDODatabase } from '../../../types/db/stores';
 
 // Import all store creators
 import { createCoreHRStores } from './stores/coreHR';
-import { createTrackingStores } from './stores/tracking';
-import { createLeaveStores } from './stores/leave';
-import { createRecruitmentStores } from './stores/recruitment';
-import { createPayrollStores } from './stores/payroll';
-import { createPerformanceStores } from './stores/performance';
-import { createTrainingStores } from './stores/training';
-import { createExitStores } from './stores/exit';
 import { createDisciplinaryStores } from './stores/disciplinary';
 import { createEmployeeAdminStores } from './stores/employeeAdmin';
+import { createExitStores } from './stores/exit';
+import { createLeaveStores } from './stores/leave';
+import { createPayrollStores } from './stores/payroll';
+import { createPerformanceStores } from './stores/performance';
+import { createRecruitmentStores } from './stores/recruitment';
+import { createTrackingStores } from './stores/tracking';
+import { createTrainingStores } from './stores/training';
+import { createFinanceStores } from './stores/finance';
+import { createContractStores } from './stores/contracts';
+import { createAssetStores } from './stores/assets';
+import { createTravelStores } from './stores/travel';
+import { createStaffAssociationStores } from './stores/staffAssociation';
+import { createProcurementStores } from './stores/procurement';
+import { createPolicyStores } from './stores/policy';
+import { createAuditStores } from './stores/audit';
 
 /**
  * Main database upgrade function
@@ -35,7 +43,6 @@ export function upgradeDatabase(
   db: IDBPDatabase<VDODatabase>,
   oldVersion: number,
   newVersion: number | null,
-  transaction: IDBPTransaction<VDODatabase, ArrayLike<string>, 'versionchange'>
 ): void {
   try {
     console.log(`IndexedDB: Upgrading from v${oldVersion} to v${newVersion || 'latest'}`);
@@ -102,6 +109,30 @@ function createAllStores(db: IDBPDatabase<VDODatabase>): void {
   // Tracking stores (in/out, access, DNR, MOU, work plans)
   createTrackingStores(db);
 
+  // Finance & Compliance stores (donors, projects, compliance)
+  createFinanceStores(db);
+
+  // Contract management stores
+  createContractStores(db);
+
+  // Asset management stores
+  createAssetStores(db);
+
+  // Travel management stores
+  createTravelStores(db);
+
+  // Staff association stores
+  createStaffAssociationStores(db);
+
+  // Procurement stores
+  createProcurementStores(db);
+
+  // Policy stores
+  createPolicyStores(db);
+
+  // Audit management stores
+  createAuditStores(db);
+
   console.log('All database stores created');
 }
 
@@ -116,9 +147,10 @@ function deleteOldInterviewStores(db: IDBPDatabase<VDODatabase>): void {
   ];
 
   oldInterviewStores.forEach((storeName) => {
-    if (db.objectStoreNames.contains(storeName)) {
+    // These are legacy stores being deleted, use type assertion
+    if ((db.objectStoreNames as DOMStringList).contains(storeName)) {
       console.log(`IndexedDB: Deleting old store ${storeName}`);
-      db.deleteObjectStore(storeName);
+      (db as unknown as IDBDatabase).deleteObjectStore(storeName);
     }
   });
 }
@@ -164,9 +196,10 @@ function deleteAllRecruitmentStores(db: IDBPDatabase<VDODatabase>): void {
   ];
 
   allRecruitmentStores.forEach((storeName) => {
-    if (db.objectStoreNames.contains(storeName)) {
+    // These are stores being deleted for migration, use type assertion
+    if ((db.objectStoreNames as DOMStringList).contains(storeName)) {
       console.log(`IndexedDB: Deleting recruitment store ${storeName}`);
-      db.deleteObjectStore(storeName);
+      (db as unknown as IDBDatabase).deleteObjectStore(storeName);
     }
   });
 }
@@ -178,7 +211,7 @@ export function storeExists(
   db: IDBPDatabase<VDODatabase>,
   storeName: string
 ): boolean {
-  return db.objectStoreNames.contains(storeName);
+  return (db.objectStoreNames as DOMStringList).contains(storeName);
 }
 
 /**

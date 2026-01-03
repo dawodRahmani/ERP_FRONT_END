@@ -1,13 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
-import {
-  createProgramWorkPlan,
-  updateProgramWorkPlan,
-  getProgramWorkPlanById,
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Save } from "lucide-react";
+import programWorkService, {
   generateTimelineMonths,
-} from '../../services/db/programWorkPlanService';
-
+} from "../../services/db/programWorkPlanService";
+const { create, update, getById } = programWorkService;
 const ProgramWorkPlanForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -15,20 +12,20 @@ const ProgramWorkPlanForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    donor: '',
-    project: '',
-    output: '',
-    activity: '',
-    implementationMethodology: '',
-    programComplianceDocuments: '',
-    location: '',
-    brandingVisibility: '',
-    socialMedia: '',
-    website: '',
-    targetMatrixMeal: '',
+    donor: "",
+    project: "",
+    output: "",
+    activity: "",
+    implementationMethodology: "",
+    programComplianceDocuments: "",
+    location: "",
+    brandingVisibility: "",
+    socialMedia: "",
+    website: "",
+    targetMatrixMeal: "",
     timelineData: {},
-    remarks: '',
-    status: 'draft',
+    remarks: "",
+    status: "draft",
   });
 
   const timelineMonths = generateTimelineMonths();
@@ -42,28 +39,28 @@ const ProgramWorkPlanForm = () => {
   const loadWorkPlan = async () => {
     try {
       setLoading(true);
-      const plan = await getProgramWorkPlanById(Number(id));
+      const plan = await getById(Number(id));
       if (plan) {
         setFormData({
-          donor: plan.donor || '',
-          project: plan.project || '',
-          output: plan.output || '',
-          activity: plan.activity || '',
-          implementationMethodology: plan.implementationMethodology || '',
-          programComplianceDocuments: plan.programComplianceDocuments || '',
-          location: plan.location || '',
-          brandingVisibility: plan.brandingVisibility || '',
-          socialMedia: plan.socialMedia || '',
-          website: plan.website || '',
-          targetMatrixMeal: plan.targetMatrixMeal || '',
+          donor: plan.donor || "",
+          project: plan.project || "",
+          output: plan.output || "",
+          activity: plan.activity || "",
+          implementationMethodology: plan.implementationMethodology || "",
+          programComplianceDocuments: plan.programComplianceDocuments || "",
+          location: plan.location || "",
+          brandingVisibility: plan.brandingVisibility || "",
+          socialMedia: plan.socialMedia || "",
+          website: plan.website || "",
+          targetMatrixMeal: plan.targetMatrixMeal || "",
           timelineData: plan.timelineData || {},
-          remarks: plan.remarks || '',
-          status: plan.status || 'draft',
+          remarks: plan.remarks || "",
+          status: plan.status || "draft",
         });
       }
     } catch (error) {
-      console.error('Error loading work plan:', error);
-      alert('Failed to load work plan');
+      console.error("Error loading work plan:", error);
+      alert("Failed to load work plan");
     } finally {
       setLoading(false);
     }
@@ -94,15 +91,15 @@ const ProgramWorkPlanForm = () => {
       setLoading(true);
 
       if (isEditMode) {
-        await updateProgramWorkPlan(Number(id), formData);
+        await update(Number(id), formData);
       } else {
-        await createProgramWorkPlan(formData);
+        await create(formData);
       }
 
-      navigate('/programm/work-plans');
+      navigate("/programm/work-plans");
     } catch (error) {
-      console.error('Error saving work plan:', error);
-      alert('Failed to save work plan');
+      console.error("Error saving work plan:", error);
+      alert("Failed to save work plan");
     } finally {
       setLoading(false);
     }
@@ -122,19 +119,19 @@ const ProgramWorkPlanForm = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/work-plans')}
+          onClick={() => navigate("/programm/work-plans")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
           Back to Work Plans
         </button>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {isEditMode ? 'Edit Work Plan' : 'New Work Plan'}
+          {isEditMode ? "Edit Work Plan" : "New Work Plan"}
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {isEditMode
-            ? 'Update the program work plan details'
-            : 'Create a new program work plan'}
+            ? "Update the program work plan details"
+            : "Create a new program work plan"}
         </p>
       </div>
 
@@ -377,7 +374,7 @@ const ProgramWorkPlanForm = () => {
         <div className="flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => navigate('/programm/work-plans')}
+            onClick={() => navigate("/programm/work-plans")}
             className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Cancel
@@ -388,7 +385,7 @@ const ProgramWorkPlanForm = () => {
             className="flex items-center gap-2 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-5 w-5" />
-            {loading ? 'Saving...' : isEditMode ? 'Update' : 'Create'}
+            {loading ? "Saving..." : isEditMode ? "Update" : "Create"}
           </button>
         </div>
       </form>

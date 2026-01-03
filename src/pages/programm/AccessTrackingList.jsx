@@ -1,22 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Search, Filter, Edit, Trash2, Eye } from 'lucide-react';
-import {
-  getAllAccessTracking,
-  deleteAccessTracking,
-  searchAccessTracking,
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Plus, Search, Filter, Edit, Trash2, Eye } from "lucide-react";
+
+import accessTrackingService from "../../services/db/accessTrackingService";
+
+const {
+  getAll: getAllAccessTracking,
+  delete: deleteAccessTracking,
+  search: searchAccessTracking,
   getUniqueDonors,
   getUniqueProjects,
   getUniqueLineMinistries,
-} from '../../services/db/accessTrackingService';
+} = accessTrackingService;
 
 const AccessTrackingList = () => {
   const [entries, setEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterDonor, setFilterDonor] = useState('');
-  const [filterProject, setFilterProject] = useState('');
-  const [filterMinistry, setFilterMinistry] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterDonor, setFilterDonor] = useState("");
+  const [filterProject, setFilterProject] = useState("");
+  const [filterMinistry, setFilterMinistry] = useState("");
   const [donors, setDonors] = useState([]);
   const [projects, setProjects] = useState([]);
   const [ministries, setMinistries] = useState([]);
@@ -39,7 +42,7 @@ const AccessTrackingList = () => {
       setEntries(data);
       setFilteredEntries(data);
     } catch (error) {
-      console.error('Error loading access tracking entries:', error);
+      console.error("Error loading access tracking entries:", error);
     } finally {
       setLoading(false);
     }
@@ -56,7 +59,7 @@ const AccessTrackingList = () => {
       setProjects(projectList);
       setMinistries(ministryList);
     } catch (error) {
-      console.error('Error loading filter options:', error);
+      console.error("Error loading filter options:", error);
     }
   };
 
@@ -72,33 +75,41 @@ const AccessTrackingList = () => {
     }
 
     if (filterProject) {
-      filtered = filtered.filter((entry) => entry.projectName === filterProject);
+      filtered = filtered.filter(
+        (entry) => entry.projectName === filterProject
+      );
     }
 
     if (filterMinistry) {
-      filtered = filtered.filter((entry) => entry.lineMinistry === filterMinistry);
+      filtered = filtered.filter(
+        (entry) => entry.lineMinistry === filterMinistry
+      );
     }
 
     setFilteredEntries(filtered);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this access tracking entry?')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this access tracking entry?"
+      )
+    ) {
       try {
         await deleteAccessTracking(id);
         loadEntries();
       } catch (error) {
-        console.error('Error deleting entry:', error);
-        alert('Failed to delete entry');
+        console.error("Error deleting entry:", error);
+        alert("Failed to delete entry");
       }
     }
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setFilterDonor('');
-    setFilterProject('');
-    setFilterMinistry('');
+    setSearchTerm("");
+    setFilterDonor("");
+    setFilterProject("");
+    setFilterMinistry("");
   };
 
   if (loading) {
@@ -168,7 +179,9 @@ const AccessTrackingList = () => {
                   >
                     <option value="">All Donors</option>
                     {donors.map((donor) => (
-                      <option key={donor} value={donor}>{donor}</option>
+                      <option key={donor} value={donor}>
+                        {donor}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -184,7 +197,9 @@ const AccessTrackingList = () => {
                   >
                     <option value="">All Projects</option>
                     {projects.map((project) => (
-                      <option key={project} value={project}>{project}</option>
+                      <option key={project} value={project}>
+                        {project}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -200,7 +215,9 @@ const AccessTrackingList = () => {
                   >
                     <option value="">All Ministries</option>
                     {ministries.map((ministry) => (
-                      <option key={ministry} value={ministry}>{ministry}</option>
+                      <option key={ministry} value={ministry}>
+                        {ministry}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -208,7 +225,10 @@ const AccessTrackingList = () => {
 
               {(filterDonor || filterProject || filterMinistry) && (
                 <div className="mt-4">
-                  <button onClick={clearFilters} className="text-sm text-primary-500 hover:text-primary-600">
+                  <button
+                    onClick={clearFilters}
+                    className="text-sm text-primary-500 hover:text-primary-600"
+                  >
                     Clear all filters
                   </button>
                 </div>
@@ -249,48 +269,76 @@ const AccessTrackingList = () => {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {filteredEntries.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    No access tracking entries found. Click "Add Entry" to create one.
+                  <td
+                    colSpan="7"
+                    className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    No access tracking entries found. Click "Add Entry" to
+                    create one.
                   </td>
                 </tr>
               ) : (
                 filteredEntries.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <tr
+                    key={entry.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {entry.serialNumber || '-'}
+                      {entry.serialNumber || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       {entry.donor}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      <div className="max-w-xs truncate" title={entry.projectName}>
+                      <div
+                        className="max-w-xs truncate"
+                        title={entry.projectName}
+                      >
                         {entry.projectName}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      {entry.location || '-'}
+                      {entry.location || "-"}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      {entry.lineMinistry || '-'}
+                      {entry.lineMinistry || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {entry.startDate && entry.endDate && (
                         <span className="text-xs">
-                          {new Date(entry.startDate).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
-                          {' - '}
-                          {new Date(entry.endDate).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
+                          {new Date(entry.startDate).toLocaleDateString(
+                            "en-US",
+                            { month: "short", year: "2-digit" }
+                          )}
+                          {" - "}
+                          {new Date(entry.endDate).toLocaleDateString("en-US", {
+                            month: "short",
+                            year: "2-digit",
+                          })}
                         </span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
-                        <Link to={`/programm/access-tracking/${entry.id}`} className="text-primary-500 hover:text-primary-600" title="View">
+                        <Link
+                          to={`/programm/access-tracking/${entry.id}`}
+                          className="text-primary-500 hover:text-primary-600"
+                          title="View"
+                        >
                           <Eye className="h-4 w-4" />
                         </Link>
-                        <Link to={`/programm/access-tracking/${entry.id}/edit`} className="text-blue-500 hover:text-blue-600" title="Edit">
+                        <Link
+                          to={`/programm/access-tracking/${entry.id}/edit`}
+                          className="text-blue-500 hover:text-blue-600"
+                          title="Edit"
+                        >
                           <Edit className="h-4 w-4" />
                         </Link>
-                        <button onClick={() => handleDelete(entry.id)} className="text-red-500 hover:text-red-600" title="Delete">
+                        <button
+                          onClick={() => handleDelete(entry.id)}
+                          className="text-red-500 hover:text-red-600"
+                          title="Delete"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Plus,
   Search,
@@ -8,24 +8,24 @@ import {
   Trash2,
   Eye,
   Calendar,
-} from 'lucide-react';
-import {
-  getAllDNRTracking,
-  deleteDNRTracking,
-  searchDNRTracking,
+} from "lucide-react";
+import dnrTrackingService from "../../services/db/dnrTrackingService.ts";
+const {
+  search,
+  getAll,
+  delete: deleteDNRTracking,
   getUniqueDonors,
   getUniqueProjects,
   getUniqueReportTypes,
-} from '../../services/db/dnrTrackingService';
-
+} = dnrTrackingService;
 const DNRTrackingList = () => {
   const [entries, setEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterDonor, setFilterDonor] = useState('');
-  const [filterProject, setFilterProject] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-  const [filterReportType, setFilterReportType] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterDonor, setFilterDonor] = useState("");
+  const [filterProject, setFilterProject] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterReportType, setFilterReportType] = useState("");
   const [donors, setDonors] = useState([]);
   const [projects, setProjects] = useState([]);
   const [reportTypes, setReportTypes] = useState([]);
@@ -39,16 +39,23 @@ const DNRTrackingList = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [searchTerm, filterDonor, filterProject, filterStatus, filterReportType, entries]);
+  }, [
+    searchTerm,
+    filterDonor,
+    filterProject,
+    filterStatus,
+    filterReportType,
+    entries,
+  ]);
 
   const loadEntries = async () => {
     try {
       setLoading(true);
-      const data = await getAllDNRTracking();
+      const data = await getAll();
       setEntries(data);
       setFilteredEntries(data);
     } catch (error) {
-      console.error('Error loading DNR tracking entries:', error);
+      console.error("Error loading DNR tracking entries:", error);
     } finally {
       setLoading(false);
     }
@@ -65,7 +72,7 @@ const DNRTrackingList = () => {
       setProjects(projectList);
       setReportTypes(reportTypeList);
     } catch (error) {
-      console.error('Error loading filter options:', error);
+      console.error("Error loading filter options:", error);
     }
   };
 
@@ -74,7 +81,7 @@ const DNRTrackingList = () => {
 
     // Apply search
     if (searchTerm) {
-      filtered = await searchDNRTracking(searchTerm);
+      filtered = await search(searchTerm);
     }
 
     // Apply donor filter
@@ -84,48 +91,59 @@ const DNRTrackingList = () => {
 
     // Apply project filter
     if (filterProject) {
-      filtered = filtered.filter((entry) => entry.projectName === filterProject);
+      filtered = filtered.filter(
+        (entry) => entry.projectName === filterProject
+      );
     }
 
     // Apply status filter
     if (filterStatus) {
-      filtered = filtered.filter((entry) => entry.projectStatus === filterStatus);
+      filtered = filtered.filter(
+        (entry) => entry.projectStatus === filterStatus
+      );
     }
 
     // Apply report type filter
     if (filterReportType) {
-      filtered = filtered.filter((entry) => entry.reportType === filterReportType);
+      filtered = filtered.filter(
+        (entry) => entry.reportType === filterReportType
+      );
     }
 
     setFilteredEntries(filtered);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this DNR tracking entry?')) {
+    if (
+      window.confirm("Are you sure you want to delete this DNR tracking entry?")
+    ) {
       try {
         await deleteDNRTracking(id);
         loadEntries();
       } catch (error) {
-        console.error('Error deleting entry:', error);
-        alert('Failed to delete entry');
+        console.error("Error deleting entry:", error);
+        alert("Failed to delete entry");
       }
     }
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setFilterDonor('');
-    setFilterProject('');
-    setFilterStatus('');
-    setFilterReportType('');
+    setSearchTerm("");
+    setFilterDonor("");
+    setFilterProject("");
+    setFilterStatus("");
+    setFilterReportType("");
   };
 
   const getStatusBadgeClass = (status) => {
     const classes = {
-      active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      active:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+      completed:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+      pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+      cancelled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     };
     return classes[status?.toLowerCase()] || classes.active;
   };
@@ -263,7 +281,10 @@ const DNRTrackingList = () => {
                 </div>
               </div>
 
-              {(filterDonor || filterProject || filterStatus || filterReportType) && (
+              {(filterDonor ||
+                filterProject ||
+                filterStatus ||
+                filterReportType) && (
                 <div className="mt-4">
                   <button
                     onClick={clearFilters}
@@ -313,8 +334,12 @@ const DNRTrackingList = () => {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {filteredEntries.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    No DNR tracking entries found. Click "Add DNR Entry" to create one.
+                  <td
+                    colSpan="8"
+                    className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    No DNR tracking entries found. Click "Add DNR Entry" to
+                    create one.
                   </td>
                 </tr>
               ) : (
@@ -324,18 +349,21 @@ const DNRTrackingList = () => {
                     className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {entry.serialNumber || '-'}
+                      {entry.serialNumber || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       {entry.donor}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      <div className="max-w-xs truncate" title={entry.projectName}>
+                      <div
+                        className="max-w-xs truncate"
+                        title={entry.projectName}
+                      >
                         {entry.projectName}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {entry.location || '-'}
+                      {entry.location || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {entry.reportType}
@@ -344,15 +372,23 @@ const DNRTrackingList = () => {
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3 text-gray-400" />
                         <span className="text-xs">
-                          {entry.startDate && new Date(entry.startDate).toLocaleDateString('en-US', {
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                          {' - '}
-                          {entry.endDate && new Date(entry.endDate).toLocaleDateString('en-US', {
-                            month: 'short',
-                            year: 'numeric',
-                          })}
+                          {entry.startDate &&
+                            new Date(entry.startDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )}
+                          {" - "}
+                          {entry.endDate &&
+                            new Date(entry.endDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )}
                         </span>
                       </div>
                     </td>
@@ -362,7 +398,7 @@ const DNRTrackingList = () => {
                           entry.projectStatus
                         )}`}
                       >
-                        {entry.projectStatus || 'active'}
+                        {entry.projectStatus || "active"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

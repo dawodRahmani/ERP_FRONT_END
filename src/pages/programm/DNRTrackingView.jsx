@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Edit, Trash2, CheckCircle2, Calendar } from 'lucide-react';
-import {
-  getDNRTrackingById,
-  deleteDNRTracking,
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { ArrowLeft, Edit, Trash2, CheckCircle2, Calendar } from "lucide-react";
+import dnrTrackingService from "../../services/db/dnrTrackingService.ts";
+const {
+  getById: getDNRTrackingById,
+  delete: deleteDNRTracking,
   groupMonthsByYearAndQuarter,
-} from '../../services/db/dnrTrackingService';
+} = dnrTrackingService;
 
 const DNRTrackingView = () => {
   const navigate = useNavigate();
@@ -25,30 +26,33 @@ const DNRTrackingView = () => {
       const data = await getDNRTrackingById(Number(id));
       setEntry(data);
     } catch (error) {
-      console.error('Error loading DNR entry:', error);
+      console.error("Error loading DNR entry:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this DNR entry?')) {
+    if (window.confirm("Are you sure you want to delete this DNR entry?")) {
       try {
         await deleteDNRTracking(Number(id));
-        navigate('/programm/dnr-tracking');
+        navigate("/programm/dnr-tracking");
       } catch (error) {
-        console.error('Error deleting entry:', error);
-        alert('Failed to delete entry');
+        console.error("Error deleting entry:", error);
+        alert("Failed to delete entry");
       }
     }
   };
 
   const getStatusBadgeClass = (status) => {
     const classes = {
-      active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      active:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+      completed:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+      pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+      cancelled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     };
     return classes[status?.toLowerCase()] || classes.active;
   };
@@ -76,7 +80,7 @@ const DNRTrackingView = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/dnr-tracking')}
+          onClick={() => navigate("/programm/dnr-tracking")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -123,7 +127,9 @@ const DNRTrackingView = () => {
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Serial Number (S/N)
               </label>
-              <p className="text-gray-900 dark:text-white">{entry.serialNumber}</p>
+              <p className="text-gray-900 dark:text-white">
+                {entry.serialNumber}
+              </p>
             </div>
           )}
 
@@ -145,7 +151,9 @@ const DNRTrackingView = () => {
             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Location
             </label>
-            <p className="text-gray-900 dark:text-white">{entry.location || '-'}</p>
+            <p className="text-gray-900 dark:text-white">
+              {entry.location || "-"}
+            </p>
           </div>
 
           <div>
@@ -157,7 +165,7 @@ const DNRTrackingView = () => {
                 entry.projectStatus
               )}`}
             >
-              {entry.projectStatus || 'active'}
+              {entry.projectStatus || "active"}
             </span>
           </div>
 
@@ -169,24 +177,24 @@ const DNRTrackingView = () => {
               <Calendar className="h-4 w-4 text-gray-400" />
               {entry.startDate && (
                 <span>
-                  {new Date(entry.startDate).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
+                  {new Date(entry.startDate).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
                   })}
                 </span>
               )}
               {entry.startDate && entry.endDate && <span>→</span>}
               {entry.endDate && (
                 <span>
-                  {new Date(entry.endDate).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
+                  {new Date(entry.endDate).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
                   })}
                 </span>
               )}
-              {!entry.startDate && !entry.endDate && '-'}
+              {!entry.startDate && !entry.endDate && "-"}
             </div>
           </div>
         </div>
@@ -203,7 +211,9 @@ const DNRTrackingView = () => {
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Type of Report
               </label>
-              <p className="text-gray-900 dark:text-white">{entry.reportType}</p>
+              <p className="text-gray-900 dark:text-white">
+                {entry.reportType}
+              </p>
             </div>
 
             <div>
@@ -212,12 +222,12 @@ const DNRTrackingView = () => {
               </label>
               <p className="text-gray-900 dark:text-white">
                 {entry.dueDate
-                  ? new Date(entry.dueDate).toLocaleDateString('en-US', {
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric',
+                  ? new Date(entry.dueDate).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
                     })
-                  : '-'}
+                  : "-"}
               </p>
             </div>
           </div>
@@ -227,7 +237,7 @@ const DNRTrackingView = () => {
               Reporting Description
             </label>
             <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
-              {entry.reportingDescription || '-'}
+              {entry.reportingDescription || "-"}
             </p>
           </div>
 
@@ -236,7 +246,7 @@ const DNRTrackingView = () => {
               Reporting Format
             </label>
             <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
-              {entry.reportingFormat || '-'}
+              {entry.reportingFormat || "-"}
             </p>
           </div>
 
@@ -245,7 +255,7 @@ const DNRTrackingView = () => {
               Reports (Links or References)
             </label>
             <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
-              {entry.reports || '-'}
+              {entry.reports || "-"}
             </p>
           </div>
         </div>
@@ -259,7 +269,10 @@ const DNRTrackingView = () => {
 
         <div className="space-y-6">
           {Object.entries(monthsByYearQuarter).map(([year, quarters]) => (
-            <div key={year} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div
+              key={year}
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+            >
               <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
                 {year}
               </h3>
@@ -279,8 +292,8 @@ const DNRTrackingView = () => {
                               key={month.key}
                               className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
                                 isMarked
-                                  ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700'
-                                  : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+                                  ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700"
+                                  : "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
                               }`}
                             >
                               {isMarked && (
@@ -289,11 +302,11 @@ const DNRTrackingView = () => {
                               <span
                                 className={`text-xs ${
                                   isMarked
-                                    ? 'text-green-900 dark:text-green-300 font-medium'
-                                    : 'text-gray-600 dark:text-gray-400'
+                                    ? "text-green-900 dark:text-green-300 font-medium"
+                                    : "text-gray-600 dark:text-gray-400"
                                 }`}
                               >
-                                {month.label.split(' ')[0]}
+                                {month.label.split(" ")[0]}
                               </span>
                             </div>
                           );

@@ -1,16 +1,22 @@
-import { useState, useEffect } from 'react';
 import {
+  Calendar,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  Filter,
   RefreshCw,
-  Calendar,
   User,
   Users,
-  Filter,
-  Eye,
-} from 'lucide-react';
-import { leaveCalendarService, holidayService } from '../../services/db/leaveManagementService';
-import { leaveRequestDB, leaveTypeDB, employeeDB, departmentDB, seedAllDefaults } from '../../services/db/indexedDB';
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  departmentDB,
+  employeeDB,
+  leaveRequestDB,
+  leaveTypeDB,
+  seedAllDefaults,
+} from "../../services/db/indexedDB";
+import { holidaysDB } from "../../services/db/leaveManagementService";
 
 const LeaveCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -21,14 +27,18 @@ const LeaveCalendar = () => {
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [filterDepartment, setFilterDepartment] = useState('');
-  const [filterEmployee, setFilterEmployee] = useState('');
-  const [viewMode, setViewMode] = useState('month'); // month, week
+  const [filterDepartment, setFilterDepartment] = useState("");
+  const [filterEmployee, setFilterEmployee] = useState("");
+  const [viewMode, setViewMode] = useState("month"); // month, week
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   useEffect(() => {
     loadData();
@@ -44,20 +54,30 @@ const LeaveCalendar = () => {
       const startDate = new Date(year, month, 1);
       const endDate = new Date(year, month + 1, 0);
 
-      const [requestsData, holidaysData, employeesData, departmentsData, leaveTypesData] = await Promise.all([
+      const [
+        requestsData,
+        holidaysData,
+        employeesData,
+        departmentsData,
+        leaveTypesData,
+      ] = await Promise.all([
         leaveRequestDB.getAll(),
-        holidayService.getByDateRange(startDate.toISOString(), endDate.toISOString()),
+        holidaysDB.getByDateRange(
+          startDate.toISOString(),
+          endDate.toISOString()
+        ),
         employeeDB.getAll(),
         departmentDB.getAll(),
         leaveTypeDB.getAll(),
       ]);
 
       // Filter requests that overlap with current month
-      const monthRequests = requestsData.filter(r => {
-        if (!['approved', 'taken', 'completed'].includes(r.status)) return false;
+      const monthRequests = requestsData.filter((r) => {
+        if (!["approved", "taken", "completed"].includes(r.status))
+          return false;
         const reqStart = new Date(r.startDate);
         const reqEnd = new Date(r.endDate);
-        return (reqStart <= endDate && reqEnd >= startDate);
+        return reqStart <= endDate && reqEnd >= startDate;
       });
 
       setLeaveRequests(monthRequests);
@@ -66,36 +86,39 @@ const LeaveCalendar = () => {
       setDepartments(departmentsData);
       setLeaveTypes(leaveTypesData);
     } catch (error) {
-      console.error('Error loading data:', error);
-      showToast('Failed to load calendar data', 'error');
+      console.error("Error loading data:", error);
+      showToast("Failed to load calendar data", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const showToast = (message, type = 'success') => {
+  const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+    setTimeout(
+      () => setToast({ show: false, message: "", type: "success" }),
+      3000
+    );
   };
 
   const getEmployeeName = (id) => {
-    const employee = employees.find(e => e.id === id);
-    return employee ? `${employee.firstName} ${employee.lastName}` : 'Unknown';
+    const employee = employees.find((e) => e.id === id);
+    return employee ? `${employee.firstName} ${employee.lastName}` : "Unknown";
   };
 
   const getEmployeeDepartment = (id) => {
-    const employee = employees.find(e => e.id === id);
+    const employee = employees.find((e) => e.id === id);
     return employee?.departmentId || employee?.department;
   };
 
   const getLeaveTypeName = (id) => {
-    const type = leaveTypes.find(lt => lt.id === id);
-    return type?.name || 'Unknown';
+    const type = leaveTypes.find((lt) => lt.id === id);
+    return type?.name || "Unknown";
   };
 
   const getLeaveTypeColor = (id) => {
-    const type = leaveTypes.find(lt => lt.id === id);
-    return type?.color || 'gray';
+    const type = leaveTypes.find((lt) => lt.id === id);
+    return type?.color || "gray";
   };
 
   const getDaysInMonth = (date) => {
@@ -107,7 +130,9 @@ const LeaveCalendar = () => {
   };
 
   const navigateMonth = (direction) => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, 1)
+    );
   };
 
   const goToToday = () => {
@@ -124,20 +149,30 @@ const LeaveCalendar = () => {
   };
 
   const isWeekend = (day) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
     const dayOfWeek = date.getDay();
     return dayOfWeek === 5 || dayOfWeek === 6; // Friday-Saturday
   };
 
   const getHolidayForDate = (day) => {
-    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return holidays.find(h => h.date === dateStr);
+    const dateStr = `${currentDate.getFullYear()}-${String(
+      currentDate.getMonth() + 1
+    ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    return holidays.find((h) => h.date === dateStr);
   };
 
   const getLeavesForDate = (day) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
 
-    let filteredRequests = leaveRequests.filter(r => {
+    let filteredRequests = leaveRequests.filter((r) => {
       const start = new Date(r.startDate);
       const end = new Date(r.endDate);
       start.setHours(0, 0, 0, 0);
@@ -146,14 +181,18 @@ const LeaveCalendar = () => {
     });
 
     if (filterDepartment) {
-      filteredRequests = filteredRequests.filter(r => {
+      filteredRequests = filteredRequests.filter((r) => {
         const empDept = getEmployeeDepartment(r.employeeId);
-        return empDept === Number(filterDepartment) || empDept === filterDepartment;
+        return (
+          empDept === Number(filterDepartment) || empDept === filterDepartment
+        );
       });
     }
 
     if (filterEmployee) {
-      filteredRequests = filteredRequests.filter(r => r.employeeId === Number(filterEmployee));
+      filteredRequests = filteredRequests.filter(
+        (r) => r.employeeId === Number(filterEmployee)
+      );
     }
 
     return filteredRequests;
@@ -174,9 +213,21 @@ const LeaveCalendar = () => {
   };
 
   const { daysInMonth, firstDayOfMonth } = getDaysInMonth(currentDate);
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'];
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   if (loading) {
     return (
@@ -189,9 +240,11 @@ const LeaveCalendar = () => {
   return (
     <div className="p-6 space-y-6">
       {toast.show && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg ${
-          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-        } text-white`}>
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg ${
+            toast.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+        >
           {toast.message}
         </div>
       )}
@@ -199,7 +252,9 @@ const LeaveCalendar = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Leave Calendar</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Leave Calendar
+          </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             View team leaves and holidays at a glance
           </p>
@@ -234,7 +289,9 @@ const LeaveCalendar = () => {
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex items-center gap-2">
             <Filter className="w-5 h-5 text-gray-400" />
-            <span className="text-sm text-gray-500 dark:text-gray-400">Filter:</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Filter:
+            </span>
           </div>
           <select
             value={filterDepartment}
@@ -242,8 +299,10 @@ const LeaveCalendar = () => {
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">All Departments</option>
-            {departments.map(dept => (
-              <option key={dept.id} value={dept.id}>{dept.name}</option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.id}>
+                {dept.name}
+              </option>
             ))}
           </select>
           <select
@@ -252,15 +311,19 @@ const LeaveCalendar = () => {
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">All Employees</option>
-            {employees.filter(e => e.status === 'active').map(emp => (
-              <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
-            ))}
+            {employees
+              .filter((e) => e.status === "active")
+              .map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.firstName} {emp.lastName}
+                </option>
+              ))}
           </select>
           {(filterDepartment || filterEmployee) && (
             <button
               onClick={() => {
-                setFilterDepartment('');
-                setFilterEmployee('');
+                setFilterDepartment("");
+                setFilterEmployee("");
               }}
               className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
             >
@@ -294,8 +357,11 @@ const LeaveCalendar = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         {/* Day Headers */}
         <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
-          {dayNames.map(day => (
-            <div key={day} className="px-2 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50">
+          {dayNames.map((day) => (
+            <div
+              key={day}
+              className="px-2 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50"
+            >
               {day}
             </div>
           ))}
@@ -305,7 +371,10 @@ const LeaveCalendar = () => {
         <div className="grid grid-cols-7">
           {/* Empty cells for days before first day of month */}
           {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-            <div key={`empty-${index}`} className="min-h-[100px] p-2 border-b border-r border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50" />
+            <div
+              key={`empty-${index}`}
+              className="min-h-[100px] p-2 border-b border-r border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50"
+            />
           ))}
 
           {/* Days of the month */}
@@ -321,17 +390,23 @@ const LeaveCalendar = () => {
                 key={day}
                 onClick={() => handleDateClick(day)}
                 className={`min-h-[100px] p-2 border-b border-r border-gray-100 dark:border-gray-700 cursor-pointer transition-colors ${
-                  holiday ? 'bg-red-50 dark:bg-red-900/20' :
-                  weekend ? 'bg-gray-50 dark:bg-gray-800/50' :
-                  'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                } ${today ? 'ring-2 ring-inset ring-primary-500' : ''}`}
+                  holiday
+                    ? "bg-red-50 dark:bg-red-900/20"
+                    : weekend
+                    ? "bg-gray-50 dark:bg-gray-800/50"
+                    : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                } ${today ? "ring-2 ring-inset ring-primary-500" : ""}`}
               >
                 <div className="flex justify-between items-start">
-                  <span className={`inline-flex items-center justify-center w-7 h-7 text-sm rounded-full ${
-                    today ? 'bg-primary-500 text-white font-bold' :
-                    weekend ? 'text-gray-400' :
-                    'text-gray-900 dark:text-white'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center justify-center w-7 h-7 text-sm rounded-full ${
+                      today
+                        ? "bg-primary-500 text-white font-bold"
+                        : weekend
+                        ? "text-gray-400"
+                        : "text-gray-900 dark:text-white"
+                    }`}
+                  >
                     {day}
                   </span>
                   {(leaves.length > 0 || holiday) && (
@@ -351,9 +426,17 @@ const LeaveCalendar = () => {
                   {leaves.slice(0, 3).map((leave, idx) => (
                     <div
                       key={idx}
-                      className={`text-xs px-1.5 py-0.5 rounded truncate bg-${getLeaveTypeColor(leave.leaveTypeId)}-100 text-${getLeaveTypeColor(leave.leaveTypeId)}-800 dark:bg-${getLeaveTypeColor(leave.leaveTypeId)}-900/30 dark:text-${getLeaveTypeColor(leave.leaveTypeId)}-400`}
+                      className={`text-xs px-1.5 py-0.5 rounded truncate bg-${getLeaveTypeColor(
+                        leave.leaveTypeId
+                      )}-100 text-${getLeaveTypeColor(
+                        leave.leaveTypeId
+                      )}-800 dark:bg-${getLeaveTypeColor(
+                        leave.leaveTypeId
+                      )}-900/30 dark:text-${getLeaveTypeColor(
+                        leave.leaveTypeId
+                      )}-400`}
                     >
-                      {getEmployeeName(leave.employeeId).split(' ')[0]}
+                      {getEmployeeName(leave.employeeId).split(" ")[0]}
                     </div>
                   ))}
                   {leaves.length > 3 && (
@@ -377,11 +460,11 @@ const LeaveCalendar = () => {
                 <Calendar className="w-6 h-6 text-primary-500" />
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                    {selectedDate.date.toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
+                    {selectedDate.date.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}
                   </h2>
                 </div>
@@ -393,7 +476,9 @@ const LeaveCalendar = () => {
                 <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                   <div className="flex items-center gap-2 text-red-700 dark:text-red-300">
                     <Calendar className="w-5 h-5" />
-                    <span className="font-medium">Holiday: {selectedDate.holiday.name}</span>
+                    <span className="font-medium">
+                      Holiday: {selectedDate.holiday.name}
+                    </span>
                   </div>
                 </div>
               )}
@@ -407,7 +492,10 @@ const LeaveCalendar = () => {
                   </h3>
                   <div className="space-y-3">
                     {selectedDate.leaves.map((leave, idx) => (
-                      <div key={idx} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div
+                        key={idx}
+                        className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-white dark:bg-gray-800 rounded-full">
@@ -422,12 +510,24 @@ const LeaveCalendar = () => {
                               </p>
                             </div>
                           </div>
-                          <span className={`text-xs px-2 py-1 rounded-full bg-${getLeaveTypeColor(leave.leaveTypeId)}-100 text-${getLeaveTypeColor(leave.leaveTypeId)}-800 dark:bg-${getLeaveTypeColor(leave.leaveTypeId)}-900/30 dark:text-${getLeaveTypeColor(leave.leaveTypeId)}-400`}>
-                            {leave.totalDays} day{leave.totalDays !== 1 ? 's' : ''}
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full bg-${getLeaveTypeColor(
+                              leave.leaveTypeId
+                            )}-100 text-${getLeaveTypeColor(
+                              leave.leaveTypeId
+                            )}-800 dark:bg-${getLeaveTypeColor(
+                              leave.leaveTypeId
+                            )}-900/30 dark:text-${getLeaveTypeColor(
+                              leave.leaveTypeId
+                            )}-400`}
+                          >
+                            {leave.totalDays} day
+                            {leave.totalDays !== 1 ? "s" : ""}
                           </span>
                         </div>
                         <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                          {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
+                          {new Date(leave.startDate).toLocaleDateString()} -{" "}
+                          {new Date(leave.endDate).toLocaleDateString()}
                         </div>
                       </div>
                     ))}

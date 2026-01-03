@@ -19,14 +19,13 @@ import {
   UserCheck,
 } from 'lucide-react';
 import {
-  trainingTypeDB,
-  trainingProgramDB,
-  trainingAttendanceDB,
-  tnaDB,
-  tnaItemDB,
-  idpDB,
-  idpGoalDB,
-  trainingBondDB,
+  trainingTypesDB,
+  trainingProgramsDB,
+  trainingParticipantsDB,
+  tnasDB,
+  tnaTrainingNeedsDB,
+  // TODO: idpDB and idpGoalDB don't exist - IDP (Individual Development Plan) not implemented
+  trainingBondsDB,
   employeeDB,
   seedAllDefaults,
 } from '../../services/db/indexedDB';
@@ -141,14 +140,14 @@ export default function TrainingDevelopment() {
         bondsData,
         employeesData,
       ] = await Promise.all([
-        trainingTypeDB.getAll(),
-        trainingProgramDB.getAll(),
-        trainingAttendanceDB.getAll(),
-        tnaDB.getAll(),
-        tnaItemDB.getAll(),
-        idpDB.getAll(),
-        idpGoalDB.getAll(),
-        trainingBondDB.getAll(),
+        trainingTypesDB.getAll(),
+        trainingProgramsDB.getAll(),
+        trainingParticipantsDB.getAll(),
+        tnasDB.getAll(),
+        tnaTrainingNeedsDB.getAll(),
+        Promise.resolve([]), // TODO: idpDB not implemented
+        Promise.resolve([]), // TODO: idpGoalDB not implemented
+        trainingBondsDB.getAll(),
         employeeDB.getAll(),
       ]);
 
@@ -282,10 +281,10 @@ export default function TrainingDevelopment() {
       };
 
       if (isEditing && selectedRecord) {
-        await trainingProgramDB.update(selectedRecord.id, data);
+        await trainingProgramsDB.update(selectedRecord.id, data);
         showToast('Program updated successfully');
       } else {
-        await trainingProgramDB.add(data);
+        await trainingProgramsDB.create(data);
         showToast('Program created successfully');
       }
 
@@ -312,10 +311,10 @@ export default function TrainingDevelopment() {
       };
 
       if (isEditing && selectedRecord) {
-        await trainingAttendanceDB.update(selectedRecord.id, data);
+        await trainingParticipantsDB.update(selectedRecord.id, data);
         showToast('Attendance updated successfully');
       } else {
-        await trainingAttendanceDB.add(data);
+        await trainingParticipantsDB.create(data);
         showToast('Participant enrolled successfully');
       }
 
@@ -369,12 +368,15 @@ export default function TrainingDevelopment() {
         supervisorId: idpForm.supervisorId ? parseInt(idpForm.supervisorId) : null,
       };
 
+      // TODO: IDP (Individual Development Plan) not implemented
       if (isEditing && selectedRecord) {
-        await idpDB.update(selectedRecord.id, data);
-        showToast('IDP updated successfully');
+        // await idpDB.update(selectedRecord.id, data);
+        console.warn('IDP service not implemented yet');
+        showToast('IDP feature not implemented', 'error');
       } else {
-        await idpDB.add(data);
-        showToast('IDP created successfully');
+        // await idpDB.add(data);
+        console.warn('IDP service not implemented yet');
+        showToast('IDP feature not implemented', 'error');
       }
 
       await loadData();
@@ -400,10 +402,10 @@ export default function TrainingDevelopment() {
       };
 
       if (isEditing && selectedRecord) {
-        await trainingBondDB.update(selectedRecord.id, data);
+        await trainingBondsDB.update(selectedRecord.id, data);
         showToast('Bond updated successfully');
       } else {
-        await trainingBondDB.add(data);
+        await trainingBondsDB.create(data);
         showToast('Bond created successfully');
       }
 
@@ -419,19 +421,20 @@ export default function TrainingDevelopment() {
     try {
       switch (activeTab) {
         case 'programs':
-          await trainingProgramDB.delete(selectedRecord.id);
+          await trainingProgramsDB.delete(selectedRecord.id);
           break;
         case 'attendance':
-          await trainingAttendanceDB.delete(selectedRecord.id);
+          await trainingParticipantsDB.delete(selectedRecord.id);
           break;
         case 'tna':
-          await tnaDB.delete(selectedRecord.id);
+          await tnasDB.delete(selectedRecord.id);
           break;
         case 'idp':
-          await idpDB.delete(selectedRecord.id);
+          // TODO: IDP not implemented
+          console.warn('IDP service not implemented yet');
           break;
         case 'bonds':
-          await trainingBondDB.delete(selectedRecord.id);
+          await trainingBondsDB.delete(selectedRecord.id);
           break;
       }
       showToast('Record deleted successfully');

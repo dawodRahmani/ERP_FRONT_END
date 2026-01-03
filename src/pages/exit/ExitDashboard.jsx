@@ -1,24 +1,21 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  UserMinus,
-  ClipboardCheck,
-  MessageSquare,
-  DollarSign,
-  Award,
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  FileText,
   ArrowRight,
-  Users,
+  Award,
   Calendar,
+  CheckCircle,
+  ClipboardCheck,
+  Clock,
+  DollarSign,
+  FileText,
+  LayoutDashboard,
+  MessageSquare,
   RefreshCw,
+  TrendingUp,
+  UserMinus
 } from 'lucide-react';
-import { exitDashboardService, separationService, initializeExitModule } from '../../services/db/exitService';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { exitDashboardService } from '../../services/db/exitService';
 
 const ExitDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -33,7 +30,7 @@ const ExitDashboard = () => {
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      await initializeExitModule();
+      // await initializeClearances();
 
       const [overview, pending, activity] = await Promise.all([
         exitDashboardService.getOverview(),

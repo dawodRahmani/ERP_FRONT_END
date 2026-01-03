@@ -12,7 +12,7 @@ import {
   Building,
   User,
 } from 'lucide-react';
-import { clearanceService, separationService, clearanceDepartmentService, initializeExitModule } from '../../services/db/exitService';
+import { clearanceService, separationService, clearanceDepartmentService } from '../../services/db/exitService';
 
 const ClearancesList = () => {
   const [clearances, setClearances] = useState([]);
@@ -29,7 +29,7 @@ const ClearancesList = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      await initializeExitModule();
+      // await initializeExitModule();
 
       const [clearanceData, sepData, deptData] = await Promise.all([
         clearanceService.getAll({ status: statusFilter, departmentId: departmentFilter ? Number(departmentFilter) : undefined }),

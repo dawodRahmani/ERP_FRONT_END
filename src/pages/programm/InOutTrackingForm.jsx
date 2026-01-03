@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
-import {
-  createInOutTracking,
-  updateInOutTracking,
-  getInOutTrackingById,
-} from '../../services/db/inOutTrackingService';
-
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Save } from "lucide-react";
+import inOutTrackingService from "../../services/db/inOutTrackingService.ts";
+const {
+  create: createInOutTracking,
+  update: updateInOutTracking,
+  getById: getInOutTrackingById,
+} = inOutTrackingService;
 const InOutTrackingForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -14,17 +14,17 @@ const InOutTrackingForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    serialNumber: '',
-    documentType: 'incoming',
-    referenceNumber: '',
-    documentTitle: '',
-    subject: '',
-    from: '',
-    to: '',
-    date: '',
-    status: 'pending',
-    documentLink: '',
-    notes: '',
+    serialNumber: "",
+    documentType: "incoming",
+    referenceNumber: "",
+    documentTitle: "",
+    subject: "",
+    from: "",
+    to: "",
+    date: "",
+    status: "pending",
+    documentLink: "",
+    notes: "",
   });
 
   useEffect(() => {
@@ -39,22 +39,22 @@ const InOutTrackingForm = () => {
       const entry = await getInOutTrackingById(Number(id));
       if (entry) {
         setFormData({
-          serialNumber: entry.serialNumber || '',
-          documentType: entry.documentType || 'incoming',
-          referenceNumber: entry.referenceNumber || '',
-          documentTitle: entry.documentTitle || '',
-          subject: entry.subject || '',
-          from: entry.from || '',
-          to: entry.to || '',
-          date: entry.date || '',
-          status: entry.status || 'pending',
-          documentLink: entry.documentLink || '',
-          notes: entry.notes || '',
+          serialNumber: entry.serialNumber || "",
+          documentType: entry.documentType || "incoming",
+          referenceNumber: entry.referenceNumber || "",
+          documentTitle: entry.documentTitle || "",
+          subject: entry.subject || "",
+          from: entry.from || "",
+          to: entry.to || "",
+          date: entry.date || "",
+          status: entry.status || "pending",
+          documentLink: entry.documentLink || "",
+          notes: entry.notes || "",
         });
       }
     } catch (error) {
-      console.error('Error loading entry:', error);
-      alert('Failed to load entry');
+      console.error("Error loading entry:", error);
+      alert("Failed to load entry");
     } finally {
       setLoading(false);
     }
@@ -80,10 +80,10 @@ const InOutTrackingForm = () => {
         await createInOutTracking(formData);
       }
 
-      navigate('/programm/in-out-tracking');
+      navigate("/programm/in-out-tracking");
     } catch (error) {
-      console.error('Error saving entry:', error);
-      alert('Failed to save entry');
+      console.error("Error saving entry:", error);
+      alert("Failed to save entry");
     } finally {
       setLoading(false);
     }
@@ -94,19 +94,19 @@ const InOutTrackingForm = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/programm/in-out-tracking')}
+          onClick={() => navigate("/programm/in-out-tracking")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
           Back to In-Out Tracking
         </button>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {isEditMode ? 'Edit Document Entry' : 'New Document Entry'}
+          {isEditMode ? "Edit Document Entry" : "New Document Entry"}
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {isEditMode
-            ? 'Update the document tracking details'
-            : 'Create a new document tracking entry'}
+            ? "Update the document tracking details"
+            : "Create a new document tracking entry"}
         </p>
       </div>
 
@@ -287,9 +287,9 @@ const InOutTrackingForm = () => {
             About In-Out Tracking
           </h3>
           <p className="text-sm text-blue-800 dark:text-blue-400">
-            This system tracks all incoming and outgoing correspondence and documents. Use it
-            to maintain a complete record of document movement for compliance and reference
-            purposes.
+            This system tracks all incoming and outgoing correspondence and
+            documents. Use it to maintain a complete record of document movement
+            for compliance and reference purposes.
           </p>
         </div>
 
@@ -297,7 +297,7 @@ const InOutTrackingForm = () => {
         <div className="flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => navigate('/programm/in-out-tracking')}
+            onClick={() => navigate("/programm/in-out-tracking")}
             className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Cancel
@@ -308,7 +308,7 @@ const InOutTrackingForm = () => {
             className="flex items-center gap-2 px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-5 w-5" />
-            {loading ? 'Saving...' : isEditMode ? 'Update' : 'Create'}
+            {loading ? "Saving..." : isEditMode ? "Update" : "Create"}
           </button>
         </div>
       </form>

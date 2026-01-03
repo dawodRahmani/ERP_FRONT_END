@@ -30,7 +30,12 @@ import type {
   RequestStatus,
   TimesheetStatus,
   AdjustmentType,
-} from '@/types/modules/leave';
+} from '../../types/modules/leave';
+import type {
+  AllowanceTypeRecord,
+  EmployeeRewardRecord,
+  CTORecord,
+} from '../../types/modules/legacy';
 
 // ========== LEAVE TYPES ==========
 
@@ -1045,6 +1050,79 @@ export const leaveReportService = {
     };
   },
 };
+
+// ========== LEGACY BACKWARD COMPATIBILITY ==========
+
+/**
+ * Legacy allowance types (backward compatibility)
+ * Maps to allowanceTypes store
+ */
+const allowanceTypesCRUD = createCRUDService<AllowanceTypeRecord>('allowanceTypes');
+
+export const allowanceTypeDB = {
+  ...allowanceTypesCRUD,
+
+  /**
+   * Get active allowance types
+   */
+  async getActive(): Promise<AllowanceTypeRecord[]> {
+    return allowanceTypesCRUD.getByIndex('isActive', true);
+  },
+};
+
+/**
+ * Legacy employee rewards (backward compatibility)
+ * Maps to employeeRewards store
+ */
+const employeeRewardsCRUD = createCRUDService<EmployeeRewardRecord>('employeeRewards');
+
+export const employeeRewardDB = {
+  ...employeeRewardsCRUD,
+
+  /**
+   * Get rewards by employee ID
+   */
+  async getByEmployee(employeeId: number): Promise<EmployeeRewardRecord[]> {
+    return employeeRewardsCRUD.getByIndex('employeeId', employeeId);
+  },
+
+  /**
+   * Get rewards by reward type
+   */
+  async getByType(rewardType: string): Promise<EmployeeRewardRecord[]> {
+    return employeeRewardsCRUD.getByIndex('rewardType', rewardType);
+  },
+};
+
+/**
+ * Legacy CTO (Compensatory Time Off) records (backward compatibility)
+ * Maps to ctoRecords store
+ */
+const ctoRecordsCRUD = createCRUDService<CTORecord>('ctoRecords');
+
+export const ctoRecordDB = {
+  ...ctoRecordsCRUD,
+
+  /**
+   * Get CTO records by employee ID
+   */
+  async getByEmployee(employeeId: number): Promise<CTORecord[]> {
+    return ctoRecordsCRUD.getByIndex('employeeId', employeeId);
+  },
+
+  /**
+   * Get CTO records by status
+   */
+  async getByStatus(status: string): Promise<CTORecord[]> {
+    return ctoRecordsCRUD.getByIndex('status', status);
+  },
+};
+
+/**
+ * Legacy leave approval DB (backward compatibility alias)
+ * Maps to existing leaveApprovalsDB
+ */
+export const leaveApprovalDB = leaveApprovalsDB;
 
 // ========== MAIN EXPORT ==========
 

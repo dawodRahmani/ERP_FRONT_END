@@ -5,10 +5,9 @@
  * Eliminates code duplication across all database services.
  */
 
-import type { IDBPDatabase } from 'idb';
-import type { BaseRecord, CRUDService, CreateInput, UpdateInput } from '@/types/db/base';
-import type { VDODatabase, StoreName } from '@/types/db/stores';
-import { RecordNotFoundError, TransactionError } from '@/types/db/errors';
+import type { BaseRecord, CRUDService, CreateInput, UpdateInput } from '../../../types/db/base';
+import { RecordNotFoundError, TransactionError } from '../../../types/db/errors';
+import type { StoreName } from '../../../types/db/stores';
 import { getDB } from './connection';
 
 /**
@@ -52,8 +51,7 @@ export function createCRUDService<T extends BaseRecord>(
           createdAt: now,
           updatedAt: now,
         } as T;
-
-        const id = await db.add(storeName, record as any);
+        const id = await db.add(storeName, record);
 
         return {
           ...record,
@@ -139,7 +137,7 @@ export function createCRUDService<T extends BaseRecord>(
           updatedAt: new Date().toISOString(),
         } as T;
 
-        await db.put(storeName, updated as any);
+        await db.put(storeName, updated);
 
         return updated;
       } catch (error) {
@@ -195,7 +193,7 @@ export function createCRUDService<T extends BaseRecord>(
     async getByIndex<K extends keyof T>(indexName: string, value: T[K]): Promise<T[]> {
       try {
         const db = await getDB();
-        const records = await db.getAllFromIndex(storeName, indexName, value as any);
+        const records = await db.getAllFromIndex(storeName, indexName, value as IDBValidKey);
         return records as T[];
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
@@ -236,7 +234,7 @@ export async function batchCreate<T extends BaseRecord>(
         updatedAt: now,
       } as T;
 
-      const id = await store.add(record as any);
+      const id = await store.add(record);
       createdRecords.push({
         ...record,
         id: id as number,
@@ -320,6 +318,35 @@ export async function clearStore(storeName: StoreName): Promise<void> {
     throw new TransactionError(
       `Failed to clear store ${storeName}: ${message}`,
       storeName,
+      error
+    );
+  }
+}
+
+/**
+ * Clear all data from all stores in the database
+ * WARNING: This will delete all data from the database
+ * Only use for testing or complete data reset
+ */
+export async function clearAllData(): Promise<void> {
+  try {
+    const db = await getDB();
+    const allStores = Array.from(db.objectStoreNames) as StoreName[];
+
+    // Use a single transaction to clear all stores efficiently
+    const tx = db.transaction(allStores, 'readwrite');
+
+    await Promise.all(
+      allStores.map(storeName => tx.objectStore(storeName).clear())
+    );
+
+    await tx.done;
+    console.log('All data cleared from database');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new TransactionError(
+      `Failed to clear all data: ${message}`,
+      'multiple',
       error
     );
   }
