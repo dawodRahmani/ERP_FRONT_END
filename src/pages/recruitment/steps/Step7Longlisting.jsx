@@ -49,6 +49,7 @@ const Step7Longlisting = ({ recruitment, onAdvance, isCurrentStep }) => {
 
   const handleToggle = async (id, field) => {
     setSaving(true);
+    setError(null); // Clear any previous errors
     try {
       const candidate = candidates.find(c => c.id === id);
       const newValue = !candidate[field];
@@ -56,6 +57,7 @@ const Step7Longlisting = ({ recruitment, onAdvance, isCurrentStep }) => {
       setCandidates(prev => prev.map(c => c.id === id ? { ...c, [field]: newValue } : c));
     } catch (err) {
       setError(err.message);
+      console.error('Toggle error:', err);
     } finally {
       setSaving(false);
     }
@@ -63,20 +65,52 @@ const Step7Longlisting = ({ recruitment, onAdvance, isCurrentStep }) => {
 
   const handleLonglist = async (id, value) => {
     setSaving(true);
+    setError(null); // Clear any previous errors
     try {
       await longlistingCandidateDB.update(id, { isLonglisted: value });
       setCandidates(prev => prev.map(c => c.id === id ? { ...c, isLonglisted: value } : c));
     } catch (err) {
       setError(err.message);
+      console.error('Longlist error:', err);
     } finally {
       setSaving(false);
     }
   };
 
   const handleComplete = async () => {
-    if (longlisting && onAdvance) {
-      await longlistingDB.complete(longlisting.id);
-      await onAdvance();
+    if (!longlisting) return;
+
+    // Validate at least one candidate is longlisted
+    const longlisted = candidates.filter(c => c.isLonglisted);
+    console.log('Longlisting validation:', { total: candidates.length, longlisted: longlisted.length, candidates });
+
+    if (longlisted.length === 0) {
+      setError('At least one candidate must be longlisted before proceeding');
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      // Verify data in database before completing
+      const dbCandidates = await longlistingCandidateDB.getByLonglistingId(longlisting.id);
+      const dbLonglisted = dbCandidates.filter(c => c.isLonglisted);
+      console.log('Database check before complete:', { dbTotal: dbCandidates.length, dbLonglisted: dbLonglisted.length });
+
+      // Mark longlisting as complete
+      const completed = await longlistingDB.complete(longlisting.id);
+      setLonglisting(completed);
+
+      // Advance to next step
+      if (onAdvance) {
+        await onAdvance();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to complete longlisting');
+      console.error('Longlisting completion error:', err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -122,9 +156,21 @@ const Step7Longlisting = ({ recruitment, onAdvance, isCurrentStep }) => {
         </div>
       </div>
 
-      {error && <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-center gap-3">
-        <AlertCircle className="w-5 h-5 text-red-500" /><p className="text-red-700 dark:text-red-400">{error}</p>
-      </div>}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500" />
+          <p className="text-red-700 dark:text-red-400">{error}</p>
+        </div>
+      )}
+
+      {isCurrentStep && longlisted === 0 && !error && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-blue-500" />
+          <p className="text-blue-700 dark:text-blue-400">
+            Click the checkboxes to mark candidates who meet each criterion, then click "Yes" in the Longlist column for candidates you want to proceed.
+          </p>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <table className="w-full">

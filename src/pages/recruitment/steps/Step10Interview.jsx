@@ -87,10 +87,35 @@ const Step10Interview = ({ recruitment, onAdvance, isCurrentStep }) => {
   };
 
   const handleComplete = async () => {
-    if (onAdvance) {
+    if (!interview) return;
+
+    // Validate at least one candidate attended
+    const attended = candidates.filter(c => c.attended);
+    if (attended.length === 0) {
+      setError('At least one candidate must attend the interview before proceeding');
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      // Rank candidates based on their scores
       await interviewResultDB.rankCandidates(interview.id);
-      await interviewDB.complete(interview.id);
-      await onAdvance();
+
+      // Mark interview as complete
+      const completed = await interviewDB.complete(interview.id);
+      setInterview(completed);
+
+      // Advance to next step
+      if (onAdvance) {
+        await onAdvance();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to complete interview');
+      console.error('Interview completion error:', err);
+    } finally {
+      setSaving(false);
     }
   };
 

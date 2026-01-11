@@ -176,6 +176,21 @@ import {
   SafeguardingForm,
   SafeguardingView,
 } from '../pages/program';
+
+// Governance Module Pages
+import {
+  GovernanceLayout,
+  BoardMemberList,
+  BoardMemberForm,
+  BoardMemberView,
+  BoardMeetingList,
+  BoardMeetingForm,
+  BoardMeetingView,
+  CorrespondenceList,
+  CorrespondenceForm,
+  CorrespondenceView,
+} from '../pages/governance';
+
 import type { JSX } from 'react';
 
 // User Management Routes
@@ -404,6 +419,33 @@ const programRoutes: RouteObject[] = [
   { path: 'program/safeguarding/:id/edit', element: <SafeguardingForm /> },
 ];
 
+// Governance Routes
+const governanceRoutes: RouteObject[] = [
+  {
+    path: 'governance',
+    element: <GovernanceLayout />,
+    children: [
+      // Default redirect
+      { index: true, element: <BoardMemberList /> },
+      // Board Members
+      { path: 'board-members', element: <BoardMemberList /> },
+      { path: 'board-members/new', element: <BoardMemberForm /> },
+      { path: 'board-members/:id', element: <BoardMemberView /> },
+      { path: 'board-members/:id/edit', element: <BoardMemberForm /> },
+      // Board Meetings
+      { path: 'board-meetings', element: <BoardMeetingList /> },
+      { path: 'board-meetings/new', element: <BoardMeetingForm /> },
+      { path: 'board-meetings/:id', element: <BoardMeetingView /> },
+      { path: 'board-meetings/:id/edit', element: <BoardMeetingForm /> },
+      // Correspondence
+      { path: 'correspondence', element: <CorrespondenceList /> },
+      { path: 'correspondence/new', element: <CorrespondenceForm /> },
+      { path: 'correspondence/:id', element: <CorrespondenceView /> },
+      { path: 'correspondence/:id/edit', element: <CorrespondenceForm /> },
+    ],
+  },
+];
+
 // Combine all routes
 const routes: RouteObject[] = [
   {
@@ -423,6 +465,7 @@ const routes: RouteObject[] = [
       ...performanceRoutes,
       ...auditRoutes,
       ...programRoutes,
+      ...governanceRoutes,
     ],
   },
 ];

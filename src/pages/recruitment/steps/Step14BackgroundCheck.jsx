@@ -94,10 +94,19 @@ const Step14BackgroundCheck = ({ recruitment, onAdvance, isCurrentStep }) => {
 
   const handleSave = async () => {
     setSaving(true);
+    setError(null);
+
     try {
       await backgroundCheckDB.update(backgroundCheck.id, backgroundCheck);
+      // Show success feedback
+      const successMsg = document.createElement('div');
+      successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      successMsg.textContent = 'Progress saved successfully!';
+      document.body.appendChild(successMsg);
+      setTimeout(() => successMsg.remove(), 3000);
     } catch (err) {
-      setError(err.message);
+      setError(`Failed to save: ${err.message}`);
+      console.error('Background check save error:', err);
     } finally {
       setSaving(false);
     }
@@ -279,26 +288,28 @@ const Step14BackgroundCheck = ({ recruitment, onAdvance, isCurrentStep }) => {
   };
 
   const handleComplete = async () => {
-    // Check if all checks are completed
-    const refsComplete = backgroundCheck.references?.length >= 2 &&
-      backgroundCheck.references?.every(r => r.status === 'verified');
-    const guaranteeComplete = backgroundCheck.guaranteeLetter?.status === 'verified';
-    const addressComplete = backgroundCheck.homeAddress?.verificationStatus === 'verified';
-    const criminalComplete = backgroundCheck.criminalCheck?.status === 'cleared';
-
-    if (!refsComplete || !guaranteeComplete || !addressComplete || !criminalComplete) {
-      setError('All background checks must be completed and verified before proceeding.');
-      return;
-    }
-
     setSaving(true);
+    setError(null); // Clear previous errors
+
     try {
+      // First save current state
+      await backgroundCheckDB.update(backgroundCheck.id, backgroundCheck);
+
+      // Validate and complete (service will validate)
       await backgroundCheckDB.complete(backgroundCheck.id);
+
+      // Refresh data
       const updated = await backgroundCheckDB.getByRecruitmentId(recruitment.id);
       setBackgroundCheck(updated);
-      if (onAdvance) await onAdvance();
+
+      // Advance to next step
+      if (onAdvance) {
+        await onAdvance();
+      }
     } catch (err) {
-      setError(err.message);
+      // Display detailed error message from validation
+      setError(err.message || 'Failed to complete background check');
+      console.error('Background check completion error:', err);
     } finally {
       setSaving(false);
     }

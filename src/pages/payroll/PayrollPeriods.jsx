@@ -53,7 +53,7 @@ const PayrollPeriods = () => {
   const loadPeriods = async () => {
     try {
       setLoading(true);
-      const data = await payrollService.payrollPeriods.getAll();
+      const data = await payrollService.periods.getAll();
       const sortedData = data.sort(
         (a, b) => new Date(b.startDate) - new Date(a.startDate)
       );
@@ -207,7 +207,7 @@ const PayrollPeriods = () => {
 
       switch (action.action) {
         case "initiate":
-          updated = await payrollService.initiatePayroll(selectedPeriod.id);
+          updated = await payrollService.periods.initiate(selectedPeriod.id);
           break;
         case "process":
           updated = {
@@ -215,13 +215,10 @@ const PayrollPeriods = () => {
             status: "processing",
             updatedAt: new Date().toISOString(),
           };
-          await payrollService.payrollPeriods.update(
-            selectedPeriod.id,
-            updated
-          );
+          await payrollService.periods.update(selectedPeriod.id, updated);
           break;
         case "hrSubmit":
-          updated = await payrollService.hrSubmitPayroll(selectedPeriod.id);
+          updated = await payrollService.periods.submitToHR(selectedPeriod.id);
           break;
         case "financeSubmit":
           updated = {
@@ -229,10 +226,7 @@ const PayrollPeriods = () => {
             status: "finance_review",
             updatedAt: new Date().toISOString(),
           };
-          await payrollService.payrollPeriods.update(
-            selectedPeriod.id,
-            updated
-          );
+          await payrollService.periods.update(selectedPeriod.id, updated);
           break;
         case "requestApproval":
           updated = {
@@ -240,16 +234,10 @@ const PayrollPeriods = () => {
             status: "pending_approval",
             updatedAt: new Date().toISOString(),
           };
-          await payrollService.payrollPeriods.update(
-            selectedPeriod.id,
-            updated
-          );
+          await payrollService.periods.update(selectedPeriod.id, updated);
           break;
         case "approve":
-          updated = await payrollService.approvePayroll(
-            selectedPeriod.id,
-            "admin"
-          );
+          updated = await payrollService.periods.approve(selectedPeriod.id);
           break;
         case "disburse":
           updated = {
@@ -257,16 +245,13 @@ const PayrollPeriods = () => {
             status: "disbursing",
             updatedAt: new Date().toISOString(),
           };
-          await payrollService.payrollPeriods.update(
-            selectedPeriod.id,
-            updated
-          );
+          await payrollService.periods.update(selectedPeriod.id, updated);
           break;
         case "complete":
-          updated = await payrollService.completePayroll(selectedPeriod.id);
+          updated = await payrollService.periods.complete(selectedPeriod.id);
           break;
         case "lock":
-          updated = await payrollService.lockPayroll(selectedPeriod.id);
+          updated = await payrollService.periods.lock(selectedPeriod.id);
           break;
         default:
           break;
@@ -311,8 +296,18 @@ const PayrollPeriods = () => {
 
     const [year, month] = monthValue.split("-");
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
     const monthName = monthNames[parseInt(month) - 1];
     const yearNum = parseInt(year);
@@ -337,7 +332,12 @@ const PayrollPeriods = () => {
   };
 
   const handleAddPeriod = async () => {
-    if (!newPeriod.month || !newPeriod.startDate || !newPeriod.endDate || !newPeriod.paymentDate) {
+    if (
+      !newPeriod.month ||
+      !newPeriod.startDate ||
+      !newPeriod.endDate ||
+      !newPeriod.paymentDate
+    ) {
       alert("Please fill in all required fields");
       return;
     }
@@ -354,10 +354,12 @@ const PayrollPeriods = () => {
         status: "draft",
         employeeCount: 0,
         totalAmount: 0,
-        periodCode: `PAY-${newPeriod.year}-${String(new Date(newPeriod.startDate).getMonth() + 1).padStart(2, "0")}`,
+        periodCode: `PAY-${newPeriod.year}-${String(
+          new Date(newPeriod.startDate).getMonth() + 1
+        ).padStart(2, "0")}`,
       };
 
-      await payrollService.payrollPeriods.create(periodData);
+      await payrollService.periods.create(periodData);
       await loadPeriods();
 
       setShowAddModal(false);
@@ -665,7 +667,10 @@ const PayrollPeriods = () => {
                   {/* Period Name Preview */}
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <p className="text-sm text-blue-600 dark:text-blue-400">
-                      Period Name: <strong>{newPeriod.month} {newPeriod.year} Payroll</strong>
+                      Period Name:{" "}
+                      <strong>
+                        {newPeriod.month} {newPeriod.year} Payroll
+                      </strong>
                     </p>
                   </div>
 
@@ -678,7 +683,12 @@ const PayrollPeriods = () => {
                       <input
                         type="date"
                         value={newPeriod.startDate}
-                        onChange={(e) => setNewPeriod({ ...newPeriod, startDate: e.target.value })}
+                        onChange={(e) =>
+                          setNewPeriod({
+                            ...newPeriod,
+                            startDate: e.target.value,
+                          })
+                        }
                         className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       />
                     </div>
@@ -689,7 +699,12 @@ const PayrollPeriods = () => {
                       <input
                         type="date"
                         value={newPeriod.endDate}
-                        onChange={(e) => setNewPeriod({ ...newPeriod, endDate: e.target.value })}
+                        onChange={(e) =>
+                          setNewPeriod({
+                            ...newPeriod,
+                            endDate: e.target.value,
+                          })
+                        }
                         className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       />
                     </div>
@@ -702,7 +717,12 @@ const PayrollPeriods = () => {
                     <input
                       type="date"
                       value={newPeriod.paymentDate}
-                      onChange={(e) => setNewPeriod({ ...newPeriod, paymentDate: e.target.value })}
+                      onChange={(e) =>
+                        setNewPeriod({
+                          ...newPeriod,
+                          paymentDate: e.target.value,
+                        })
+                      }
                       className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>

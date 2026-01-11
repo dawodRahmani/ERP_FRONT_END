@@ -453,6 +453,18 @@ export {
   programSafeguardDB,
 } from './programService';
 
+// Re-export governance services
+export {
+  governanceBoardMembersDB,
+  governanceBoardMeetingsDB,
+  governanceCorrespondenceDB,
+  governanceService,
+  // Backward compatibility aliases
+  governanceBoardMemberDB,
+  governanceBoardMeetingDB,
+  governanceCorrespondenceService,
+} from './governanceService';
+
 // Re-export utility functions
 export {
   generateFormattedCode,

@@ -172,18 +172,113 @@ export const recruitmentDB = {
     return results[0];
   },
 
+  /**
+   * Validate that a step is complete before advancing
+   */
+  async validateStepCompletion(recruitmentId: number, step: number): Promise<void> {
+    switch (step) {
+      case 7: // Longlisting
+        const longlisting = await longlistingDB.getByRecruitmentId(recruitmentId);
+        if (!longlisting) {
+          throw new Error('Longlisting record not found');
+        }
+        // Check that at least one candidate is longlisted
+        const llCandidates = await longlistingCandidateDB.getByLonglistingId(longlisting.id);
+        if (!llCandidates.some(c => c.isLonglisted)) {
+          throw new Error('At least one candidate must be longlisted');
+        }
+        // Note: We don't validate status === 'completed' here because the complete() method
+        // is called immediately before advanceStep, and the DB transaction might not be
+        // visible yet. The component already calls complete() before advancing.
+        break;
+
+      case 8: // Shortlisting
+        const shortlisting = await shortlistingDB.getByRecruitmentId(recruitmentId);
+        if (!shortlisting) {
+          throw new Error('Shortlisting record not found');
+        }
+        // Check that at least one candidate is shortlisted
+        const slCandidates = await shortlistingCandidateDB.getByShortlistingId(shortlisting.id);
+        if (!slCandidates.some(c => c.isShortlisted)) {
+          throw new Error('At least one candidate must be shortlisted');
+        }
+        // Note: Status validation skipped due to transaction timing (see longlisting note)
+        break;
+
+      case 9: // Written Test
+        const writtenTest = await writtenTestDB.getByRecruitmentId(recruitmentId);
+        if (!writtenTest) {
+          throw new Error('Written test record not found');
+        }
+        // Check that at least one candidate passed
+        const testCandidates = await writtenTestCandidateDB.getByTestId(writtenTest.id);
+        if (!testCandidates.some(c => c.isPassed)) {
+          throw new Error('At least one candidate must pass the written test');
+        }
+        // Note: Status validation skipped due to transaction timing
+        break;
+
+      case 10: // Interview
+        const interviewRecord = await interviewDB.getByRecruitmentId(recruitmentId);
+        if (!interviewRecord) {
+          throw new Error('Interview record not found');
+        }
+        // Check that at least one candidate attended
+        const interviewCandidates = await interviewCandidateDB.getByInterviewId(interviewRecord.id);
+        if (!interviewCandidates.some(c => c.attended)) {
+          throw new Error('At least one candidate must attend the interview');
+        }
+        // Note: Status validation skipped due to transaction timing
+        break;
+
+      case 14: // Background Check
+        const bgCheck = await backgroundCheckDB.getByRecruitmentId(recruitmentId);
+        if (!bgCheck) {
+          throw new Error('Background check not found');
+        }
+        const validation = await backgroundCheckDB.validateCompletion(bgCheck.id);
+        if (!validation.valid) {
+          throw new Error(`Background check incomplete: ${validation.errors.join(', ')}`);
+        }
+        break;
+
+      // Add validation for other critical steps as needed
+      default:
+        // No specific validation required for this step
+        break;
+    }
+  },
+
   async advanceStep(id: number): Promise<RecruitmentRecord> {
     const recruitment = await this.getById(id);
-    if (!recruitment) throw new RecordNotFoundError("Recruitment", id);
-    if (recruitment.currentStep >= 15) throw new Error("Already at final step");
+    if (!recruitment) {
+      throw new RecordNotFoundError("Recruitment", id);
+    }
 
-    const nextStep = recruitment.currentStep + 1;
+    if (recruitment.currentStep >= 15) {
+      throw new Error("Cannot advance: already at final step");
+    }
+
+    const currentStep = recruitment.currentStep;
+    const nextStep = currentStep + 1;
     const stepInfo = RECRUITMENT_STEPS.find((s) => s.step === nextStep);
 
-    return this.update(id, {
-      currentStep: nextStep,
-      status: (stepInfo?.status || recruitment.status) as RecruitmentStatus,
-    });
+    try {
+      // Validate current step is complete before advancing
+      await this.validateStepCompletion(id, currentStep);
+
+      // Update to next step
+      const updated = await this.update(id, {
+        currentStep: nextStep,
+        status: (stepInfo?.status || recruitment.status) as RecruitmentStatus,
+      });
+
+      console.log(`Advanced recruitment ${id} from step ${currentStep} to ${nextStep}`);
+      return updated;
+    } catch (error) {
+      console.error(`Failed to advance recruitment ${id} from step ${currentStep}:`, error);
+      throw new Error(`Cannot advance to next step: ${error.message}`);
+    }
   },
 
   async filterByStatus(
@@ -658,12 +753,19 @@ export const longlistingCandidateDB = {
     const tx = db.transaction("longlistingCandidates", "readwrite");
     const store = tx.objectStore("longlistingCandidates");
     const now = new Date().toISOString();
-    const promises = records.map((r) =>
-      store.add({ ...r, id: r.longlistingId, createdAt: now, updatedAt: now })
-    );
-    await Promise.all(promises);
-    await tx.done;
-    return true;
+
+    try {
+      const promises = records.map((r) =>
+        // Let IndexedDB auto-generate unique IDs (removed: id: r.longlistingId)
+        store.add({ ...r, createdAt: now, updatedAt: now })
+      );
+      await Promise.all(promises);
+      await tx.done;
+      return true;
+    } catch (error) {
+      console.error('Failed to bulk create longlisting candidates:', error);
+      throw new Error(`Failed to create longlisting candidates: ${error.message}`);
+    }
   },
 };
 
@@ -1201,10 +1303,37 @@ export const backgroundCheckDB = {
   async create(
     data: CreateInput<BackgroundCheckRecord>
   ): Promise<BackgroundCheckRecord> {
-    return backgroundCheckCRUD.create({
+    // Ensure nested structures are initialized with defaults
+    const defaultData: CreateInput<BackgroundCheckRecord> = {
       ...data,
       overallStatus: "pending",
-    } as CreateInput<BackgroundCheckRecord>);
+      references: data.references || [],
+      guaranteeLetter: data.guaranteeLetter || {
+        guarantorName: '',
+        guarantorNationalId: '',
+        relationship: '',
+        phone: '',
+        address: '',
+        status: 'pending',
+      },
+      homeAddress: data.homeAddress || {
+        province: '',
+        district: '',
+        village: '',
+        verificationStatus: 'pending',
+        verifiedBy: '',
+        verificationDate: '',
+      },
+      criminalCheck: data.criminalCheck || {
+        status: 'pending',
+        checkedBy: '',
+        checkedDate: '',
+        notes: '',
+      },
+      attachments: data.attachments || [],
+    };
+
+    return backgroundCheckCRUD.create(defaultData as CreateInput<BackgroundCheckRecord>);
   },
 
   async getByRecruitmentId(
@@ -1214,7 +1343,55 @@ export const backgroundCheckDB = {
     return results[0];
   },
 
+  /**
+   * Validate background check completion before advancing
+   */
+  async validateCompletion(id: number): Promise<{ valid: boolean; errors: string[] }> {
+    const record = await this.getById(id);
+    if (!record) {
+      return { valid: false, errors: ['Background check record not found'] };
+    }
+
+    const errors: string[] = [];
+
+    // Check references (minimum 2 verified)
+    if (!record.references || record.references.length < 2) {
+      errors.push('At least 2 references are required');
+    } else if (!record.references.every(r => r.status === 'verified')) {
+      errors.push('All references must be verified');
+    }
+
+    // Check guarantee letter
+    if (record.guaranteeLetter?.status !== 'verified') {
+      errors.push('Guarantee letter must be verified');
+    }
+
+    // Check address verification
+    if (record.homeAddress?.verificationStatus !== 'verified') {
+      errors.push('Home address must be verified');
+    }
+
+    // Check criminal record
+    if (record.criminalCheck?.status !== 'cleared') {
+      errors.push('Criminal record check must be cleared');
+    }
+
+    return { valid: errors.length === 0, errors };
+  },
+
+  /**
+   * Complete background check with validation
+   */
   async complete(id: number, passed = true): Promise<BackgroundCheckRecord> {
+    // Validate before completing
+    const validation = await this.validateCompletion(id);
+
+    if (!validation.valid) {
+      throw new Error(
+        `Cannot complete background check: ${validation.errors.join(', ')}`
+      );
+    }
+
     return this.update(id, {
       overallStatus: passed ? "completed" : "failed",
       completedAt: new Date().toISOString(),

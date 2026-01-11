@@ -669,21 +669,66 @@ export interface SanctionClearanceRecord extends BaseRecord {
 }
 
 /**
- * Background Check
+ * Background Check - Nested Type Interfaces
+ */
+export interface BackgroundCheckReference {
+  id: number;
+  name: string;
+  organization: string;
+  position: string;
+  phone: string;
+  email: string;
+  relationship: string;
+  status: 'pending' | 'contacted' | 'verified' | 'failed';
+  feedback: string;
+}
+
+export interface BackgroundCheckGuarantee {
+  guarantorName: string;
+  guarantorNationalId: string;
+  relationship: string;
+  phone: string;
+  address: string;
+  status: 'pending' | 'received' | 'verified';
+}
+
+export interface BackgroundCheckAddress {
+  province: string;
+  district: string;
+  village: string;
+  verificationStatus: 'pending' | 'in_progress' | 'verified' | 'failed';
+  verifiedBy: string;
+  verificationDate: string;
+}
+
+export interface BackgroundCheckCriminal {
+  status: 'pending' | 'in_progress' | 'cleared' | 'flagged';
+  checkedBy: string;
+  checkedDate: string;
+  notes: string;
+}
+
+export interface BackgroundCheckAttachment {
+  id: number;
+  name: string;
+  type: string;
+  size: number;
+  data: string; // base64
+  uploadedAt: string;
+  category: 'general' | 'reference' | 'guarantee' | 'id_proof' | 'police_clearance' | 'other';
+}
+
+/**
+ * Background Check Record (Updated to use nested structure)
  */
 export interface BackgroundCheckRecord extends BaseRecord {
   recruitmentId: number;
   candidateApplicationId: number;
-  referenceCheck1Status?: string;
-  referenceCheck1Notes?: string;
-  referenceCheck2Status?: string;
-  referenceCheck2Notes?: string;
-  guaranteeLetterStatus?: string;
-  guaranteeLetterNotes?: string;
-  addressVerificationStatus?: string;
-  addressVerificationNotes?: string;
-  criminalRecordStatus?: string;
-  criminalRecordNotes?: string;
+  references: BackgroundCheckReference[];
+  guaranteeLetter: BackgroundCheckGuarantee;
+  homeAddress: BackgroundCheckAddress;
+  criminalCheck: BackgroundCheckCriminal;
+  attachments: BackgroundCheckAttachment[];
   overallStatus: BackgroundCheckStatus;
   verifiedBy?: string;
   completedAt?: string;

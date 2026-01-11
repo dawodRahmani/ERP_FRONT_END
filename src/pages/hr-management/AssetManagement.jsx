@@ -162,7 +162,7 @@ const AssetManagement = () => {
         await db.update(selectedItem.id, { ...formData, updatedAt: new Date().toISOString() });
         showToast('Item updated successfully');
       } else {
-        await db.add({ ...formData, createdAt: new Date().toISOString() });
+        await db.create({ ...formData, createdAt: new Date().toISOString() });
         showToast('Item added successfully');
       }
       setShowModal(false);

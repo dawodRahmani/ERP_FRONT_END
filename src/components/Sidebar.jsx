@@ -545,6 +545,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         { icon: Shield, label: "Safeguarding", path: "/program/safeguarding" },
       ],
     },
+    {
+      icon: Scale,
+      label: "Governance",
+      type: "dropdown",
+      key: "governance",
+      subItems: [
+        { icon: Users, label: "Board Members", path: "/governance/board-members" },
+        { icon: Calendar, label: "Board Meetings", path: "/governance/board-meetings" },
+        { icon: FileText, label: "Correspondence", path: "/governance/correspondence" },
+      ],
+    },
   ];
 
   const toggleDropdown = (key) => {

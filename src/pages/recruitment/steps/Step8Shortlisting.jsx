@@ -53,22 +53,53 @@ const Step8Shortlisting = ({ recruitment, onAdvance, isCurrentStep }) => {
   const handleScoreChange = async (id, field, value) => {
     const numValue = Math.min(100, Math.max(0, parseInt(value) || 0));
     setSaving(true);
+    setError(null);
+
     try {
-      await shortlistingCandidateDB.update(id, { [field]: numValue }, shortlisting);
+      // Update the score field
+      await shortlistingCandidateDB.update(id, { [field]: numValue });
+
+      // Recalculate total score and shortlisting status
+      await shortlistingCandidateDB.recalculateScore(id, shortlisting);
+
+      // Refresh all candidates
       const updated = await shortlistingCandidateDB.getByShortlistingId(shortlisting.id);
       setCandidates(updated);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to update score');
+      console.error('Score update error:', err);
     } finally {
       setSaving(false);
     }
   };
 
   const handleComplete = async () => {
+    if (!shortlisting) return;
+
+    // Validate at least one candidate is shortlisted
     const shortlisted = candidates.filter(c => c.isShortlisted);
-    if (shortlisted.length > 0 && onAdvance) {
-      await shortlistingDB.complete(shortlisting.id);
-      await onAdvance();
+    if (shortlisted.length === 0) {
+      setError('At least one candidate must be shortlisted before proceeding');
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      // Mark shortlisting as complete
+      const completed = await shortlistingDB.complete(shortlisting.id);
+      setShortlisting(completed);
+
+      // Advance to next step
+      if (onAdvance) {
+        await onAdvance();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to complete shortlisting');
+      console.error('Shortlisting completion error:', err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -158,8 +189,13 @@ const Step8Shortlisting = ({ recruitment, onAdvance, isCurrentStep }) => {
 
       {isCurrentStep && shortlisted > 0 && (
         <div className="flex justify-end">
-          <button onClick={handleComplete} className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-            <CheckCircle className="w-4 h-4" /> Complete & Proceed to Written Test
+          <button
+            onClick={handleComplete}
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CheckCircle className="w-4 h-4" />
+            {saving ? 'Processing...' : 'Complete & Proceed to Written Test'}
           </button>
         </div>
       )}

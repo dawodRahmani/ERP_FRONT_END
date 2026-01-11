@@ -1,55 +1,68 @@
 /**
- * Safeguarding Module - Placeholder
- * TODO: Implement full CRUD similar to other modules
+ * Safeguarding Module
+ *
+ * Manages safeguarding activities including reports, trainings, awareness raising,
+ * and visibility materials.
+ *
+ * Components:
+ * - SafeguardingList: Browse, search, filter safeguarding activities with status tracking
+ * - SafeguardingForm: Create/edit safeguarding activities with document uploads
+ * - SafeguardingView: Detailed activity information with project context
+ *
+ * Features:
+ * - Project-based activity tracking
+ * - Multiple activity types (Report, Training, Awareness, Banners, Work Plan)
+ * - Frequency tracking (Quarterly, Annually, As Per Plan)
+ * - Due date reminders with color-coded alerts
+ * - Document upload for reports and materials
+ * - Status workflow (Pending, In Progress, Completed, Overdue)
+ * - Responsible officer assignment
+ *
+ * Activity Types (from VDO Safeguarding template):
+ * - Safeguarding Report: Quarterly/Annually reports
+ * - Awareness Raising: Per plan awareness activities
+ * - Training: Safeguarding trainings as per plan
+ * - Banners & Visibility Materials: Annual design and production
+ * - Work Plan: Safeguarding work plan tracking
+ *
+ * API Integration Points:
+ * When integrating with a backend API, update programService.ts:
+ *
+ * 1. Replace IndexedDB operations with API calls:
+ *    - GET /api/program/safeguarding - List all activities
+ *    - GET /api/program/safeguarding/:id - Get single activity
+ *    - POST /api/program/safeguarding - Create activity
+ *    - PUT /api/program/safeguarding/:id - Update activity
+ *    - DELETE /api/program/safeguarding/:id - Delete activity
+ *    - POST /api/program/safeguarding/:id/complete - Mark as completed
+ *
+ * 2. File upload endpoints:
+ *    - POST /api/uploads/safeguarding - Upload safeguarding document
+ *    - GET /api/uploads/safeguarding/:id - Download document
+ *
+ * 3. Filtering and search:
+ *    - GET /api/program/safeguarding?projectId=X&type=Y&status=Z
+ *    - GET /api/program/safeguarding/overdue - Get overdue activities
+ *    - GET /api/program/safeguarding/due-soon?days=15 - Get activities due soon
+ *
+ * Data Structure (Safeguarding):
+ * {
+ *   id: number;
+ *   projectId: number;
+ *   projectName?: string;
+ *   activityType: 'report' | 'awareness_raising' | 'training' | 'banners_visibility' | 'work_plan';
+ *   frequency: 'quarterly' | 'annually' | 'as_per_plan';
+ *   documentFile?: FileMetadata;
+ *   responsibleOfficer?: string;
+ *   dueDate?: string;
+ *   status: 'pending' | 'in_progress' | 'completed' | 'overdue';
+ *   completedDate?: string;
+ *   description?: string;
+ *   createdAt: string;
+ *   updatedAt: string;
+ * }
  */
 
-import { Link } from 'react-router-dom';
-import { Shield, Plus } from 'lucide-react';
-
-export const SafeguardingList = () => (
-  <div className="p-6">
-    <div className="flex justify-between items-center mb-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Safeguarding</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Manage safeguarding activities
-        </p>
-      </div>
-      <Link
-        to="/program/safeguarding/new"
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-      >
-        <Plus className="h-5 w-5" />
-        New Activity
-      </Link>
-    </div>
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-12 text-center">
-      <Shield className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-      <p className="text-gray-600 dark:text-gray-400">Safeguarding module coming soon</p>
-    </div>
-  </div>
-);
-
-export const SafeguardingForm = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Safeguarding Form</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
-      <p className="text-gray-600 dark:text-gray-400">Safeguarding form coming soon</p>
-      <Link to="/program/safeguarding" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
-        Back to Safeguarding
-      </Link>
-    </div>
-  </div>
-);
-
-export const SafeguardingView = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Safeguarding Details</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
-      <p className="text-gray-600 dark:text-gray-400">Safeguarding view coming soon</p>
-      <Link to="/program/safeguarding" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
-        Back to Safeguarding
-      </Link>
-    </div>
-  </div>
-);
+export { default as SafeguardingList } from './SafeguardingList';
+export { default as SafeguardingForm } from './SafeguardingForm';
+export { default as SafeguardingView } from './SafeguardingView';

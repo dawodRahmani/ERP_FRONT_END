@@ -28,6 +28,7 @@ import { createStaffAssociationStores } from './stores/staffAssociation';
 import { createPolicyStores } from './stores/policy';
 import { createAuditStores } from './stores/audit';
 import { createProgramStores } from './stores/program';
+import { createGovernanceStores } from './stores/governance';
 
 /**
  * Main database upgrade function
@@ -133,6 +134,9 @@ function createAllStores(db: IDBPDatabase<VDODatabase>): void {
 
   // Program module stores (donors, projects, work plans, etc.)
   createProgramStores(db);
+
+  // Governance module stores (board members, meetings, correspondence)
+  createGovernanceStores(db);
 
   console.log('All database stores created');
 }
