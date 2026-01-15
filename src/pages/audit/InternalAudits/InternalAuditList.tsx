@@ -116,7 +116,7 @@ const InternalAuditList: React.FC = () => {
           </select>
 
           <Link
-            to="/compliance/audit/internal/new"
+            to="/audit/internal/new"
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-4 w-4" />
@@ -263,14 +263,14 @@ const InternalAuditList: React.FC = () => {
                       ) : (
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => navigate(`/compliance/audit/internal/${item.id}`)}
+                            onClick={() => navigate(`/audit/internal/${item.id}`)}
                             className="text-gray-600 hover:text-gray-800 dark:text-gray-400"
                             title="View"
                           >
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => navigate(`/compliance/audit/internal/${item.id}?edit=true`)}
+                            onClick={() => navigate(`/audit/internal/${item.id}?edit=true`)}
                             className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
                             title="Edit"
                           >

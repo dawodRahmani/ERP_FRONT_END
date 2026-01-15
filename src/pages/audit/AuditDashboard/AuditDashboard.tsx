@@ -60,32 +60,32 @@ const AuditDashboard: React.FC = () => {
     {
       title: 'HACT Assessments',
       count: stats?.totalHACT || 0,
-      link: '/compliance/audit/hact',
+      link: '/audit/hact',
       icon: FileSearch,
       subtext: stats?.expiringHACT ? `${stats.expiringHACT} expiring soon` : undefined,
     },
     {
       title: 'Donor Project Audits',
       count: stats?.totalDonorProject || 0,
-      link: '/compliance/audit/donor-project',
+      link: '/audit/donor-project',
       icon: Building2,
     },
     {
       title: 'External Audits',
       count: stats?.totalExternal || 0,
-      link: '/compliance/audit/external',
+      link: '/audit/external',
       icon: Users,
     },
     {
       title: 'Internal Audits',
       count: stats?.totalInternal || 0,
-      link: '/compliance/audit/internal',
+      link: '/audit/internal',
       icon: ClipboardCheck,
     },
     {
       title: 'Partner Audits',
       count: stats?.totalPartner || 0,
-      link: '/compliance/audit/partner',
+      link: '/audit/partner',
       icon: Users,
     },
   ];
@@ -101,7 +101,7 @@ const AuditDashboard: React.FC = () => {
           </p>
         </div>
         <Link
-          to="/compliance/audit/settings"
+          to="/audit/settings"
           className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
         >
           <Settings className="h-4 w-4" />
@@ -295,31 +295,31 @@ const AuditDashboard: React.FC = () => {
         </h2>
         <div className="flex flex-wrap gap-3">
           <Link
-            to="/compliance/audit/hact/new"
+            to="/audit/hact/new"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             New HACT Assessment
           </Link>
           <Link
-            to="/compliance/audit/donor-project/new"
+            to="/audit/donor-project/new"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             New Donor Project Audit
           </Link>
           <Link
-            to="/compliance/audit/external/new"
+            to="/audit/external/new"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             New External Audit
           </Link>
           <Link
-            to="/compliance/audit/internal/new"
+            to="/audit/internal/new"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             New Internal Audit
           </Link>
           <Link
-            to="/compliance/audit/partner/new"
+            to="/audit/partner/new"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             New Partner Audit

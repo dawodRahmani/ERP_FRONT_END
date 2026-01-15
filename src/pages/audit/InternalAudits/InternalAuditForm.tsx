@@ -111,7 +111,7 @@ const InternalAuditForm: React.FC = () => {
       } else {
         await updateMutation.mutateAsync({ id: parseInt(id!), data: payload });
       }
-      navigate('/compliance/audit/internal');
+      navigate('/audit/internal');
     } catch (error) {
       console.error('Failed to save internal audit:', error);
     }
@@ -208,7 +208,7 @@ const InternalAuditForm: React.FC = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/compliance/audit/internal')}
+          onClick={() => navigate('/audit/internal')}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -526,7 +526,7 @@ const InternalAuditForm: React.FC = () => {
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => navigate('/compliance/audit/internal')}
+              onClick={() => navigate('/audit/internal')}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Cancel
@@ -546,7 +546,7 @@ const InternalAuditForm: React.FC = () => {
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={() => navigate(`/compliance/audit/internal/${id}?edit=true`)}
+              onClick={() => navigate(`/audit/internal/${id}?edit=true`)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Edit Audit

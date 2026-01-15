@@ -94,7 +94,7 @@ const DonorProjectAuditList: React.FC = () => {
           </div>
 
           <Link
-            to="/compliance/audit/donor-project/new"
+            to="/audit/donor-project/new"
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-4 w-4" />
@@ -215,14 +215,14 @@ const DonorProjectAuditList: React.FC = () => {
                       ) : (
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => navigate(`/compliance/audit/donor-project/${item.id}`)}
+                            onClick={() => navigate(`/audit/donor-project/${item.id}`)}
                             className="text-gray-600 hover:text-gray-800 dark:text-gray-400"
                             title="View"
                           >
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => navigate(`/compliance/audit/donor-project/${item.id}?edit=true`)}
+                            onClick={() => navigate(`/audit/donor-project/${item.id}?edit=true`)}
                             className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
                             title="Edit"
                           >

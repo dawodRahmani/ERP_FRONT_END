@@ -105,7 +105,7 @@ const ExternalAuditForm: React.FC = () => {
       } else {
         await updateMutation.mutateAsync({ id: parseInt(id!), data: payload });
       }
-      navigate('/compliance/audit/external');
+      navigate('/audit/external');
     } catch (error) {
       console.error('Failed to save external audit:', error);
     }
@@ -201,7 +201,7 @@ const ExternalAuditForm: React.FC = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/compliance/audit/external')}
+          onClick={() => navigate('/audit/external')}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -468,7 +468,7 @@ const ExternalAuditForm: React.FC = () => {
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => navigate('/compliance/audit/external')}
+              onClick={() => navigate('/audit/external')}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Cancel
@@ -488,7 +488,7 @@ const ExternalAuditForm: React.FC = () => {
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={() => navigate(`/compliance/audit/external/${id}?edit=true`)}
+              onClick={() => navigate(`/audit/external/${id}?edit=true`)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Edit Audit
