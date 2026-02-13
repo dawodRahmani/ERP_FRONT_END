@@ -1,6 +1,47 @@
 import { useState, useEffect } from 'react';
 import { Shield, Key, Save, Check } from 'lucide-react';
-import { roleDB, permissionDB, rolePermissionDB, seedAllDefaults } from '../../services/db/indexedDB';
+import { createCRUDService } from '../../services/db/indexedDB';
+
+const roleDB = createCRUDService('roles');
+const rolePermissionDBService = createCRUDService('rolePermissions');
+const permissionDBService = createCRUDService('permissions');
+
+// Wrapper with getAllGrouped method
+const permissionDB = {
+  ...permissionDBService,
+  async getAllGrouped() {
+    const all = await permissionDBService.getAll();
+    const grouped = {};
+    all.forEach(p => {
+      const module = p.module || 'Other';
+      if (!grouped[module]) {
+        grouped[module] = { module, permissions: [] };
+      }
+      grouped[module].permissions.push(p);
+    });
+    return Object.values(grouped);
+  }
+};
+
+// Wrapper for rolePermissions
+const rolePermissionDB = {
+  ...rolePermissionDBService,
+  async getByRoleId(roleId) {
+    const all = await rolePermissionDBService.getAll();
+    return all.filter(rp => rp.roleId === roleId);
+  },
+  async saveRolePermissions(roleId, permissionIds) {
+    // Delete existing permissions for this role
+    const existing = await this.getByRoleId(roleId);
+    for (const rp of existing) {
+      await rolePermissionDBService.delete(rp.id);
+    }
+    // Add new permissions
+    for (const permissionId of permissionIds) {
+      await rolePermissionDBService.create({ roleId, permissionId });
+    }
+  }
+};
 
 const RolePermissions = () => {
   const [selectedRole, setSelectedRole] = useState(null);
@@ -20,7 +61,6 @@ const RolePermissions = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      await seedAllDefaults();
       const [rolesData, permissionsGrouped] = await Promise.all([
         roleDB.getAll(),
         permissionDB.getAllGrouped(),

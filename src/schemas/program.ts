@@ -75,7 +75,7 @@ export const donorSchema = z.object({
   ).default('active'),
 });
 
-export type DonorFormData = z.infer<typeof donorSchema>;
+export type DonorFormData = z.output<typeof donorSchema>;
 
 // ============================================================================
 // PROJECT SCHEMA
@@ -105,7 +105,7 @@ export const projectSchema = z.object({
   { message: 'End date must be on or after start date', path: ['endDate'] }
 );
 
-export type ProjectFormData = z.infer<typeof projectSchema>;
+export type ProjectFormData = z.output<typeof projectSchema>;
 
 // ============================================================================
 // WORK PLAN SCHEMA
@@ -142,7 +142,7 @@ export const workPlanSchema = z.object({
   reminderDays: z.number().min(1).max(90, 'Reminder days must be between 1 and 90').default(15),
 });
 
-export type WorkPlanFormData = z.infer<typeof workPlanSchema>;
+export type WorkPlanFormData = z.output<typeof workPlanSchema>;
 
 // ============================================================================
 // CERTIFICATE SCHEMA
@@ -165,7 +165,7 @@ export const certificateSchema = z.object({
   documentFile: fileMetadataSchema,
 });
 
-export type CertificateFormData = z.infer<typeof certificateSchema>;
+export type CertificateFormData = z.output<typeof certificateSchema>;
 
 // ============================================================================
 // DOCUMENT SCHEMA
@@ -185,7 +185,7 @@ export const documentSchema = z.object({
   description: z.string().max(1000, 'Description must be 1000 characters or less').optional(),
 });
 
-export type DocumentFormData = z.infer<typeof documentSchema>;
+export type DocumentFormData = z.output<typeof documentSchema>;
 
 // ============================================================================
 // REPORTING SCHEMA
@@ -219,7 +219,7 @@ export const reportingSchema = z.object({
   submittedDate: dateStringSchema.optional(),
 });
 
-export type ReportingFormData = z.infer<typeof reportingSchema>;
+export type ReportingFormData = z.output<typeof reportingSchema>;
 
 // ============================================================================
 // BENEFICIARY SCHEMA
@@ -262,7 +262,7 @@ export const beneficiarySchema = z.object({
   ).optional(),
 });
 
-export type BeneficiaryFormData = z.infer<typeof beneficiarySchema>;
+export type BeneficiaryFormData = z.output<typeof beneficiarySchema>;
 
 // ============================================================================
 // SAFEGUARDING SCHEMA
@@ -290,7 +290,7 @@ export const safeguardingSchema = z.object({
   description: z.string().max(1000, 'Description must be 1000 characters or less').optional(),
 });
 
-export type SafeguardingFormData = z.infer<typeof safeguardingSchema>;
+export type SafeguardingFormData = z.output<typeof safeguardingSchema>;
 
 // ============================================================================
 // SEARCH/FILTER SCHEMAS
@@ -306,4 +306,4 @@ export const programSearchSchema = z.object({
   endDate: dateStringSchema.optional(),
 });
 
-export type ProgramSearchParams = z.infer<typeof programSearchSchema>;
+export type ProgramSearchParams = z.output<typeof programSearchSchema>;

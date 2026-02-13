@@ -35,7 +35,7 @@ const DocumentForm = () => {
     setValue,
     formState: { errors },
   } = useForm<DocumentFormData>({
-    resolver: zodResolver(documentSchema),
+    resolver: zodResolver(documentSchema) as any,
     defaultValues: {
       projectId: 0,
       projectName: '',

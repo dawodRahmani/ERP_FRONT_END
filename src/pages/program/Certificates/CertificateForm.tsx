@@ -39,7 +39,7 @@ const CertificateForm = () => {
     setValue,
     formState: { errors },
   } = useForm<CertificateFormData>({
-    resolver: zodResolver(certificateSchema),
+    resolver: zodResolver(certificateSchema) as any,
     defaultValues: {
       projectId: 0,
       projectName: '',

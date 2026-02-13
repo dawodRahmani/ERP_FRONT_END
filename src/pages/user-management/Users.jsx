@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import { UserPlus, Search, Edit, Trash2, Lock, X, User, Mail, Key, Shield, Unlock } from 'lucide-react';
-import { userDB, roleDB, employeeDB, seedAllDefaults } from '../../services/db/indexedDB';
+import { createCRUDService } from '../../services/db/indexedDB';
+
+// Create simple CRUD services for user management
+const userDB = createCRUDService('users');
+const roleDB = createCRUDService('roles');
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-  const [userSource, setUserSource] = useState('manual'); // 'manual' or 'employee'
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,7 +21,6 @@ const Users = () => {
     password: '',
     roleId: '',
     status: 'active',
-    employeeId: null,
   });
   const [errors, setErrors] = useState({});
 
@@ -32,18 +32,13 @@ const Users = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Seed defaults if needed
-      await seedAllDefaults();
-
-      const [usersData, rolesData, employeesData] = await Promise.all([
-        userDB.getAll({ search: searchTerm }),
+      const [usersData, rolesData] = await Promise.all([
+        userDB.getAll(),
         roleDB.getAll(),
-        employeeDB.getAll({ status: 'active' }),
       ]);
 
       setUsers(usersData);
       setRoles(rolesData);
-      setEmployees(employeesData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -54,10 +49,19 @@ const Users = () => {
   // Search effect
   useEffect(() => {
     const searchUsers = async () => {
-      const filtered = await userDB.getAll({ search: searchTerm });
+      const allUsers = await userDB.getAll();
+      const filtered = allUsers.filter(user =>
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.username?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
       setUsers(filtered);
     };
-    searchUsers();
+    if (searchTerm) {
+      searchUsers();
+    } else {
+      loadData();
+    }
   }, [searchTerm]);
 
   // Get role name by ID
@@ -73,33 +77,6 @@ const Users = () => {
     // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  // Handle employee selection
-  const handleEmployeeSelect = (e) => {
-    const empId = e.target.value;
-    if (empId) {
-      const employee = employees.find(emp => emp.id === Number(empId));
-      if (employee) {
-        setSelectedEmployee(employee);
-        setFormData(prev => ({
-          ...prev,
-          name: `${employee.firstName} ${employee.lastName}`,
-          email: employee.email || '',
-          username: employee.email ? employee.email.split('@')[0] : '',
-          employeeId: employee.id,
-        }));
-      }
-    } else {
-      setSelectedEmployee(null);
-      setFormData(prev => ({
-        ...prev,
-        name: '',
-        email: '',
-        username: '',
-        employeeId: null,
-      }));
     }
   };
 
@@ -136,8 +113,6 @@ const Users = () => {
   // Open modal for adding
   const handleAdd = () => {
     setEditingUser(null);
-    setUserSource('manual');
-    setSelectedEmployee(null);
     setFormData({
       name: '',
       email: '',
@@ -145,7 +120,6 @@ const Users = () => {
       password: '',
       roleId: roles[0]?.id || '',
       status: 'active',
-      employeeId: null,
     });
     setErrors({});
     setShowModal(true);
@@ -154,8 +128,6 @@ const Users = () => {
   // Open modal for editing
   const handleEdit = (user) => {
     setEditingUser(user);
-    setUserSource(user.employeeId ? 'employee' : 'manual');
-    setSelectedEmployee(user.employeeId ? employees.find(e => e.id === user.employeeId) : null);
     setFormData({
       name: user.name,
       email: user.email,
@@ -163,7 +135,6 @@ const Users = () => {
       password: '',
       roleId: user.roleId,
       status: user.status,
-      employeeId: user.employeeId,
     });
     setErrors({});
     setShowModal(true);
@@ -180,11 +151,10 @@ const Users = () => {
         username: formData.username,
         roleId: Number(formData.roleId),
         status: formData.status,
-        employeeId: formData.employeeId,
       };
 
       if (formData.password) {
-        userData.password = formData.password;
+        userData.passwordHash = formData.password; // In production, hash this
       }
 
       if (editingUser) {
@@ -208,7 +178,10 @@ const Users = () => {
   // Toggle user status
   const handleToggleStatus = async (user) => {
     try {
-      await userDB.toggleStatus(user.id);
+      await userDB.update(user.id, {
+        ...user,
+        status: user.status === 'active' ? 'inactive' : 'active'
+      });
       loadData();
     } catch (error) {
       console.error('Error toggling status:', error);
@@ -313,7 +286,7 @@ const Users = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-semibold">
-                          {getInitials(user.name)}
+                          {getInitials(user.name || 'U')}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -396,70 +369,6 @@ const Users = () => {
             </div>
 
             <div className="p-6 space-y-4">
-              {/* User Source Selection */}
-              {!editingUser && (
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    User Source
-                  </label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="userSource"
-                        value="manual"
-                        checked={userSource === 'manual'}
-                        onChange={() => {
-                          setUserSource('manual');
-                          setSelectedEmployee(null);
-                          setFormData(prev => ({
-                            ...prev,
-                            name: '',
-                            email: '',
-                            username: '',
-                            employeeId: null,
-                          }));
-                        }}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Enter manually</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="userSource"
-                        value="employee"
-                        checked={userSource === 'employee'}
-                        onChange={() => setUserSource('employee')}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Select from employees</span>
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              {/* Employee Selection */}
-              {userSource === 'employee' && !editingUser && (
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Select Employee
-                  </label>
-                  <select
-                    value={selectedEmployee?.id || ''}
-                    onChange={handleEmployeeSelect}
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                  >
-                    <option value="">-- Select an employee --</option>
-                    {employees.map(emp => (
-                      <option key={emp.id} value={emp.id}>
-                        {emp.firstName} {emp.lastName} ({emp.email || emp.employeeId})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               {/* Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -471,8 +380,7 @@ const Users = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  disabled={userSource === 'employee' && selectedEmployee}
-                  className={`w-full rounded-lg border ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 px-4 py-2.5 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 dark:disabled:bg-gray-800`}
+                  className={`w-full rounded-lg border ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 px-4 py-2.5 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500`}
                   placeholder="Enter full name"
                 />
                 {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
@@ -489,8 +397,7 @@ const Users = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  disabled={userSource === 'employee' && selectedEmployee}
-                  className={`w-full rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 px-4 py-2.5 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 dark:disabled:bg-gray-800`}
+                  className={`w-full rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 px-4 py-2.5 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500`}
                   placeholder="Enter email"
                 />
                 {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}

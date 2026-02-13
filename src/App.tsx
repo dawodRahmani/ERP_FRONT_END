@@ -1,4 +1,3 @@
-import { RecruitmentProvider } from "./contexts/RecruitmentContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
 import AppRouterProvider from "./providers/AppRouterProvider";
@@ -8,9 +7,7 @@ function App() {
   return (
     <QueryProvider>
       <ThemeProvider>
-        <RecruitmentProvider>
-          <AppRouterProvider />
-        </RecruitmentProvider>
+        <AppRouterProvider />
       </ThemeProvider>
     </QueryProvider>
   );

@@ -1,6 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Key, Plus, Edit, Trash2, X } from 'lucide-react';
-import { permissionDB, seedAllDefaults } from '../../services/db/indexedDB';
+import { createCRUDService } from '../../services/db/indexedDB';
+
+const permissionDBService = createCRUDService('permissions');
+
+// Wrapper with getAllGrouped method
+const permissionDB = {
+  ...permissionDBService,
+  async getAllGrouped() {
+    const all = await permissionDBService.getAll();
+    // Group by module
+    const grouped = {};
+    all.forEach(p => {
+      const module = p.module || 'Other';
+      if (!grouped[module]) {
+        grouped[module] = { module, permissions: [] };
+      }
+      grouped[module].permissions.push(p);
+    });
+    return Object.values(grouped);
+  }
+};
 
 const Permissions = () => {
   const [permissionGroups, setPermissionGroups] = useState([]);
@@ -35,7 +55,6 @@ const Permissions = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      await seedAllDefaults();
       const groupedData = await permissionDB.getAllGrouped();
       setPermissionGroups(groupedData);
     } catch (error) {

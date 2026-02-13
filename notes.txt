@@ -10,3 +10,11 @@ performanceService.ts line 57 (getTemplateWithSections)
 install NodeJS
 
 add audit to sidebar
+
+termination letter dropdown 
+probation
+Induction Form 
+
+
+Induction Checklist remove Checklist
+when the promotion letter is approved it should go to contact ammendmetn 

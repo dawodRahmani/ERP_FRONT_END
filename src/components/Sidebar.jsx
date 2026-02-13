@@ -1,75 +1,50 @@
 import {
-  AlertTriangle,
-  Award,
   Ban,
-  // Payroll icons
-  Banknote,
   BarChart3,
   BookOpen,
   Briefcase,
-  Building,
   Building2,
-  Calculator,
   Calendar,
-  CalendarCheck,
+  CalendarDays,
+  CheckCircle,
   ChevronDown,
   ChevronRight,
-  // Compliance icons
   ClipboardCheck,
   ClipboardList,
-  ClipboardMinus,
-  ClipboardSignature,
   Clock,
-  Coins,
   DollarSign,
-  Download,
   FileCheck,
-  // HR Extended icons
-  FileEdit,
   FileKey,
   FilePlus,
   FileSearch2,
+  FileSignature,
+  FileSpreadsheet,
   FileText,
-  FileWarning,
+  Fingerprint,
   FolderArchive,
-  FolderClosed,
   FolderKanban,
   FolderOpen,
-  // Disciplinary icons
-  Gavel,
   GraduationCap,
   HandCoins,
   Handshake,
   Heart,
-  Home,
   Key,
-  Laptop,
   LayoutDashboard,
-  ListChecks,
   Lock,
-  LogOut,
-  MessageSquare,
   Network,
-  PiggyBank,
-  Plane,
-  Receipt,
+  PenLine,
   Scale,
   ScrollText,
-  Search,
   Send,
   Settings,
   Shield,
   ShieldCheck,
   Target,
-  TrendingUp,
   UserCheck,
   UserCog,
   UserPlus,
-  // Recruitment icons
-  UserRoundSearch,
-  Users,
-  Users2,
   UserSearch,
+  Users,
   X
 } from "lucide-react";
 import { useState } from "react";
@@ -103,314 +78,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           icon: Shield,
           label: "Role Permissions",
           path: "/user-management/role-permissions",
-        },
-      ],
-    },
-    {
-      icon: UserCog,
-      label: "HR Management",
-      type: "dropdown",
-      key: "hr",
-      subItems: [
-        {
-          type: "nested-dropdown",
-          key: "hr-employee-admin",
-          label: "Employee Administration",
-          icon: Users2,
-          items: [
-            {
-              icon: LayoutDashboard,
-              label: "HR Dashboard",
-              path: "/employee-admin/dashboard",
-            },
-            {
-              icon: Users,
-              label: "Employees",
-              path: "/employee-admin/employees",
-            },
-            {
-              icon: UserPlus,
-              label: "New Employee",
-              path: "/employee-admin/employees/new",
-            },
-            {
-              icon: UserCheck,
-              label: "Onboarding",
-              path: "/employee-admin/onboarding",
-            },
-            {
-              icon: FileEdit,
-              label: "Contracts",
-              path: "/employee-admin/contracts",
-            },
-            {
-              icon: ClipboardMinus,
-              label: "Interim Hiring",
-              path: "/employee-admin/interim-hiring",
-            },
-            {
-              icon: FolderClosed,
-              label: "Personnel Files",
-              path: "/employee-admin/personnel-files",
-            },
-            {
-              icon: Home,
-              label: "Mahram Registration",
-              path: "/employee-admin/mahram",
-            },
-            {
-              icon: BarChart3,
-              label: "HR Reports",
-              path: "/employee-admin/reports",
-            },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-organization",
-          label: "Organization Setup",
-          icon: Building2,
-          items: [
-            { icon: Building2, label: "Departments", path: "/hr/departments" },
-            { icon: Briefcase, label: "Positions", path: "/hr/positions" },
-            { icon: Building, label: "Offices", path: "/hr/offices" },
-            { icon: Award, label: "Grades", path: "/hr/grades" },
-            {
-              icon: Users2,
-              label: "Employee Types",
-              path: "/hr/employee-types",
-            },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-recruitment",
-          label: "Recruitment",
-          icon: UserRoundSearch,
-          items: [
-            {
-              icon: ClipboardSignature,
-              label: "All Recruitments",
-              path: "/recruitment",
-            },
-            {
-              icon: UserPlus,
-              label: "New Recruitment",
-              path: "/recruitment/new",
-            },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-attendance",
-          label: "Time & Attendance",
-          icon: Clock,
-          items: [
-            {
-              icon: Calendar,
-              label: "Work Schedules",
-              path: "/hr/work-schedules",
-            },
-            { icon: Clock, label: "Attendance", path: "/hr/attendance" },
-            {
-              icon: Calendar,
-              label: "Leave Management",
-              path: "/hr/leave-management",
-            },
-            { icon: ListChecks, label: "Leave Types", path: "/hr/leave-types" },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-performance",
-          label: "Performance Appraisal",
-          icon: Target,
-          items: [
-            {
-              icon: LayoutDashboard,
-              label: "Dashboard",
-              path: "/hr/performance",
-            },
-            {
-              icon: Calendar,
-              label: "Appraisal Cycles",
-              path: "/hr/performance/cycles",
-            },
-            {
-              icon: FileText,
-              label: "Templates",
-              path: "/hr/performance/templates",
-            },
-            {
-              icon: ClipboardList,
-              label: "Employee Appraisals",
-              path: "/hr/performance/appraisals",
-            },
-            {
-              icon: UserCheck,
-              label: "Probation Tracking",
-              path: "/hr/performance/probation",
-            },
-            { icon: TrendingUp, label: "PIPs", path: "/hr/performance/pips" },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-training",
-          label: "Training & Capacity Building",
-          icon: GraduationCap,
-          items: [
-            { icon: LayoutDashboard, label: "Dashboard", path: "/training" },
-            {
-              icon: BookOpen,
-              label: "Training Types",
-              path: "/training/types",
-            },
-            {
-              icon: GraduationCap,
-              label: "Programs",
-              path: "/training/programs",
-            },
-            { icon: ClipboardList, label: "TNA", path: "/training/tna" },
-            { icon: Calendar, label: "Trainings", path: "/training/trainings" },
-            {
-              icon: CalendarCheck,
-              label: "Calendar",
-              path: "/training/calendar",
-            },
-            {
-              icon: Award,
-              label: "Certificates",
-              path: "/training/certificates",
-            },
-            { icon: FileText, label: "Bonds", path: "/training/bonds" },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-compensation",
-          label: "Compensation & Benefits",
-          icon: DollarSign,
-          items: [
-            { icon: DollarSign, label: "Payroll", path: "/hr/payroll" },
-            { icon: Plane, label: "Travel & DSA", path: "/hr/travel-dsa" },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-administration",
-          label: "HR Administration",
-          icon: FileText,
-          items: [
-            {
-              icon: Laptop,
-              label: "Asset Management",
-              path: "/hr/asset-management",
-            },
-            {
-              icon: LogOut,
-              label: "Exit Management",
-              path: "/hr/exit-management",
-            },
-            {
-              icon: Heart,
-              label: "Staff Association",
-              path: "/hr/staff-association",
-            },
-            {
-              icon: Download,
-              label: "Template Documents",
-              path: "/hr/template-documents",
-            },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-disciplinary",
-          label: "Disciplinary System",
-          icon: Gavel,
-          items: [
-            {
-              icon: LayoutDashboard,
-              label: "Dashboard",
-              path: "/disciplinary/dashboard",
-            },
-            {
-              icon: FileWarning,
-              label: "Misconduct Reports",
-              path: "/disciplinary/reports",
-            },
-            {
-              icon: Search,
-              label: "Investigations",
-              path: "/disciplinary/investigations",
-            },
-            {
-              icon: AlertTriangle,
-              label: "Warnings",
-              path: "/disciplinary/actions",
-            },
-            { icon: Scale, label: "Appeals", path: "/disciplinary/appeals" },
-            {
-              icon: MessageSquare,
-              label: "Grievances",
-              path: "/disciplinary/grievances",
-            },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-exit",
-          label: "Exit & Termination",
-          icon: LogOut,
-          items: [
-            { icon: LayoutDashboard, label: "Dashboard", path: "/exit" },
-            { icon: LogOut, label: "Separations", path: "/exit/separations" },
-            {
-              icon: ClipboardCheck,
-              label: "Clearances",
-              path: "/exit/clearances",
-            },
-            {
-              icon: MessageSquare,
-              label: "Exit Interviews",
-              path: "/exit/interviews",
-            },
-            {
-              icon: DollarSign,
-              label: "Settlements",
-              path: "/exit/settlements",
-            },
-            { icon: Award, label: "Certificates", path: "/exit/certificates" },
-          ],
-        },
-        {
-          type: "nested-dropdown",
-          key: "hr-payroll",
-          label: "Payroll System",
-          icon: Banknote,
-          items: [
-            { icon: LayoutDashboard, label: "Dashboard", path: "/payroll" },
-            {
-              icon: Calendar,
-              label: "Payroll Periods",
-              path: "/payroll/periods",
-            },
-            {
-              icon: FileText,
-              label: "Payroll Entries",
-              path: "/payroll/entries",
-            },
-            {
-              icon: Calculator,
-              label: "Salary Structures",
-              path: "/payroll/structures",
-            },
-            { icon: Coins, label: "Advances", path: "/payroll/advances" },
-            { icon: PiggyBank, label: "Loans", path: "/payroll/loans" },
-            { icon: Clock, label: "Overtime", path: "/payroll/overtime" },
-            { icon: Receipt, label: "Payslips", path: "/payroll/payslips" },
-          ],
         },
       ],
     },
@@ -556,6 +223,123 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         { icon: FileText, label: "Correspondence", path: "/governance/correspondence" },
       ],
     },
+    {
+      icon: Briefcase,
+      label: "Human Resources",
+      type: "dropdown",
+      key: "hr",
+      subItems: [
+        {
+          type: "nested-dropdown",
+          key: "hr-recruitment",
+          label: "Recruitment",
+          icon: UserPlus,
+          items: [
+            { icon: LayoutDashboard, label: "Dashboard", path: "/hr/recruitment" },
+            { icon: FileSpreadsheet, label: "Recruitment Tracker", path: "/hr/recruitment/tracker" },
+            { icon: FileText, label: "Terms of Reference", path: "/hr/recruitment/terms-of-reference" },
+            { icon: FilePlus, label: "Staff Requisition", path: "/hr/recruitment/staff-requisition" },
+            { icon: Users, label: "Applications", path: "/hr/recruitment/applications" },
+            { icon: UserCheck, label: "RC Formation", path: "/hr/recruitment/committee" },
+            { icon: ShieldCheck, label: "Conflict of Interest", path: "/hr/recruitment/conflict-of-interest" },
+            { icon: ClipboardList, label: "Longlisting", path: "/hr/recruitment/longlisting" },
+            { icon: CheckCircle, label: "Shortlisting", path: "/hr/recruitment/shortlisting" },
+            { icon: FileCheck, label: "Written Test", path: "/hr/recruitment/written-test" },
+            { icon: UserSearch, label: "Interview", path: "/hr/recruitment/interview" },
+            { icon: FileText, label: "Recruitment Report", path: "/hr/recruitment/report" },
+            { icon: Send, label: "Offer Letter", path: "/hr/recruitment/offer-letter" },
+            { icon: Shield, label: "Background Checks", path: "/hr/recruitment/background-checks" },
+            { icon: ScrollText, label: "Employment Contract", path: "/hr/recruitment/employment-contract" },
+            { icon: ClipboardCheck, label: "Checklist", path: "/hr/recruitment/checklist" },
+            { icon: FileSearch2, label: "Sole Source", path: "/hr/recruitment/sole-source" },
+            { icon: Target, label: "Candidate Sourcing", path: "/hr/recruitment/candidate-sourcing" },
+            { icon: Settings, label: "Dropdown Settings", path: "/hr/recruitment/dropdown-settings" },
+          ],
+        },
+        {
+          type: "nested-dropdown",
+          key: "hr-employee-management",
+          label: "Employee Management",
+          icon: UserCog,
+          items: [
+            { icon: LayoutDashboard, label: "Dashboard", path: "/hr/employee-management" },
+            { icon: FilePlus, label: "Extension Letter", path: "/hr/employee-management/contract/extension" },
+            { icon: FileSignature, label: "Confirmation Letter", path: "/hr/employee-management/contract/confirmation" },
+            { icon: FileText, label: "Contract Amendment", path: "/hr/employee-management/contract/amendment" },
+            { icon: Ban, label: "Termination Letter", path: "/hr/employee-management/contract/termination" },
+            { icon: BookOpen, label: "Induction Form", path: "/hr/employee-management/onboarding/induction" },
+            { icon: ShieldCheck, label: "Code of Conduct", path: "/hr/employee-management/onboarding/code-of-conduct" },
+            { icon: FolderArchive, label: "Personnel File", path: "/hr/employee-management/onboarding/personnel-file" },
+            { icon: Users, label: "Mahram Form", path: "/hr/employee-management/onboarding/mahram" },
+            { icon: ClipboardList, label: "Induction Pack", path: "/hr/employee-management/onboarding/induction-pack" },
+            { icon: Heart, label: "Safeguarding Ack", path: "/hr/employee-management/onboarding/safeguarding" },
+            { icon: Lock, label: "NDA", path: "/hr/employee-management/onboarding/nda" },
+          ],
+        },
+        {
+          type: "nested-dropdown",
+          key: "hr-leave-attendance",
+          label: "Leave & Attendance",
+          icon: CalendarDays,
+          items: [
+            { icon: LayoutDashboard, label: "Dashboard", path: "/hr/leave-attendance" },
+            { icon: FileText, label: "Leave Request", path: "/hr/leave-attendance/leave/request" },
+            { icon: Calendar, label: "Leave Tracker", path: "/hr/leave-attendance/leave/tracker" },
+            { icon: PenLine, label: "Attendance", path: "/hr/leave-attendance/attendance/manual" },
+          ],
+        },
+        {
+          type: "nested-dropdown",
+          key: "hr-training",
+          label: "Training",
+          icon: GraduationCap,
+          items: [
+            { icon: LayoutDashboard, label: "Dashboard", path: "/hr/training" },
+            { icon: ClipboardList, label: "Needs Assessment", path: "/hr/training/needs-assessment" },
+            { icon: Calendar, label: "Training Calendar", path: "/hr/training/calendar" },
+            { icon: DollarSign, label: "Budget Proposal", path: "/hr/training/budget" },
+            { icon: FileText, label: "Training Request", path: "/hr/training/request" },
+          ],
+        },
+        {
+          type: "nested-dropdown",
+          key: "hr-performance",
+          label: "Performance",
+          icon: Target,
+          items: [
+            { icon: LayoutDashboard, label: "Dashboard", path: "/hr/performance" },
+            { icon: Fingerprint, label: "Probation Evaluation", path: "/hr/performance/probation-evaluation" },
+            { icon: ClipboardCheck, label: "Performance Appraisal", path: "/hr/performance/appraisal" },
+            { icon: FileSearch2, label: "Promotion Feasibility", path: "/hr/performance/promotion-feasibility" },
+            { icon: FileText, label: "Promotion Letter", path: "/hr/performance/promotion-letter" },
+          ],
+        },
+        {
+          type: "nested-dropdown",
+          key: "hr-payroll",
+          label: "Payroll",
+          icon: DollarSign,
+          items: [
+            { icon: LayoutDashboard, label: "Dashboard", path: "/hr/payroll" },
+            { icon: ClipboardList, label: "Payroll Generation", path: "/hr/payroll/generation" },
+            { icon: FileText, label: "Payslips", path: "/hr/payroll/payslips" },
+            { icon: HandCoins, label: "Advances", path: "/hr/payroll/advances" },
+          ],
+        },
+        {
+          type: "nested-dropdown",
+          key: "hr-exit",
+          label: "Exit & Separation",
+          icon: Ban,
+          items: [
+            { icon: LayoutDashboard, label: "Dashboard", path: "/hr/exit" },
+            { icon: ClipboardCheck, label: "Exit Checklist", path: "/hr/exit/checklist" },
+            { icon: FileText, label: "Exit Interview", path: "/hr/exit/interview" },
+            { icon: ScrollText, label: "Work Certificate", path: "/hr/exit/certificate" },
+          ],
+        },
+      ],
+    },
   ];
 
   const toggleDropdown = (key) => {
@@ -578,16 +362,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col overflow-y-hidden bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 duration-300 ease-linear lg:static lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col overflow-hidden bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 duration-300 ease-linear lg:static lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
           <NavLink to="/" className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-500 text-white">
-              <span className="text-xl font-bold">V</span>
-            </div>
+            <img
+              src="/logo.png"
+              alt="VDO Logo"
+              className="h-10 w-10 object-contain"
+            />
             <span className="text-xl font-bold text-gray-900 dark:text-white">
               VDO ERP
             </span>
@@ -602,7 +388,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         {/* Sidebar Menu */}
-        <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear custom-scrollbar">
+        <div className="flex-1 flex flex-col overflow-y-auto duration-300 ease-linear custom-scrollbar">
           <nav className="px-4 py-4 lg:px-6">
             <div>
               <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-500 dark:text-gray-400">

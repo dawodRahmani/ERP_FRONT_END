@@ -94,7 +94,7 @@ export const boardMemberSchema = z
     }
   );
 
-export type BoardMemberFormData = z.infer<typeof boardMemberSchema>;
+export type BoardMemberFormData = z.output<typeof boardMemberSchema>;
 
 // ============================================================================
 // BOARD MEETING SCHEMA
@@ -137,7 +137,7 @@ export const boardMeetingSchema = z.object({
     .optional(),
 });
 
-export type BoardMeetingFormData = z.infer<typeof boardMeetingSchema>;
+export type BoardMeetingFormData = z.output<typeof boardMeetingSchema>;
 
 // ============================================================================
 // CORRESPONDENCE SCHEMA
@@ -167,4 +167,4 @@ export const correspondenceSchema = z.object({
   relatedBoardMeetingId: z.number().optional(),
 });
 
-export type CorrespondenceFormData = z.infer<typeof correspondenceSchema>;
+export type CorrespondenceFormData = z.output<typeof correspondenceSchema>;

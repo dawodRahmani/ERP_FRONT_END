@@ -8,7 +8,10 @@
  */
 
 import type { BaseRecord } from '../db/base';
-import type { FileMetadata } from './program';
+import type { FileMetadata as ProgramFileMetadata } from './program';
+
+// Re-export FileMetadata for use by governance components
+export type FileMetadata = ProgramFileMetadata;
 
 // ============================================================================
 // BOARD MEMBERS

@@ -1,29 +1,29 @@
 import { useState, useEffect } from 'react';
 import {
-  Users,
-  Briefcase,
-  Building2,
-  UserCheck,
   FileText,
-  ClipboardCheck
+  ClipboardCheck,
+  Target,
+  Scale,
+  FileSearch2,
+  Users
 } from 'lucide-react';
 import {
-  employeeDB,
-  departmentDB,
-  positionDB,
-  attendanceDB,
   complianceProjectDB,
-  complianceDocumentDB
+  complianceDocumentDB,
+  programProjectsDB,
+  programDonorsDB,
+  governanceBoardMembersDB,
+  auditService
 } from '../services/db/indexedDB';
 
 const Dashboard = () => {
   const [stats, setStats] = useState([
-    { title: 'Total Employees', value: 0, icon: Users, color: 'blue' },
-    { title: 'Departments', value: 0, icon: Building2, color: 'purple' },
-    { title: 'Positions', value: 0, icon: Briefcase, color: 'green' },
-    { title: 'Attendance Today', value: 0, icon: UserCheck, color: 'indigo' },
-    { title: 'Compliance Projects', value: 0, icon: ClipboardCheck, color: 'pink' },
-    { title: 'Compliance Documents', value: 0, icon: FileText, color: 'red' },
+    { title: 'Compliance Projects', value: 0, icon: ClipboardCheck, color: 'blue' },
+    { title: 'Compliance Documents', value: 0, icon: FileText, color: 'purple' },
+    { title: 'Program Projects', value: 0, icon: Target, color: 'green' },
+    { title: 'Program Donors', value: 0, icon: Users, color: 'indigo' },
+    { title: 'Board Members', value: 0, icon: Scale, color: 'pink' },
+    { title: 'Total Audits', value: 0, icon: FileSearch2, color: 'red' },
   ]);
   const [loading, setLoading] = useState(true);
 
@@ -34,36 +34,36 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const today = new Date().toISOString().split('T')[0];
 
       const [
-        employees,
-        departments,
-        positions,
-        attendance,
         complianceProjects,
-        documents
+        documents,
+        projects,
+        donors,
+        boardMembers,
+        auditStats
       ] = await Promise.all([
-        employeeDB.getAll(),
-        departmentDB.getAll(),
-        positionDB.getAll(),
-        attendanceDB.getByDate(today),
         complianceProjectDB.getAll(),
-        complianceDocumentDB.getAll()
+        complianceDocumentDB.getAll(),
+        programProjectsDB.getAll(),
+        programDonorsDB.getAll(),
+        governanceBoardMembersDB.getAll(),
+        auditService.getDashboardStats()
       ]);
 
-      const activeEmployees = employees.filter(e => e.status === 'active').length;
-      const presentToday = attendance.filter(a => a.status === 'present').length;
-      const activeComplianceProjects = complianceProjects.filter(p => p.status === 'active').length;
-      const activeDocuments = documents.filter(d => d.status === 'active').length;
+      const activeComplianceProjects = complianceProjects.filter(p => p.status === 'in_progress' || p.status === 'pending').length;
+      const activeDocuments = documents.filter(d => d.status === 'approved').length;
+      const activeProjects = projects.filter(p => p.status === 'in_progress' || p.status === 'ongoing').length;
+      const activeDonors = donors.filter(d => d.status === 'active').length;
+      const activeBoardMembers = boardMembers.filter(m => m.status === 'active').length;
 
       setStats([
-        { title: 'Active Employees', value: activeEmployees, icon: Users, color: 'blue' },
-        { title: 'Departments', value: departments.length, icon: Building2, color: 'purple' },
-        { title: 'Positions', value: positions.length, icon: Briefcase, color: 'green' },
-        { title: 'Present Today', value: presentToday, icon: UserCheck, color: 'indigo' },
-        { title: 'Active Compliance Projects', value: activeComplianceProjects, icon: ClipboardCheck, color: 'pink' },
-        { title: 'Active Documents', value: activeDocuments, icon: FileText, color: 'red' },
+        { title: 'Compliance Projects', value: activeComplianceProjects, icon: ClipboardCheck, color: 'blue' },
+        { title: 'Compliance Documents', value: activeDocuments, icon: FileText, color: 'purple' },
+        { title: 'Program Projects', value: activeProjects, icon: Target, color: 'green' },
+        { title: 'Active Donors', value: activeDonors, icon: Users, color: 'indigo' },
+        { title: 'Board Members', value: activeBoardMembers, icon: Scale, color: 'pink' },
+        { title: 'Total Audits', value: auditStats.totalAudits, icon: FileSearch2, color: 'red' },
       ]);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -84,13 +84,20 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Dashboard
-        </h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Welcome back! Here's an overview of your organization.
-        </p>
+      <div className="flex items-center gap-4">
+        <img
+          src="/logo.png"
+          alt="VDO Logo"
+          className="h-16 w-16 object-contain"
+        />
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Welcome back! Here's an overview of your organization.
+          </p>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -99,7 +106,7 @@ const Dashboard = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (

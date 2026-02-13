@@ -10,25 +10,12 @@ import { DB_CONFIG } from '../../../types/db/constants';
 import { UpgradeError } from '../../../types/db/errors';
 import type { VDODatabase } from '../../../types/db/stores';
 
-// Import all store creators
-import { createCoreHRStores } from './stores/coreHR';
-import { createDisciplinaryStores } from './stores/disciplinary';
-import { createEmployeeAdminStores } from './stores/employeeAdmin';
-import { createExitStores } from './stores/exit';
-import { createLeaveStores } from './stores/leave';
-import { createPayrollStores } from './stores/payroll';
-import { createPerformanceStores } from './stores/performance';
-import { createRecruitmentStores } from './stores/recruitment';
+// Import store creators for remaining modules
 import { createTrackingStores } from './stores/tracking';
-import { createTrainingStores } from './stores/training';
-import { createContractStores } from './stores/contracts';
-import { createAssetStores } from './stores/assets';
-import { createTravelStores } from './stores/travel';
-import { createStaffAssociationStores } from './stores/staffAssociation';
-import { createPolicyStores } from './stores/policy';
 import { createAuditStores } from './stores/audit';
 import { createProgramStores } from './stores/program';
 import { createGovernanceStores } from './stores/governance';
+import { createRecruitmentStores } from './stores/recruitment';
 
 /**
  * Main database upgrade function
@@ -46,16 +33,6 @@ export function upgradeDatabase(
 ): void {
   try {
     console.log(`IndexedDB: Upgrading from v${oldVersion} to v${newVersion || 'latest'}`);
-
-    // v28: Delete old interview stores (conflicted with HR module)
-    if (oldVersion < 28) {
-      deleteOldInterviewStores(db);
-    }
-
-    // v27: Force delete ALL recruitment stores to fix index issues
-    if (oldVersion < 27) {
-      deleteAllRecruitmentStores(db);
-    }
 
     // v40: Recreate program stores with proper indexes
     if (oldVersion < 40) {
@@ -84,50 +61,8 @@ export function upgradeDatabase(
 function createAllStores(db: IDBPDatabase<VDODatabase>): void {
   console.log('Creating database stores...');
 
-  // Core HR stores (employees, departments, positions, users, roles, etc.)
-  createCoreHRStores(db);
-
-  // Leave management stores
-  createLeaveStores(db);
-
-  // Recruitment stores
-  createRecruitmentStores(db);
-
-  // Payroll stores
-  createPayrollStores(db);
-
-  // Performance management stores
-  createPerformanceStores(db);
-
-  // Training stores
-  createTrainingStores(db);
-
-  // Exit/Separation stores
-  createExitStores(db);
-
-  // Disciplinary stores
-  createDisciplinaryStores(db);
-
-  // Employee administration stores
-  createEmployeeAdminStores(db);
-
-  // Tracking stores (in/out, access, DNR, MOU, work plans)
+  // Tracking stores (compliance tracking)
   createTrackingStores(db);
-
-  // Contract management stores
-  createContractStores(db);
-
-  // Asset management stores
-  createAssetStores(db);
-
-  // Travel management stores
-  createTravelStores(db);
-
-  // Staff association stores
-  createStaffAssociationStores(db);
-
-  // Policy stores
-  createPolicyStores(db);
 
   // Audit management stores
   createAuditStores(db);
@@ -138,75 +73,10 @@ function createAllStores(db: IDBPDatabase<VDODatabase>): void {
   // Governance module stores (board members, meetings, correspondence)
   createGovernanceStores(db);
 
+  // Recruitment module stores (dropdown management)
+  createRecruitmentStores(db);
+
   console.log('All database stores created');
-}
-
-/**
- * Delete old interview stores that conflicted with HR module (v28)
- */
-function deleteOldInterviewStores(db: IDBPDatabase<VDODatabase>): void {
-  const oldInterviewStores = [
-    'interviewCandidates',
-    'interviewEvaluations',
-    'interviewResults',
-  ];
-
-  oldInterviewStores.forEach((storeName) => {
-    // These are legacy stores being deleted, use type assertion
-    if ((db.objectStoreNames as DOMStringList).contains(storeName)) {
-      console.log(`IndexedDB: Deleting old store ${storeName}`);
-      (db as unknown as IDBDatabase).deleteObjectStore(storeName);
-    }
-  });
-}
-
-/**
- * Delete all recruitment stores to fix index issues (v27)
- */
-function deleteAllRecruitmentStores(db: IDBPDatabase<VDODatabase>): void {
-  const allRecruitmentStores = [
-    'recruitments',
-    'termsOfReferences',
-    'staffRequisitions',
-    'vacancyAnnouncements',
-    'recruitmentCandidates',
-    'candidateApplications',
-    'candidateEducations',
-    'candidateExperiences',
-    'recruitmentCommittees',
-    'committeeMembers',
-    'coiDeclarations',
-    'longlistings',
-    'longlistingCandidates',
-    'shortlistings',
-    'shortlistingCandidates',
-    'writtenTests',
-    'writtenTestCandidates',
-    'recruitmentInterviews',
-    'recruitmentInterviewCandidates',
-    'recruitmentInterviewEvaluations',
-    'recruitmentInterviewResults',
-    'recruitmentReports',
-    'reportCandidates',
-    'offerLetters',
-    'sanctionClearances',
-    'backgroundChecks',
-    'referenceChecks',
-    'guaranteeLetters',
-    'homeAddressVerifications',
-    'criminalChecks',
-    'employmentContracts',
-    'fileChecklists',
-    'provinces',
-  ];
-
-  allRecruitmentStores.forEach((storeName) => {
-    // These are stores being deleted for migration, use type assertion
-    if ((db.objectStoreNames as DOMStringList).contains(storeName)) {
-      console.log(`IndexedDB: Deleting recruitment store ${storeName}`);
-      (db as unknown as IDBDatabase).deleteObjectStore(storeName);
-    }
-  });
 }
 
 /**

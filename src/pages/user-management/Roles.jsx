@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Shield, Plus, Edit, Trash2, Users, X } from 'lucide-react';
-import { roleDB, seedAllDefaults } from '../../services/db/indexedDB';
+import { createCRUDService } from '../../services/db/indexedDB';
+
+const roleDB = createCRUDService('roles');
 
 const Roles = () => {
   const [roles, setRoles] = useState([]);
@@ -32,7 +34,6 @@ const Roles = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      await seedAllDefaults();
       const rolesData = await roleDB.getAll();
       setRoles(rolesData);
     } catch (error) {

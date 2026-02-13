@@ -55,7 +55,7 @@ const InternalAuditForm: React.FC = () => {
     control,
     formState: { errors },
   } = useForm<InternalAuditFormData>({
-    resolver: zodResolver(internalAuditSchema),
+    resolver: zodResolver(internalAuditSchema) as any,
     defaultValues: {
       auditTypeId: 0,
       departmentsAudited: [],

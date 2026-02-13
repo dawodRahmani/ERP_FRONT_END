@@ -32,7 +32,7 @@ const ProjectForm = () => {
     watch,
     formState: { errors },
   } = useForm<ProjectFormData>({
-    resolver: zodResolver(projectSchema),
+    resolver: zodResolver(projectSchema) as any,
     defaultValues: {
       projectCode: '',
       donorId: 0,

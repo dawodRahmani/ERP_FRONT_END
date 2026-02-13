@@ -21,7 +21,12 @@
       "Bash(npx tsc:*)",
       "Bash(for db in employeeDB departmentDB donorDB projectDB complianceProjectDB holidaysDB)",
       "Bash(do echo -n \"$db: \")",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Bash(unzip:*)",
+      "Bash(npx vite build:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

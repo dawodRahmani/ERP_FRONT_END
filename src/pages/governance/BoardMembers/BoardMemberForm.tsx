@@ -35,7 +35,7 @@ const BoardMemberForm = () => {
     watch,
     formState: { errors },
   } = useForm<BoardMemberFormData>({
-    resolver: zodResolver(boardMemberSchema),
+    resolver: zodResolver(boardMemberSchema) as any,
     defaultValues: {
       name: '',
       position: '',

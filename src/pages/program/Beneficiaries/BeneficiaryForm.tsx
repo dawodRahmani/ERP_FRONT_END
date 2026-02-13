@@ -41,7 +41,7 @@ const BeneficiaryForm = () => {
     setValue,
     formState: { errors },
   } = useForm<BeneficiaryFormData>({
-    resolver: zodResolver(beneficiarySchema),
+    resolver: zodResolver(beneficiarySchema) as any,
     defaultValues: {
       projectId: 0,
       projectCode: '',

@@ -59,7 +59,7 @@ const PartnerAuditForm: React.FC = () => {
     watch,
     formState: { errors },
   } = useForm<PartnerAuditFormData>({
-    resolver: zodResolver(partnerAuditSchema),
+    resolver: zodResolver(partnerAuditSchema) as any,
     defaultValues: {
       auditTypeId: 0,
       partnerName: '',

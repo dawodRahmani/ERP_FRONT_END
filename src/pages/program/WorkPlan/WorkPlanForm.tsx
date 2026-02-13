@@ -30,7 +30,7 @@ const WorkPlanForm = () => {
     watch,
     formState: { errors },
   } = useForm<WorkPlanFormData>({
-    resolver: zodResolver(workPlanSchema),
+    resolver: zodResolver(workPlanSchema) as any,
     defaultValues: {
       projectId: 0,
       projectName: '',

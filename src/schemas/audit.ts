@@ -55,7 +55,7 @@ export const auditTypeSchema = z.object({
   displayOrder: z.number().int().min(0).default(0),
 });
 
-export type AuditTypeFormData = z.infer<typeof auditTypeSchema>;
+export type AuditTypeFormData = z.output<typeof auditTypeSchema>;
 
 // ========== HACT ASSESSMENT SCHEMA ==========
 
@@ -84,7 +84,7 @@ export const hactAssessmentSchema = z.object({
   { message: 'End date must be on or after start date', path: ['dateAssessmentEnded'] }
 );
 
-export type HACTAssessmentFormData = z.infer<typeof hactAssessmentSchema>;
+export type HACTAssessmentFormData = z.output<typeof hactAssessmentSchema>;
 
 // ========== DONOR PROJECT AUDIT SCHEMA ==========
 
@@ -117,7 +117,7 @@ export const donorProjectAuditSchema = z.object({
   { message: 'End date must be on or after start date', path: ['dateAuditEnded'] }
 );
 
-export type DonorProjectAuditFormData = z.infer<typeof donorProjectAuditSchema>;
+export type DonorProjectAuditFormData = z.output<typeof donorProjectAuditSchema>;
 
 // ========== EXTERNAL AUDIT SCHEMA ==========
 
@@ -153,7 +153,7 @@ export const externalAuditSchema = z.object({
   { message: 'End date must be on or after start date', path: ['dateAuditEnded'] }
 );
 
-export type ExternalAuditFormData = z.infer<typeof externalAuditSchema>;
+export type ExternalAuditFormData = z.output<typeof externalAuditSchema>;
 
 // ========== EXTERNAL ANNUAL AUDIT SCHEMA ==========
 
@@ -165,7 +165,7 @@ export const externalAnnualAuditSchema = z.object({
   notes: z.string().max(1000, 'Notes must be 1000 characters or less').optional(),
 });
 
-export type ExternalAnnualAuditFormData = z.infer<typeof externalAnnualAuditSchema>;
+export type ExternalAnnualAuditFormData = z.output<typeof externalAnnualAuditSchema>;
 
 // ========== INTERNAL AUDIT SCHEMA ==========
 
@@ -206,7 +206,7 @@ export const internalAuditSchema = z.object({
   { message: 'End date must be on or after start date', path: ['dateAuditEnded'] }
 );
 
-export type InternalAuditFormData = z.infer<typeof internalAuditSchema>;
+export type InternalAuditFormData = z.output<typeof internalAuditSchema>;
 
 // ========== INTERNAL QUARTERLY REPORT SCHEMA ==========
 
@@ -223,7 +223,7 @@ export const internalQuarterlyReportSchema = z.object({
   notes: z.string().max(1000, 'Notes must be 1000 characters or less').optional(),
 });
 
-export type InternalQuarterlyReportFormData = z.infer<typeof internalQuarterlyReportSchema>;
+export type InternalQuarterlyReportFormData = z.output<typeof internalQuarterlyReportSchema>;
 
 // ========== PARTNER AUDIT SCHEMA ==========
 
@@ -274,7 +274,7 @@ export const partnerAuditSchema = z.object({
   { message: 'End date must be on or after start date', path: ['dateAuditEnded'] }
 );
 
-export type PartnerAuditFormData = z.infer<typeof partnerAuditSchema>;
+export type PartnerAuditFormData = z.output<typeof partnerAuditSchema>;
 
 // ========== CORRECTIVE ACTION SCHEMA ==========
 
@@ -304,4 +304,4 @@ export const correctiveActionSchema = z.object({
   { message: 'Status must be "Completed" when completion date is set', path: ['status'] }
 );
 
-export type CorrectiveActionFormData = z.infer<typeof correctiveActionSchema>;
+export type CorrectiveActionFormData = z.output<typeof correctiveActionSchema>;

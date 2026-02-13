@@ -35,7 +35,7 @@ const BoardMeetingForm = () => {
     control,
     formState: { errors },
   } = useForm<BoardMeetingFormData>({
-    resolver: zodResolver(boardMeetingSchema),
+    resolver: zodResolver(boardMeetingSchema) as any,
     defaultValues: {
       meetingDate: '',
       year: new Date().getFullYear(),

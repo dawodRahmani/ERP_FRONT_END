@@ -30,7 +30,7 @@ const ReportingForm = () => {
     watch,
     formState: { errors },
   } = useForm<ReportingFormData>({
-    resolver: zodResolver(reportingSchema),
+    resolver: zodResolver(reportingSchema) as any,
     defaultValues: {
       projectId: 0,
       projectName: '',

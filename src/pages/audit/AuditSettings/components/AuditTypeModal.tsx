@@ -33,7 +33,7 @@ export const AuditTypeModal: React.FC<AuditTypeModalProps> = ({
     reset,
     formState: { errors },
   } = useForm<AuditTypeFormData>({
-    resolver: zodResolver(auditTypeSchema),
+    resolver: zodResolver(auditTypeSchema) as any,
     defaultValues: {
       code: '',
       name: '',

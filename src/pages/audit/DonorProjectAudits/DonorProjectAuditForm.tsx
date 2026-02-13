@@ -49,7 +49,7 @@ const DonorProjectAuditForm: React.FC = () => {
     reset,
     formState: { errors },
   } = useForm<DonorProjectAuditFormData>({
-    resolver: zodResolver(donorProjectAuditSchema),
+    resolver: zodResolver(donorProjectAuditSchema) as any,
     defaultValues: {
       donorId: 0,
       projectId: 0,

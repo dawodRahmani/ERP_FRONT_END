@@ -36,7 +36,7 @@ const CorrespondenceForm = () => {
     watch,
     control,
   } = useForm<GovernanceCorrespondenceRecord>({
-    resolver: zodResolver(correspondenceSchema),
+    resolver: zodResolver(correspondenceSchema) as any,
     defaultValues: {
       direction: 'in',
       status: 'pending',

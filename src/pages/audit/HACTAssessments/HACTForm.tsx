@@ -40,7 +40,7 @@ const HACTForm: React.FC = () => {
     watch,
     formState: { errors },
   } = useForm<HACTAssessmentFormData>({
-    resolver: zodResolver(hactAssessmentSchema),
+    resolver: zodResolver(hactAssessmentSchema) as any,
     defaultValues: {
       donorId: 0,
       dateAssessmentStarted: '',

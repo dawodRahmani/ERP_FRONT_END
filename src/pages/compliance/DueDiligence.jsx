@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, FileText, Search, Filter, X, Calendar } from 'lucide-react';
 import Modal from '../../components/Modal';
-import { dueDiligenceDB, seedAllDefaults } from '../../services/db/indexedDB';
+import { dueDiligenceDB } from '../../services/db/indexedDB';
 
 const DDTracking = () => {
   const [records, setRecords] = useState([]);
@@ -40,9 +40,6 @@ const DDTracking = () => {
     try {
       setLoading(true);
       console.log('DD Tracking: Loading data...');
-      // Seed default data if needed
-      await seedAllDefaults();
-      console.log('DD Tracking: Seeding completed');
       const data = await dueDiligenceDB.getAll();
       console.log('DD Tracking: Loaded records:', data.length, data);
       setRecords(data);

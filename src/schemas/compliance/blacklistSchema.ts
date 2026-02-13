@@ -117,4 +117,4 @@ export const blacklistFormSchema = z
   );
 
 // Infer TypeScript type from Zod schema
-export type BlacklistFormData = z.infer<typeof blacklistFormSchema>;
+export type BlacklistFormData = z.output<typeof blacklistFormSchema>;

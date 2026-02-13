@@ -23,115 +23,6 @@ import {
   Blacklist
 } from '../pages/compliance';
 
-// HR Management Pages
-import Departments from '../pages/hr-management/Departments';
-import Positions from '../pages/hr-management/Positions';
-import Offices from '../pages/hr-management/Offices';
-import Grades from '../pages/hr-management/Grades';
-import EmployeeTypes from '../pages/hr-management/EmployeeTypes';
-import WorkSchedules from '../pages/hr-management/WorkSchedules';
-import Attendance from '../pages/hr-management/Attendance';
-import LeaveManagement from '../pages/hr-management/LeaveManagement';
-import LeaveTypes from '../pages/hr-management/LeaveTypes';
-import LeavePolicies from '../pages/hr-management/LeavePolicies';
-import LeaveBalances from '../pages/hr-management/LeaveBalances';
-import Holidays from '../pages/hr-management/Holidays';
-import LeaveCalendar from '../pages/hr-management/LeaveCalendar';
-import Timesheets from '../pages/hr-management/Timesheets';
-import LeaveReports from '../pages/hr-management/LeaveReports';
-import Recruitment from '../pages/hr-management/Recruitment';
-import Payroll from '../pages/hr-management/Payroll';
-import TemplateDocuments from '../pages/hr-management/TemplateDocuments';
-import ProbationOrientation from '../pages/hr-management/ProbationOrientation';
-import PerformanceManagement from '../pages/hr-management/PerformanceManagement';
-import TrainingDevelopment from '../pages/hr-management/TrainingDevelopment';
-import DisciplinaryGrievance from '../pages/hr-management/DisciplinaryGrievance';
-import TravelDSA from '../pages/hr-management/TravelDSA';
-import AssetManagement from '../pages/hr-management/AssetManagement';
-import ExitManagement from '../pages/hr-management/ExitManagement';
-import StaffAssociation from '../pages/hr-management/StaffAssociation';
-
-// Employee Administration Module Pages
-import {
-  HRDashboard,
-  EmployeeList,
-  EmployeeProfile,
-  EmployeeForm,
-  UpdatePosition,
-  OnboardingDashboard,
-  ContractManagement,
-  InterimHiring,
-  PersonnelFiles,
-  MahramRegistration,
-  HRReports
-} from '../pages/employee-admin';
-
-// Recruitment Module Pages
-import RecruitmentList from '../pages/recruitment/RecruitmentList';
-import NewRecruitment from '../pages/recruitment/NewRecruitment';
-import RecruitmentDetail from '../pages/recruitment/RecruitmentDetail';
-
-// Training Module Pages
-import {
-  TrainingDashboard,
-  TrainingTypes,
-  TrainingPrograms,
-  TNAList,
-  TNAForm,
-  TrainingsList,
-  TrainingForm,
-  TrainingCalendar,
-  TrainingCertificates,
-  TrainingBonds,
-} from '../pages/training';
-
-// Disciplinary Module Pages
-import {
-  DisciplinaryDashboard,
-  MisconductReports,
-  MisconductReportForm,
-  Investigations,
-  DisciplinaryActions,
-  Appeals,
-  Grievances
-} from '../pages/disciplinary';
-
-// Exit & Termination Module Pages
-import {
-  ExitDashboard,
-  SeparationsList,
-  SeparationForm,
-  ClearancesList,
-  ExitInterviewList,
-  FinalSettlements,
-  WorkCertificates,
-} from '../pages/exit';
-
-// Payroll Module Pages
-import {
-  PayrollDashboard,
-  PayrollPeriods,
-  PayrollEntries,
-  SalaryStructures,
-  Advances,
-  Loans,
-  OvertimeRecords,
-  Payslips,
-  PayrollGeneration,
-  PayrollGenerationReport
-} from '../pages/payroll';
-
-// Performance Appraisal Module Pages
-import {
-  PerformanceDashboard,
-  AppraisalCycles,
-  AppraisalTemplates,
-  EmployeeAppraisals,
-  AppraisalForm,
-  ProbationTracking,
-  PIPs
-} from '../pages/performance';
-
 // Audit Module Pages
 import {
   AuditDashboard,
@@ -191,6 +82,94 @@ import {
   CorrespondenceView,
 } from '../pages/governance';
 
+// HR Recruitment Module Pages
+import {
+  RecruitmentDashboard,
+  RecruitmentTracker,
+  TermsOfReference,
+  StaffRequisition,
+  JobApplications,
+  RecruitmentCommittee,
+  ConflictOfInterest,
+  Longlisting,
+  Shortlisting,
+  WrittenTest,
+  Interview,
+  RecruitmentReport,
+  OfferLetter,
+  BackgroundChecks,
+  EmploymentContract,
+  RecruitmentChecklist,
+  SoleSourceJustification,
+  CandidateSourcing,
+  DropdownSettings,
+} from '../pages/hr/recruitment';
+
+// HR Employee Management Module Pages
+import {
+  EmployeeManagementDashboard,
+  ExtensionLetter,
+  TerminationLetter,
+  ConfirmationLetter,
+  ContractAmendment,
+  InductionForm,
+  CodeOfConductAck,
+  PersonnelFileChecklist,
+  MahramForm,
+  InductionPackChecklist,
+  SafeguardingAck,
+  NDAForm,
+} from '../pages/hr/employee-management';
+
+// HR Leave & Attendance Module Pages
+import {
+  LeaveAttendanceDashboard,
+  LeaveRequest,
+  LeaveTracker,
+  ManualAttendance,
+  ElectronicAttendance,
+} from '../pages/hr/leave-attendance';
+
+// HR Performance Module Pages
+import {
+  PerformanceDashboard,
+  ProbationEvaluation,
+  PerformanceAppraisal,
+  InternalPromotionFeasibility,
+  PromotionLetter,
+} from '../pages/hr/performance';
+
+// HR Training Module Pages
+import {
+  TrainingDashboard,
+  TrainingNeedsAssessment,
+  TrainingCalendar,
+  TrainingBudget,
+  TrainingRequest,
+} from '../pages/hr/training';
+
+// HR Payroll Module Pages
+import {
+  PayrollDashboard,
+  PayrollGeneration,
+  Payslips,
+} from '../pages/hr/payroll';
+
+// HR Exit & Separation Module Pages
+import {
+  ExitDashboard,
+  WorkCertificate,
+  ExitInterview,
+  ExitChecklist,
+} from '../pages/hr/exit';
+
+// HR Special Forms Module Pages
+import {
+  SpecialFormsDashboard,
+  InternalTransferEligibility,
+  DualEmploymentDeclaration,
+} from '../pages/hr/special-forms';
+
 import type { JSX } from 'react';
 
 // User Management Routes
@@ -199,54 +178,6 @@ const userManagementRoutes: RouteObject[] = [
   { path: 'user-management/roles', element: <Roles /> },
   { path: 'user-management/permissions', element: <Permissions /> },
   { path: 'user-management/role-permissions', element: <RolePermissions /> },
-];
-
-// Employee Administration Routes
-const employeeAdminRoutes: RouteObject[] = [
-  { path: 'employee-admin', element: <HRDashboard /> },
-  { path: 'employee-admin/dashboard', element: <HRDashboard /> },
-  { path: 'employee-admin/employees', element: <EmployeeList /> },
-  { path: 'employee-admin/employees/new', element: <EmployeeForm /> },
-  { path: 'employee-admin/employees/:id', element: <EmployeeProfile /> },
-  { path: 'employee-admin/employees/:id/edit', element: <EmployeeForm /> },
-  { path: 'employee-admin/employees/:id/update-position', element: <UpdatePosition /> },
-  { path: 'employee-admin/onboarding', element: <OnboardingDashboard /> },
-  { path: 'employee-admin/contracts', element: <ContractManagement /> },
-  { path: 'employee-admin/interim-hiring', element: <InterimHiring /> },
-  { path: 'employee-admin/personnel-files', element: <PersonnelFiles /> },
-  { path: 'employee-admin/personnel-files/:id', element: <PersonnelFiles /> },
-  { path: 'employee-admin/mahram', element: <MahramRegistration /> },
-  { path: 'employee-admin/reports', element: <HRReports /> },
-];
-
-// HR Settings Routes
-const hrSettingsRoutes: RouteObject[] = [
-  { path: 'hr/departments', element: <Departments /> },
-  { path: 'hr/positions', element: <Positions /> },
-  { path: 'hr/offices', element: <Offices /> },
-  { path: 'hr/grades', element: <Grades /> },
-  { path: 'hr/employee-types', element: <EmployeeTypes /> },
-  { path: 'hr/work-schedules', element: <WorkSchedules /> },
-  { path: 'hr/attendance', element: <Attendance /> },
-  { path: 'hr/leave-management', element: <LeaveManagement /> },
-  { path: 'hr/leave-types', element: <LeaveTypes /> },
-  { path: 'hr/leave-policies', element: <LeavePolicies /> },
-  { path: 'hr/leave-balances', element: <LeaveBalances /> },
-  { path: 'hr/holidays', element: <Holidays /> },
-  { path: 'hr/leave-calendar', element: <LeaveCalendar /> },
-  { path: 'hr/timesheets', element: <Timesheets /> },
-  { path: 'hr/leave-reports', element: <LeaveReports /> },
-  { path: 'hr/recruitment', element: <Recruitment /> },
-  { path: 'hr/probation-orientation', element: <ProbationOrientation /> },
-  { path: 'hr/performance', element: <PerformanceManagement /> },
-  { path: 'hr/training', element: <TrainingDevelopment /> },
-  { path: 'hr/disciplinary-grievance', element: <DisciplinaryGrievance /> },
-  { path: 'hr/travel-dsa', element: <TravelDSA /> },
-  { path: 'hr/asset-management', element: <AssetManagement /> },
-  { path: 'hr/exit-management', element: <ExitManagement /> },
-  { path: 'hr/staff-association', element: <StaffAssociation /> },
-  { path: 'hr/payroll', element: <Payroll /> },
-  { path: 'hr/template-documents', element: <TemplateDocuments /> },
 ];
 
 // Compliance Routes
@@ -262,94 +193,6 @@ const complianceRoutes: RouteObject[] = [
   { path: 'compliance/donor-outreach', element: <DonorOutreach /> },
   { path: 'compliance/documents', element: <ComplianceDocuments /> },
   { path: 'compliance/blacklist', element: <Blacklist /> },
-];
-
-// Recruitment Module Routes
-const recruitmentRoutes: RouteObject[] = [
-  { path: 'recruitment', element: <RecruitmentList /> },
-  { path: 'recruitment/new', element: <NewRecruitment /> },
-  { path: 'recruitment/:id', element: <RecruitmentDetail /> },
-];
-
-// Training Module Routes
-const trainingRoutes: RouteObject[] = [
-  { path: 'training', element: <TrainingDashboard /> },
-  { path: 'training/types', element: <TrainingTypes /> },
-  { path: 'training/programs', element: <TrainingPrograms /> },
-  { path: 'training/tna', element: <TNAList /> },
-  { path: 'training/tna/new', element: <TNAForm /> },
-  { path: 'training/tna/:id', element: <TNAForm /> },
-  { path: 'training/tna/:id/edit', element: <TNAForm /> },
-  { path: 'training/trainings', element: <TrainingsList /> },
-  { path: 'training/trainings/new', element: <TrainingForm /> },
-  { path: 'training/trainings/:id', element: <TrainingForm /> },
-  { path: 'training/trainings/:id/edit', element: <TrainingForm /> },
-  { path: 'training/calendar', element: <TrainingCalendar /> },
-  { path: 'training/certificates', element: <TrainingCertificates /> },
-  { path: 'training/bonds', element: <TrainingBonds /> },
-];
-
-// Disciplinary Module Routes
-const disciplinaryRoutes: RouteObject[] = [
-  { path: 'disciplinary', element: <DisciplinaryDashboard /> },
-  { path: 'disciplinary/dashboard', element: <DisciplinaryDashboard /> },
-  { path: 'disciplinary/reports', element: <MisconductReports /> },
-  { path: 'disciplinary/reports/new', element: <MisconductReportForm /> },
-  { path: 'disciplinary/reports/:id', element: <MisconductReportForm /> },
-  { path: 'disciplinary/reports/:id/edit', element: <MisconductReportForm /> },
-  { path: 'disciplinary/investigations', element: <Investigations /> },
-  { path: 'disciplinary/investigations/:id', element: <Investigations /> },
-  { path: 'disciplinary/actions', element: <DisciplinaryActions /> },
-  { path: 'disciplinary/actions/:id', element: <DisciplinaryActions /> },
-  { path: 'disciplinary/appeals', element: <Appeals /> },
-  { path: 'disciplinary/appeals/:id', element: <Appeals /> },
-  { path: 'disciplinary/grievances', element: <Grievances /> },
-  { path: 'disciplinary/grievances/:id', element: <Grievances /> },
-];
-
-// Exit & Termination Module Routes
-const exitRoutes: RouteObject[] = [
-  { path: 'exit', element: <ExitDashboard /> },
-  { path: 'exit/dashboard', element: <ExitDashboard /> },
-  { path: 'exit/separations', element: <SeparationsList /> },
-  { path: 'exit/separations/new', element: <SeparationForm /> },
-  { path: 'exit/separations/:id', element: <SeparationForm /> },
-  { path: 'exit/separations/:id/edit', element: <SeparationForm /> },
-  { path: 'exit/clearances', element: <ClearancesList /> },
-  { path: 'exit/interviews', element: <ExitInterviewList /> },
-  { path: 'exit/interviews/new', element: <ExitInterviewList /> },
-  { path: 'exit/interviews/:id', element: <ExitInterviewList /> },
-  { path: 'exit/settlements', element: <FinalSettlements /> },
-  { path: 'exit/certificates', element: <WorkCertificates /> },
-];
-
-// Payroll Module Routes
-const payrollRoutes: RouteObject[] = [
-  { path: 'payroll', element: <PayrollDashboard /> },
-  { path: 'payroll/dashboard', element: <PayrollDashboard /> },
-  { path: 'payroll/periods', element: <PayrollPeriods /> },
-  { path: 'payroll/periods/new', element: <PayrollPeriods /> },
-  { path: 'payroll/periods/:id', element: <PayrollPeriods /> },
-  { path: 'payroll/entries', element: <PayrollEntries /> },
-  { path: 'payroll/structures', element: <SalaryStructures /> },
-  { path: 'payroll/advances', element: <Advances /> },
-  { path: 'payroll/loans', element: <Loans /> },
-  { path: 'payroll/overtime', element: <OvertimeRecords /> },
-  { path: 'payroll/payslips', element: <Payslips /> },
-  { path: 'payroll/generation', element: <PayrollGeneration /> },
-  { path: 'payroll/generation/:id', element: <PayrollGenerationReport /> },
-];
-
-// Performance Appraisal Module Routes
-const performanceRoutes: RouteObject[] = [
-  { path: 'hr/performance', element: <PerformanceDashboard /> },
-  { path: 'hr/performance/dashboard', element: <PerformanceDashboard /> },
-  { path: 'hr/performance/cycles', element: <AppraisalCycles /> },
-  { path: 'hr/performance/templates', element: <AppraisalTemplates /> },
-  { path: 'hr/performance/appraisals', element: <EmployeeAppraisals /> },
-  { path: 'hr/performance/appraisal/:id', element: <AppraisalForm /> },
-  { path: 'hr/performance/probation', element: <ProbationTracking /> },
-  { path: 'hr/performance/pips', element: <PIPs /> },
 ];
 
 // Audit Module Routes
@@ -446,6 +289,270 @@ const governanceRoutes: RouteObject[] = [
   },
 ];
 
+// HR Recruitment Routes
+const hrRecruitmentRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'hr/recruitment', element: <RecruitmentDashboard /> },
+  // Recruitment Tracker (Form 3)
+  { path: 'hr/recruitment/tracker', element: <RecruitmentTracker /> },
+  { path: 'hr/recruitment/tracker/new', element: <RecruitmentTracker /> },
+  { path: 'hr/recruitment/tracker/:id', element: <RecruitmentTracker /> },
+  // Terms of Reference (Form 1)
+  { path: 'hr/recruitment/terms-of-reference', element: <TermsOfReference /> },
+  { path: 'hr/recruitment/terms-of-reference/new', element: <TermsOfReference /> },
+  { path: 'hr/recruitment/terms-of-reference/:id', element: <TermsOfReference /> },
+  // Staff Requisition (Form 2)
+  { path: 'hr/recruitment/staff-requisition', element: <StaffRequisition /> },
+  { path: 'hr/recruitment/staff-requisition/new', element: <StaffRequisition /> },
+  { path: 'hr/recruitment/staff-requisition/:id', element: <StaffRequisition /> },
+  // Job Applications (Form 4)
+  { path: 'hr/recruitment/applications', element: <JobApplications /> },
+  { path: 'hr/recruitment/applications/new', element: <JobApplications /> },
+  { path: 'hr/recruitment/applications/:id', element: <JobApplications /> },
+  // Recruitment Committee (Form 45)
+  { path: 'hr/recruitment/committee', element: <RecruitmentCommittee /> },
+  { path: 'hr/recruitment/committee/new', element: <RecruitmentCommittee /> },
+  { path: 'hr/recruitment/committee/:id', element: <RecruitmentCommittee /> },
+  // Conflict of Interest (Form 5)
+  { path: 'hr/recruitment/conflict-of-interest', element: <ConflictOfInterest /> },
+  { path: 'hr/recruitment/conflict-of-interest/new', element: <ConflictOfInterest /> },
+  { path: 'hr/recruitment/conflict-of-interest/:id', element: <ConflictOfInterest /> },
+  // Longlisting (Form 6)
+  { path: 'hr/recruitment/longlisting', element: <Longlisting /> },
+  { path: 'hr/recruitment/longlisting/new', element: <Longlisting /> },
+  { path: 'hr/recruitment/longlisting/:id', element: <Longlisting /> },
+  // Shortlisting (Form 7)
+  { path: 'hr/recruitment/shortlisting', element: <Shortlisting /> },
+  { path: 'hr/recruitment/shortlisting/new', element: <Shortlisting /> },
+  { path: 'hr/recruitment/shortlisting/:id', element: <Shortlisting /> },
+  // Written Test (Forms 8, 9, 10)
+  { path: 'hr/recruitment/written-test', element: <WrittenTest /> },
+  { path: 'hr/recruitment/written-test/new', element: <WrittenTest /> },
+  { path: 'hr/recruitment/written-test/:id', element: <WrittenTest /> },
+  // Interview (Forms 11, 12, 13)
+  { path: 'hr/recruitment/interview', element: <Interview /> },
+  { path: 'hr/recruitment/interview/new', element: <Interview /> },
+  { path: 'hr/recruitment/interview/:id', element: <Interview /> },
+  // Recruitment Report (Form 14)
+  { path: 'hr/recruitment/report', element: <RecruitmentReport /> },
+  { path: 'hr/recruitment/report/new', element: <RecruitmentReport /> },
+  { path: 'hr/recruitment/report/:id', element: <RecruitmentReport /> },
+  // Offer Letter (Form 15)
+  { path: 'hr/recruitment/offer-letter', element: <OfferLetter /> },
+  { path: 'hr/recruitment/offer-letter/new', element: <OfferLetter /> },
+  { path: 'hr/recruitment/offer-letter/:id', element: <OfferLetter /> },
+  // Background Checks (Forms 16-20)
+  { path: 'hr/recruitment/background-checks', element: <BackgroundChecks /> },
+  { path: 'hr/recruitment/background-checks/new', element: <BackgroundChecks /> },
+  { path: 'hr/recruitment/background-checks/:id', element: <BackgroundChecks /> },
+  // Employment Contract (Form 21)
+  { path: 'hr/recruitment/employment-contract', element: <EmploymentContract /> },
+  { path: 'hr/recruitment/employment-contract/new', element: <EmploymentContract /> },
+  { path: 'hr/recruitment/employment-contract/:id', element: <EmploymentContract /> },
+  // Recruitment Checklist (Form 22)
+  { path: 'hr/recruitment/checklist', element: <RecruitmentChecklist /> },
+  { path: 'hr/recruitment/checklist/new', element: <RecruitmentChecklist /> },
+  { path: 'hr/recruitment/checklist/:id', element: <RecruitmentChecklist /> },
+  // Sole Source Justification (Form 38)
+  { path: 'hr/recruitment/sole-source', element: <SoleSourceJustification /> },
+  { path: 'hr/recruitment/sole-source/new', element: <SoleSourceJustification /> },
+  { path: 'hr/recruitment/sole-source/:id', element: <SoleSourceJustification /> },
+  // Candidate Sourcing (Form 48)
+  { path: 'hr/recruitment/candidate-sourcing', element: <CandidateSourcing /> },
+  { path: 'hr/recruitment/candidate-sourcing/new', element: <CandidateSourcing /> },
+  { path: 'hr/recruitment/candidate-sourcing/:id', element: <CandidateSourcing /> },
+  // Dropdown Settings
+  { path: 'hr/recruitment/dropdown-settings', element: <DropdownSettings /> },
+];
+
+// HR Employee Management Routes
+const hrEmployeeManagementRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'hr/employee-management', element: <EmployeeManagementDashboard /> },
+
+  // Contract Management
+  // Extension Letter (Form 26)
+  { path: 'hr/employee-management/contract/extension', element: <ExtensionLetter /> },
+  { path: 'hr/employee-management/contract/extension/new', element: <ExtensionLetter /> },
+  { path: 'hr/employee-management/contract/extension/:id', element: <ExtensionLetter /> },
+  // Termination Letter (Form 27)
+  { path: 'hr/employee-management/contract/termination', element: <TerminationLetter /> },
+  { path: 'hr/employee-management/contract/termination/new', element: <TerminationLetter /> },
+  { path: 'hr/employee-management/contract/termination/:id', element: <TerminationLetter /> },
+  // Confirmation Letter (Form 49)
+  { path: 'hr/employee-management/contract/confirmation', element: <ConfirmationLetter /> },
+  { path: 'hr/employee-management/contract/confirmation/new', element: <ConfirmationLetter /> },
+  { path: 'hr/employee-management/contract/confirmation/:id', element: <ConfirmationLetter /> },
+  // Contract Amendment (Form 50)
+  { path: 'hr/employee-management/contract/amendment', element: <ContractAmendment /> },
+  { path: 'hr/employee-management/contract/amendment/new', element: <ContractAmendment /> },
+  { path: 'hr/employee-management/contract/amendment/:id', element: <ContractAmendment /> },
+
+  // Onboarding
+  // Induction Form (Form 28)
+  { path: 'hr/employee-management/onboarding/induction', element: <InductionForm /> },
+  { path: 'hr/employee-management/onboarding/induction/new', element: <InductionForm /> },
+  { path: 'hr/employee-management/onboarding/induction/:id', element: <InductionForm /> },
+  // Code of Conduct Acknowledgement (Form 32)
+  { path: 'hr/employee-management/onboarding/code-of-conduct', element: <CodeOfConductAck /> },
+  { path: 'hr/employee-management/onboarding/code-of-conduct/new', element: <CodeOfConductAck /> },
+  { path: 'hr/employee-management/onboarding/code-of-conduct/:id', element: <CodeOfConductAck /> },
+  // Personnel File Checklist (Form 33)
+  { path: 'hr/employee-management/onboarding/personnel-file', element: <PersonnelFileChecklist /> },
+  { path: 'hr/employee-management/onboarding/personnel-file/new', element: <PersonnelFileChecklist /> },
+  { path: 'hr/employee-management/onboarding/personnel-file/:id', element: <PersonnelFileChecklist /> },
+  // Mahram Form (Form 40/52)
+  { path: 'hr/employee-management/onboarding/mahram', element: <MahramForm /> },
+  { path: 'hr/employee-management/onboarding/mahram/new', element: <MahramForm /> },
+  { path: 'hr/employee-management/onboarding/mahram/:id', element: <MahramForm /> },
+  // Induction Pack Checklist (Form 51)
+  { path: 'hr/employee-management/onboarding/induction-pack', element: <InductionPackChecklist /> },
+  { path: 'hr/employee-management/onboarding/induction-pack/new', element: <InductionPackChecklist /> },
+  { path: 'hr/employee-management/onboarding/induction-pack/:id', element: <InductionPackChecklist /> },
+  // Safeguarding/PSEAH Acknowledgement (Form 53)
+  { path: 'hr/employee-management/onboarding/safeguarding', element: <SafeguardingAck /> },
+  { path: 'hr/employee-management/onboarding/safeguarding/new', element: <SafeguardingAck /> },
+  { path: 'hr/employee-management/onboarding/safeguarding/:id', element: <SafeguardingAck /> },
+  // NDA Form (Form 55)
+  { path: 'hr/employee-management/onboarding/nda', element: <NDAForm /> },
+  { path: 'hr/employee-management/onboarding/nda/new', element: <NDAForm /> },
+  { path: 'hr/employee-management/onboarding/nda/:id', element: <NDAForm /> },
+];
+
+// HR Leave & Attendance Routes
+const hrLeaveAttendanceRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'hr/leave-attendance', element: <LeaveAttendanceDashboard /> },
+
+  // Leave Management
+  // Leave Request (Form 34)
+  { path: 'hr/leave-attendance/leave/request', element: <LeaveRequest /> },
+  { path: 'hr/leave-attendance/leave/request/new', element: <LeaveRequest /> },
+  { path: 'hr/leave-attendance/leave/request/:id', element: <LeaveRequest /> },
+  // Leave Tracker (Form 35)
+  { path: 'hr/leave-attendance/leave/tracker', element: <LeaveTracker /> },
+
+  // Attendance Management
+  // Manual Attendance (Form 37)
+  { path: 'hr/leave-attendance/attendance/manual', element: <ManualAttendance /> },
+  { path: 'hr/leave-attendance/attendance/manual/new', element: <ManualAttendance /> },
+  { path: 'hr/leave-attendance/attendance/manual/:id', element: <ManualAttendance /> },
+  // Electronic Attendance (Form 36)
+  { path: 'hr/leave-attendance/attendance/electronic', element: <ElectronicAttendance /> },
+  { path: 'hr/leave-attendance/attendance/electronic/new', element: <ElectronicAttendance /> },
+  { path: 'hr/leave-attendance/attendance/electronic/:id', element: <ElectronicAttendance /> },
+];
+
+// HR Performance Routes
+const hrPerformanceRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'hr/performance', element: <PerformanceDashboard /> },
+
+  // Probation Evaluation (Form 46)
+  { path: 'hr/performance/probation-evaluation', element: <ProbationEvaluation /> },
+  { path: 'hr/performance/probation-evaluation/new', element: <ProbationEvaluation /> },
+  { path: 'hr/performance/probation-evaluation/:id', element: <ProbationEvaluation /> },
+
+  // Performance Appraisal (Form 24)
+  { path: 'hr/performance/appraisal', element: <PerformanceAppraisal /> },
+  { path: 'hr/performance/appraisal/new', element: <PerformanceAppraisal /> },
+  { path: 'hr/performance/appraisal/:id', element: <PerformanceAppraisal /> },
+
+  // Internal Promotion Feasibility (Form 23)
+  { path: 'hr/performance/promotion-feasibility', element: <InternalPromotionFeasibility /> },
+  { path: 'hr/performance/promotion-feasibility/new', element: <InternalPromotionFeasibility /> },
+  { path: 'hr/performance/promotion-feasibility/:id', element: <InternalPromotionFeasibility /> },
+
+  // Promotion Letter (Form 25)
+  { path: 'hr/performance/promotion-letter', element: <PromotionLetter /> },
+  { path: 'hr/performance/promotion-letter/new', element: <PromotionLetter /> },
+  { path: 'hr/performance/promotion-letter/:id', element: <PromotionLetter /> },
+];
+
+// HR Training Routes
+const hrTrainingRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'hr/training', element: <TrainingDashboard /> },
+
+  // Training Needs Assessment (Form 29)
+  { path: 'hr/training/needs-assessment', element: <TrainingNeedsAssessment /> },
+  { path: 'hr/training/needs-assessment/new', element: <TrainingNeedsAssessment /> },
+  { path: 'hr/training/needs-assessment/:id', element: <TrainingNeedsAssessment /> },
+
+  // Training Calendar (Form 30)
+  { path: 'hr/training/calendar', element: <TrainingCalendar /> },
+  { path: 'hr/training/calendar/new', element: <TrainingCalendar /> },
+  { path: 'hr/training/calendar/:id', element: <TrainingCalendar /> },
+
+  // Training Budget (Form 31)
+  { path: 'hr/training/budget', element: <TrainingBudget /> },
+  { path: 'hr/training/budget/new', element: <TrainingBudget /> },
+  { path: 'hr/training/budget/:id', element: <TrainingBudget /> },
+
+  // Training Request (Form 41)
+  { path: 'hr/training/request', element: <TrainingRequest /> },
+  { path: 'hr/training/request/new', element: <TrainingRequest /> },
+  { path: 'hr/training/request/:id', element: <TrainingRequest /> },
+];
+
+// HR Payroll Routes
+const hrPayrollRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'hr/payroll', element: <PayrollDashboard /> },
+
+  // Payroll Generation (Form 42)
+  { path: 'hr/payroll/generation', element: <PayrollGeneration /> },
+  { path: 'hr/payroll/generation/new', element: <PayrollGeneration /> },
+  { path: 'hr/payroll/generation/:id', element: <PayrollGeneration /> },
+
+  // Payslips
+  { path: 'hr/payroll/payslips', element: <Payslips /> },
+  { path: 'hr/payroll/payslips/:id', element: <Payslips /> },
+
+  // Advances (placeholder for future)
+  { path: 'hr/payroll/advances', element: <PayrollDashboard /> },
+
+  // Deductions (placeholder for future)
+  { path: 'hr/payroll/deductions', element: <PayrollDashboard /> },
+];
+
+// HR Exit & Separation Routes
+const hrExitRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'hr/exit', element: <ExitDashboard /> },
+
+  // Exit Checklist (Form 47)
+  { path: 'hr/exit/checklist', element: <ExitChecklist /> },
+  { path: 'hr/exit/checklist/new', element: <ExitChecklist /> },
+  { path: 'hr/exit/checklist/:id', element: <ExitChecklist /> },
+
+  // Exit Interview (Form 44)
+  { path: 'hr/exit/interview', element: <ExitInterview /> },
+  { path: 'hr/exit/interview/new', element: <ExitInterview /> },
+  { path: 'hr/exit/interview/:id', element: <ExitInterview /> },
+
+  // Work Certificate (Form 43)
+  { path: 'hr/exit/certificate', element: <WorkCertificate /> },
+  { path: 'hr/exit/certificate/new', element: <WorkCertificate /> },
+  { path: 'hr/exit/certificate/:id', element: <WorkCertificate /> },
+];
+
+// HR Special Forms Routes
+const hrSpecialFormsRoutes: RouteObject[] = [
+  // Dashboard
+  { path: 'hr/special-forms', element: <SpecialFormsDashboard /> },
+
+  // Internal Transfer Eligibility (Form 39)
+  { path: 'hr/special-forms/transfer', element: <InternalTransferEligibility /> },
+  { path: 'hr/special-forms/transfer/new', element: <InternalTransferEligibility /> },
+  { path: 'hr/special-forms/transfer/:id', element: <InternalTransferEligibility /> },
+
+  // Dual Employment Declaration (Form 54)
+  { path: 'hr/special-forms/dual-employment', element: <DualEmploymentDeclaration /> },
+  { path: 'hr/special-forms/dual-employment/new', element: <DualEmploymentDeclaration /> },
+  { path: 'hr/special-forms/dual-employment/:id', element: <DualEmploymentDeclaration /> },
+];
+
 // Combine all routes
 const routes: RouteObject[] = [
   {
@@ -454,18 +561,18 @@ const routes: RouteObject[] = [
     children: [
       { index: true, element: <Dashboard /> },
       ...userManagementRoutes,
-      ...employeeAdminRoutes,
-      ...hrSettingsRoutes,
       ...complianceRoutes,
-      ...recruitmentRoutes,
-      ...trainingRoutes,
-      ...disciplinaryRoutes,
-      ...exitRoutes,
-      ...payrollRoutes,
-      ...performanceRoutes,
       ...auditRoutes,
       ...programRoutes,
       ...governanceRoutes,
+      ...hrRecruitmentRoutes,
+      ...hrEmployeeManagementRoutes,
+      ...hrLeaveAttendanceRoutes,
+      ...hrPerformanceRoutes,
+      ...hrTrainingRoutes,
+      ...hrPayrollRoutes,
+      ...hrExitRoutes,
+      ...hrSpecialFormsRoutes,
     ],
   },
 ];

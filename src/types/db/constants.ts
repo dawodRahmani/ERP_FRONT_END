@@ -10,7 +10,7 @@
  */
 export const DB_CONFIG = {
   NAME: 'vdo-erp-db',
-  VERSION: 41, // Add governance stores (board members, meetings, correspondence)
+  VERSION: 42, // Add recruitment dropdowns store
 } as const;
 
 /**

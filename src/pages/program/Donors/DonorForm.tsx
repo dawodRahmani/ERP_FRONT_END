@@ -27,7 +27,7 @@ const DonorForm = () => {
     reset,
     formState: { errors },
   } = useForm<DonorFormData>({
-    resolver: zodResolver(donorSchema),
+    resolver: zodResolver(donorSchema) as any,
     defaultValues: {
       donorName: '',
       donorType: 'bilateral',

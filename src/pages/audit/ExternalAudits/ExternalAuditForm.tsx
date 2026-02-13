@@ -54,7 +54,7 @@ const ExternalAuditForm: React.FC = () => {
     watch,
     formState: { errors },
   } = useForm<ExternalAuditFormData>({
-    resolver: zodResolver(externalAuditSchema),
+    resolver: zodResolver(externalAuditSchema) as any,
     defaultValues: {
       auditTypeId: 0,
       frequency: 'annual',

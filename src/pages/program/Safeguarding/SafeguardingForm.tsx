@@ -38,7 +38,7 @@ const SafeguardingForm = () => {
     setValue,
     formState: { errors },
   } = useForm<SafeguardingFormData>({
-    resolver: zodResolver(safeguardingSchema),
+    resolver: zodResolver(safeguardingSchema) as any,
     defaultValues: {
       projectId: 0,
       projectName: '',
